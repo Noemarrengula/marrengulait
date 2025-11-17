@@ -29,7 +29,7 @@ const Header = () => {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Marrengula-IT Logo" className="h-12 w-auto" />
+            <img src={logo} alt="Marrengula-IT Logo" className="h-8 w-auto object-contain" />
           </div>
 
           {/* Search Bar */}
