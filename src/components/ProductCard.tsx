@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,9 +42,11 @@ const ProductCard = ({ title, price, oldPrice, image, rating, reviews, badge, st
         {storeName && (
           <p className="text-xs text-muted-foreground mb-1">Por: {storeName}</p>
         )}
-        <h3 className="font-medium text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer">
-          {title}
-        </h3>
+        <Link to="/produto/1">
+          <h3 className="font-medium text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+            {title}
+          </h3>
+        </Link>
         
         <div className="flex items-center gap-1 mb-2">
           <div className="flex">
