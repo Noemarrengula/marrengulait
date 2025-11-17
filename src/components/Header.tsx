@@ -2,6 +2,7 @@ import { ShoppingCart, User, Search, Menu, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import logo from "@/assets/logo.jpg";
 
 const Header = () => {
   return (
@@ -28,13 +29,7 @@ const Header = () => {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xl">M</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Marrengula-IT</h1>
-              <p className="text-xs text-muted-foreground">Tecnologia & Inovação</p>
-            </div>
+            <img src={logo} alt="Marrengula-IT Logo" className="h-12 w-auto" />
           </div>
 
           {/* Search Bar */}
