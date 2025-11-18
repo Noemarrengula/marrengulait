@@ -2,7 +2,8 @@ import { ShoppingCart, User, Search, Menu, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import logo from "@/assets/logo.jpg";
+import ThemeToggle from "./ThemeToggle";
+import logo from "@/assets/marrengula-logo.png";
 
 const Header = () => {
   return (
@@ -29,7 +30,7 @@ const Header = () => {
         <div className="flex items-center justify-between gap-4">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Marrengula-IT Logo" className="h-10 w-auto object-contain" />
+            <img src={logo} alt="Marrengula-IT Logo" className="h-12 w-auto object-contain" />
           </div>
 
           {/* Search Bar */}
@@ -46,19 +47,20 @@ const Header = () => {
 
           {/* Actions */}
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="relative">
+            <ThemeToggle />
+            <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
               <Heart className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button variant="ghost" size="icon" className="relative hover:bg-accent/10">
               <ShoppingCart className="h-5 w-5" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs bg-primary">
                 3
               </Badge>
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="hover:bg-accent/10">
               <User className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden hover:bg-accent/10">
               <Menu className="h-5 w-5" />
             </Button>
           </div>
