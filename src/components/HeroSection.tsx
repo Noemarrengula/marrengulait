@@ -27,10 +27,19 @@ const HeroSection = () => {
             Hardware de ponta, soluções completas de TI e marketplace com as melhores lojas de tecnologia.
           </p>
           <div className="flex gap-4">
-            <Button size="lg" className="bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30">
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
+              onClick={() => window.location.href = '/produtos'}
+            >
               Explorar Produtos
             </Button>
-            <Button size="lg" variant="outline" className="border-primary/30 hover:bg-primary/10 hover:border-primary">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="border-primary/30 hover:bg-primary/10 hover:border-primary"
+              onClick={() => window.location.href = '/servicos'}
+            >
               Serviços de TI
             </Button>
           </div>
