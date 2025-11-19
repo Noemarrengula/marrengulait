@@ -6,6 +6,15 @@ import ThemeToggle from "./ThemeToggle";
 import logo from "@/assets/marrengula-logo.png";
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Top Bar */}
