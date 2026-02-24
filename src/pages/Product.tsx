@@ -115,7 +115,7 @@ const Product = () => {
         </div>
 
         <div className="container mx-auto px-4 pb-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 animate-slide-up">
             {/* Gallery */}
             <div>
               <div className="sticky top-24">
@@ -169,7 +169,7 @@ const Product = () => {
                 <span className="text-sm text-muted-foreground">{product.sold} Vendidos</span>
               </div>
 
-              <div className="bg-secondary/50 p-6 rounded-lg mb-6">
+              <div className="bg-gradient-to-br from-secondary/50 to-secondary/30 p-6 rounded-lg mb-6 border border-primary/20">
                 <div className="flex items-baseline gap-3 mb-2">
                   <span className="text-4xl font-bold text-primary">{product.price} MZN</span>
                   <span className="text-xl text-muted-foreground line-through">{product.oldPrice} MZN</span>
@@ -236,14 +236,14 @@ const Product = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1 h-12 text-lg">
+                  <Button className="flex-1 h-12 text-lg bg-gradient-to-r from-primary to-primary-glow hover:scale-105 transition-all shadow-lg">
                     <ShoppingCart className="h-5 w-5 mr-2" />
                     Adicionar ao Carrinho
                   </Button>
-                  <Button variant="outline" size="icon" className="h-12 w-12">
+                  <Button variant="outline" size="icon" className="h-12 w-12 hover:bg-primary/10 hover:border-primary transition-all">
                     <Heart className="h-5 w-5" />
                   </Button>
-                  <Button variant="outline" size="icon" className="h-12 w-12">
+                  <Button variant="outline" size="icon" className="h-12 w-12 hover:bg-primary/10 hover:border-primary transition-all">
                     <Share2 className="h-5 w-5" />
                   </Button>
                 </div>

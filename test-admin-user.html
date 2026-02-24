@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔐 Teste Admin User - noemarrengula1@gmail.com</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .user-info {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+
+        .sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sections {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border-left: 4px solid #ffc107;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background: #f0f4ff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background: #e8ecff;
+        }
+
+        .code-block {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .steps {
+            list-style: none;
+            padding: 0;
+        }
+
+        .steps li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .steps li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .steps li.pending:before {
+            content: "○";
+            color: #999;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            font-size: 13px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .uuid-warning {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-size: 13px;
+            color: #721c24;
+        }
+
+        .success-box {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .success-box h3 {
+            color: #155724;
+            margin-bottom: 10px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>🔐 Teste Admin User</h1>
+            <p class="subtitle">Validação de configuração para noemarrengula1@gmail.com</p>
+            
+            <div class="user-info">
+                📧 <strong>Email:</strong> noemarrengula1@gmail.com<br>
+                🆔 <strong>UUID:</strong> 8d28b443-b574-46c9-9f6c-02dd416cdb63<br>
+                👤 <strong>Role:</strong> <span class="role-badge">admin</span><br>
+                📅 <strong>Criado em:</strong> 2025-11-25 12:08:30
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="sections">
+            <!-- SEÇÃO 1: DIAGNÓSTICO -->
+            <div class="card">
+                <h2>🔍 Diagnóstico</h2>
+                
+                <div id="diagnosis-status" class="status loading">
+                    ⏳ Aguardando...<br>
+                    <small>Será verificado quando clicar no botão abaixo</small>
+                </div>
+
+                <button id="run-diagnosis">
+                    <span id="diagnosis-text">🔎 Executar Diagnóstico</span>
+                </button>
+
+                <div id="diagnosis-details" style="display: none; margin-top: 15px;">
+                    <div class="code-block" id="diagnosis-output"></div>
+                </div>
+            </div>
+
+            <!-- SEÇÃO 2: VERIFICAÇÃO RÁPIDA -->
+            <div class="card">
+                <h2>⚡ Verificação Rápida</h2>
+                
+                <div class="alert">
+                    Este teste verifica se o localStorage e a sessão estão sãos.
+                </div>
+
+                <button id="check-storage">
+                    💾 Verificar Storage
+                </button>
+
+                <div id="storage-status"></div>
+
+                <button class="secondary" id="clear-storage" style="display: none; margin-top: 10px;">
+                    🗑️ Limpar Cache Supabase
+                </button>
+            </div>
+        </div>
+
+        <!-- SEÇÃO 3: PASSOS -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>📝 Passos Para Testar</h2>
+            
+            <ol class="steps">
+                <li class="pending">Executar diagnóstico acima</li>
+                <li class="pending">Verificar status do storage</li>
+                <li class="pending">Fazer <strong>Hard Refresh</strong>: Ctrl+Shift+R</li>
+                <li class="pending">Fazer <strong>Sign Out</strong> (se necessário)</li>
+                <li class="pending">Fazer <strong>Sign In</strong> com email acima</li>
+                <li class="pending">Ir para <strong>/admin</strong></li>
+                <li class="pending">Painel admin deve aparecer ✅</li>
+            </ol>
+        </div>
+
+        <!-- SEÇÃO 4: CONSOLE -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>🖥️ Log do Console</h2>
+            
+            <div class="alert">
+                Quando fizer login, procure no console (F12) por:
+            </div>
+
+            <div class="code-block">
+✅ Roles carregados do Supabase para 8d28b443-b574-46c9-9f6c-02dd416cdb63: ['admin']
+            </div>
+
+            <p style="margin: 10px 0; font-size: 13px; color: #666;">
+                <strong>Se ver isto ➜</strong> Painel admin deve aparecer em poucos segundos<br>
+                <strong>Se ver ['user'] ➜</strong> UUID está incorreto (cache corrompido)
+            </p>
+
+            <button class="secondary" id="open-console">
+                🔓 Abrir Console (F12)
+            </button>
+        </div>
+
+        <!-- SEÇÃO 5: TROUBLESHOOTING -->
+        <div class="card" style="margin-top: 20px;">
+            <h2>🐛 Troubleshooting</h2>
+            
+            <strong style="display: block; margin-bottom: 10px;">
+                ❌ Se aparecer "Acesso Negado":
+            </strong>
+
+            <div class="steps">
+                <li class="pending">Verifique o console (F12)</li>
+                <li class="pending">Procure por mensagem de UUID mismatch</li>
+                <li class="pending">Se encontrar, clique embaixo para limpar cache</li>
+                <li class="pending">Recarregue a página: F5</li>
+            </div>
+
+            <button class="secondary" id="nuke-cache" style="margin-top: 15px;">
+                💣 Limpar Tudo (Última Opção)
+            </button>
+
+            <div id="nuke-result"></div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p>Teste Automatizado • 2026-02-19</p>
+            <p>Se tudo funcionar, parabéns! O admin panel está pronto 🚀</p>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            expectedUUID: '8d28b443-b574-46c9-9f6c-02dd416cdb63',
+            expectedEmail: 'noemarrengula1@gmail.com',
+            expectedRole: 'admin'
+        };
+
+        // Diagnóstico
+        document.getElementById('run-diagnosis').addEventListener('click', async function() {
+            const btn = this;
+            const status = document.getElementById('diagnosis-status');
+            const output = document.getElementById('diagnosis-output');
+            const details = document.getElementById('diagnosis-details');
+
+            btn.disabled = true;
+            status.textContent = '⏳ Executando diagnóstico...';
+            status.className = 'status loading';
+
+            try {
+                let report = '📋 RELATÓRIO DE DIAGNÓSTICO\n';
+                report += '═'.repeat(50) + '\n\n';
+
+                // 1. Checar localStorage
+                report += '1️⃣  LOCALSTORAGE:\n';
+                const supabaseKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'));
+                
+                if (supabaseKeys.length > 0) {
+                    report += `   ✅ Keys encontradas: ${supabaseKeys.length}\n`;
+                    supabaseKeys.slice(0, 5).forEach(k => {
+                        const val = localStorage.getItem(k);
+                        report += `   • ${k}: ${val.length} bytes\n`;
+                    });
+                } else {
+                    report += '   ⚠️  Nenhuma key Supabase encontrada\n';
+                }
+
+                // 2. Checar sessionStorage
+                report += '\n2️⃣  SESSIONSTORAGE:\n';
+                const sessionKeys = Object.keys(sessionStorage).filter(k => k.includes('supabase') || k.includes('sb-'));
+                
+                if (sessionKeys.length > 0) {
+                    report += `   ✅ Keys encontradas: ${sessionKeys.length}\n`;
+                } else {
+                    report += '   ℹ️  Vazio (normal se sem sessão ativa)\n';
+                }
+
+                // 3. Checar versão gerada
+                report += '\n3️⃣  PÁGINA:\n';
+                report += `   Location: ${window.location.href}\n`;
+                report += `   Time: ${new Date().toISOString()}\n`;
+
+                // 4. Checar IndexedDB
+                report += '\n4️⃣  INDEXEDDB:\n';
+                const dbs = await indexedDB.databases?.();
+                if (dbs && dbs.length > 0) {
+                    report += `   ℹ️  Bancos: ${dbs.map(d => d.name).join(', ')}\n`;
+                } else {
+                    report += '   ℹ️  Nenhum banco IndexedDB\n';
+                }
+
+                output.textContent = report;
+                details.style.display = 'block';
+
+                status.className = 'status success';
+                status.textContent = '✅ Diagnóstico concluído\n\nVeja detalhes abaixo ⬇️';
+
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Erro ao diagnosticar: ' + error.message;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        // Verificar Storage
+        document.getElementById('check-storage').addEventListener('click', function() {
+            const status = document.getElementById('storage-status');
+            const clearBtn = document.getElementById('clear-storage');
+
+            const supabaseKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'));
+
+            if (supabaseKeys.length > 0) {
+                status.innerHTML = `
+                    <div class="status info">
+                        ℹ️ <strong>${supabaseKeys.length} chaves Supabase encontradas</strong><br>
+                        <small>Pode haver dados de sessão anterior. Clique em "Limpar Cache" se tiver problemas.</small>
+                    </div>
+                `;
+                clearBtn.style.display = 'block';
+            } else {
+                status.innerHTML = `
+                    <div class="status success">
+                        ✅ Storage limpo<br>
+                        <small>Nenhuma chave Supabase encontrada. Isto é bom!</small>
+                    </div>
+                `;
+                clearBtn.style.display = 'none';
+            }
+        });
+
+        // Limpar Storage
+        document.getElementById('clear-storage').addEventListener('click', function() {
+            const supabaseKeys = Object.keys(localStorage).filter(k => k.includes('supabase') || k.includes('sb-'));
+            
+            supabaseKeys.forEach(k => {
+                console.log('Removendo:', k);
+                localStorage.removeItem(k);
+            });
+
+            const status = document.getElementById('storage-status');
+            status.innerHTML = `
+                <div class="success-box">
+                    <h3>✅ Cache Limpo!</h3>
+                    <p>Agora faça:</p>
+                    <ol style="text-align: left; display: inline-block;">
+                        <li>Hard Refresh: <strong>Ctrl+Shift+R</strong></li>
+                        <li>Sign Out (se necessário)</li>
+                        <li>Sign In novamente</li>
+                    </ol>
+                </div>
+            `;
+
+            document.getElementById('clear-storage').style.display = 'none';
+        });
+
+        // Console
+        document.getElementById('open-console').addEventListener('click', function() {
+            alert('Pressione F12 para abrir o console e procure por:\n\n✅ Roles carregados do Supabase');
+        });
+
+        // Nuclear option
+        document.getElementById('nuke-cache').addEventListener('click', function() {
+            const result = document.getElementById('nuke-result');
+            
+            // localStorage
+            localStorage.clear();
+            sessionStorage.clear();
+
+            // IndexedDB
+            indexedDB.databases?.().then(dbs => {
+                dbs.forEach(db => indexedDB.deleteDatabase(db.name));
+            });
+
+            result.innerHTML = `
+                <div class="success-box" style="margin-top: 15px;">
+                    <h3>💣 Limpeza Completa!</h3>
+                    <p>Tudo foi limpo. Agora:</p>
+                    <ol style="text-align: left; display: inline-block; margin: 10px 0;">
+                        <li style="padding: 8px 0;"><strong>Feche o browser completamente</strong></li>
+                        <li style="padding: 8px 0;"><strong>Reabra e vá para:</strong> http://localhost:5173</li>
+                        <li style="padding: 8px 0;"><strong>Faça Sign Up novamente</strong></li>
+                    </ol>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>

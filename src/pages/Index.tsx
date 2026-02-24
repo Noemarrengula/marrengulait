@@ -1,6 +1,9 @@
 import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import HeroSection from "@/components/HeroSection";
+import PromoBanners from "@/components/PromoBanners";
+import RecentlyViewed from "@/components/RecentlyViewed";
+import LoyaltyProgram from "@/components/LoyaltyProgram";
 import Categories from "@/components/Categories";
 import ProductGrid from "@/components/ProductGrid";
 import ServicesSection from "@/components/ServicesSection";
@@ -24,7 +27,11 @@ const Index = () => {
         subtitle="Acabaram de chegar ao nosso marketplace"
       />
       <MarketplaceSection />
+      <div className="container mx-auto px-4 py-12">
+        <LoyaltyProgram />
+      </div>
       <Footer />
+      <RecentlyViewed />
     </div>
   );
 };

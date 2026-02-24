@@ -2,16 +2,54 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Validação das variáveis de ambiente
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  const missingVars = [];
+  if (!SUPABASE_URL) missingVars.push('VITE_SUPABASE_URL');
+  if (!SUPABASE_PUBLISHABLE_KEY) missingVars.push('VITE_SUPABASE_PUBLISHABLE_KEY');
+  
+  const errorMsg = `Erro de configuração: Variáveis de ambiente ausentes: ${missingVars.join(', ')}. ` +
+    'Por favor, verifique o arquivo .env na raiz do projeto.';
+  
+  console.error(errorMsg);
+  throw new Error(errorMsg);
+}
+
+// Validação do formato da URL
+if (!SUPABASE_URL.startsWith('https://')) {
+  const errorMsg = `Erro de configuração: VITE_SUPABASE_URL deve começar com 'https://'. Valor atual: ${SUPABASE_URL}`;
+  console.error(errorMsg);
+  throw new Error(errorMsg);
+}
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    storage: localStorage,
-    persistSession: true,
-    autoRefreshToken: true,
-  }
-});
+let supabaseClient;
+
+try {
+  supabaseClient = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+      // ⚠️ IMPORTANTE: Não cachear dados de usuário localmente
+      // O hook useAuth sempre faz fetch FRESH do Supabase
+      detectSessionInUrl: true,
+    },
+    // Configurar retry para garantir conexão estável
+    global: {
+      headers: {
+        'x-application-name': 'marrengula-it',
+      },
+    },
+  });
+} catch (error) {
+  console.error('Erro ao criar cliente Supabase:', error);
+  throw new Error(`Falha ao inicializar Supabase: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+}
+
+export const supabase = supabaseClient;

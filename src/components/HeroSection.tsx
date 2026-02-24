@@ -1,74 +1,115 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import heroBanner from "@/assets/hero-banner.jpg";
+import { useNavigate } from "react-router-dom";
+import { Truck, Shield, Headphones, Zap, ArrowRight } from "lucide-react";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
-    <section className="relative h-[600px] overflow-hidden">
-      <div className="absolute inset-0">
-        <img
-          src={heroBanner}
-          alt="Tecnologia Avançada"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/30" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,hsl(var(--primary)/0.15),transparent_50%)]" />
+    <div className="relative overflow-hidden">
+      {/* Video Background */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/90 via-accent/80 to-primary/90 z-10" />
+        <div className="cyber-grid opacity-30" />
       </div>
-      
-      <div className="relative container mx-auto px-4 h-full flex items-center">
-        <div className="max-w-2xl animate-fade-in">
-          <span className="inline-block px-4 py-1.5 bg-gradient-to-r from-primary/20 to-accent/20 text-primary border border-primary/30 rounded-full text-sm font-semibold mb-6 backdrop-blur-sm">
-            🔥 Novidade
-          </span>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground leading-tight">
-            A Tecnologia que o seu <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Negócio Precisa</span>
+
+      {/* Content */}
+      <div className="relative z-20 container mx-auto px-4 py-24 md:py-32">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-block mb-6 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20">
+            <span className="text-white text-sm font-semibold">🔥 Ofertas Relâmpago - Até 50% OFF</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight">
+            Tecnologia de Ponta
+            <br />
+            <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+              Preços Imbatíveis
+            </span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-            Hardware de ponta, soluções completas de TI e marketplace com as melhores lojas de tecnologia.
+          
+          <p className="text-xl md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto">
+            Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique
           </p>
-          <div className="flex gap-4">
-            <Button 
-              size="lg" 
-              className="bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30"
-              onClick={() => window.location.href = '/produtos'}
+
+          {/* Dual CTAs */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <Button
+              size="lg"
+              onClick={() => navigate('/monte-seu-pc')}
+              className="bg-white text-primary hover:bg-white/90 text-lg px-8 py-6 h-auto font-bold group"
             >
-              Explorar Produtos
+              <Zap className="w-5 h-5 mr-2" />
+              Monte Seu PC
+              <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
-              className="border-primary/30 hover:bg-primary/10 hover:border-primary"
-              onClick={() => window.location.href = '/servicos'}
+            
+            <Button
+              size="lg"
+              onClick={() => navigate('/produtos?promo=true')}
+              variant="outline"
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-primary text-lg px-8 py-6 h-auto font-bold"
             >
-              Serviços de TI
+              Ver Ofertas Relâmpago
             </Button>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+            {[
+              { value: "10K+", label: "Produtos" },
+              { value: "5K+", label: "Clientes" },
+              { value: "4.9★", label: "Avaliação" },
+              { value: "24h", label: "Entrega" }
+            ].map((stat) => (
+              <div key={stat.label} className="glass p-4 rounded-lg">
+                <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                <div className="text-sm text-white/80">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Navigation Arrows */}
-      <Button
-        size="icon"
-        variant="ghost"
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-background/50 hover:bg-background/80 backdrop-blur-sm border border-border/50"
-      >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      <Button
-        size="icon"
-        variant="ghost"
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-background/50 hover:bg-background/80 backdrop-blur-sm border border-border/50"
-      >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
-
-      {/* Indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
-        <div className="w-8 h-1 rounded-full bg-primary shadow-lg shadow-primary/50" />
-        <div className="w-8 h-1 rounded-full bg-muted/50" />
-        <div className="w-8 h-1 rounded-full bg-muted/50" />
+      {/* Benefits Bar */}
+      <div className="relative z-20 bg-black/30 backdrop-blur-md border-t border-white/10">
+        <div className="container mx-auto px-4 py-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3 text-white">
+              <Truck className="w-5 h-5 text-yellow-300" />
+              <div>
+                <div className="font-bold text-sm">Frete Grátis</div>
+                <div className="text-xs text-white/70">Acima de 5.000 MT</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 text-white">
+              <Shield className="w-5 h-5 text-yellow-300" />
+              <div>
+                <div className="font-bold text-sm">Garantia Estendida</div>
+                <div className="text-xs text-white/70">Até 3 anos</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 text-white">
+              <Headphones className="w-5 h-5 text-yellow-300" />
+              <div>
+                <div className="font-bold text-sm">Suporte 24/7</div>
+                <div className="text-xs text-white/70">Chat ao vivo</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3 text-white">
+              <Zap className="w-5 h-5 text-yellow-300" />
+              <div>
+                <div className="font-bold text-sm">Cashback</div>
+                <div className="text-xs text-white/70">Até 5% de volta</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
+    </div>
   );
 };
 

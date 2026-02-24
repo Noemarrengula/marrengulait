@@ -1,0 +1,163 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║                  ⚡ CONTA DELETADA - SOLUÇÃO RÁPIDA                        ║
+║                                                                            ║
+║                    Criar nova conta e tornar admin                         ║
+║                    EM 3 MINUTOS                                            ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+
+   📌 A SOLUÇÃO MAIS RÁPIDA (RECOMENDADO)
+   ═══════════════════════════════════════════════════════════════════════
+
+      1. Cole no terminal:
+      
+         node create-new-admin-user.js
+
+      2. Siga as 6 instruções simples
+      3. Pronto! ✅
+
+
+   📚 ESCOLHA SEU CAMINHO
+   ═══════════════════════════════════════════════════════════════════════
+
+      🎯 "Não tenho tempo, só faz!"
+      → Arquivo: QUICK_NEW_ADMIN.txt (cartão rápido com passos)
+      → Tempo: 3 minutos máximo
+
+      📖 "Quero entender cada passo"
+      → Arquivo: NEW_ADMIN_GUIDE.md (guia detalhado)
+      → Tempo: 5-10 minutos
+
+      💻 "Prefiro fazer manual"
+      → Arquivo: COPY_PASTE_COMMANDS.md (código SQL pronto)
+      → Tempo: 10-15 minutos
+
+      📊 "Qual é o índice de tudo?"
+      → Arquivo: README_ADMIN_SETUP_INDEX.md (mapa completo)
+      → Tempo: 2-5 minutos
+
+
+   📁 ARQUIVOS CRIADOS PARA VOCÊ
+   ═══════════════════════════════════════════════════════════════════════
+
+      ✅ create-new-admin-user.js
+         → Script Node.js que faz tudo automaticamente
+         → Registra novo usuário
+         → Promove a admin com um clique
+         → Verifica se funcionou
+
+      ✅ QUICK_NEW_ADMIN.txt (ABRA ISTO PRIMEIRO!)
+         → Cartão rápido 6+1 passos
+         → Post-it para decorar
+         → Cópiar-colar pronto
+
+      ✅ NEW_ADMIN_GUIDE.md
+         → Guia passo-a-passo ilustrado
+         → Troubleshooting incluído
+         → Dicas e truques
+
+      ✅ COPY_PASTE_COMMANDS.md
+         → Comandos SQL prontos
+         → JavaScript console
+         → Alternativa manual
+
+
+   🚀 VAMOS COMEÇAR
+   ═══════════════════════════════════════════════════════════════════════
+
+      PASSO 1: Abrir Terminal
+      ───────────────────────
+      Ctrl + Shift + ~  (no VS Code)
+         ou qualquer PowerShell
+
+      PASSO 2: Executar o Script
+      ────────────────────────────
+      node create-new-admin-user.js
+
+      PASSO 3: Seguir as Instruções
+      ──────────────────────────────
+      Script mostra o que fazer passo-a-passo.
+      Você só precisa abrir o app e registar.
+
+      PASSO 4: Pronto! ✅
+      ──────────────────
+      Script promove automaticamente
+      Seu novo admin está funcional
+
+
+   ✅ VERIFICAÇÃO
+   ═══════════════════════════════════════════════════════════════════════
+
+      Se tudo funcionou, você verá:
+
+      ✅ VERIFICAÇÃO OK - Usuário é ADMIN
+
+      Resumo Final:
+      Email: seu-email@exemplo.com
+      UUID: 1234abcd-5678-90ef-ghij-klmnopqrstuv
+      Roles: admin
+      Status: ✅ PRONTO
+
+
+   ⏱️  TEMPO ESTIMADO
+   ═════════════════════════════════════════════════════════════════════════
+
+      Script automático:      3-5 minutos 🚀
+      Manual (SQL):          10-15 minutos
+      Troubleshooting extra:  5-10 minutos (se necessário)
+
+
+   💡 PRÓXIMOS PASSOS (Após completar)
+   ═════════════════════════════════════════════════════════════════════════
+
+      1. Sign Out no app (se necessário)
+      2. Sign In novamente com nova conta
+      3. Depois acesse: http://localhost:5173/admin
+      4. Painel admin deve aparecer ✅
+
+
+   🐛 ERROS COMUNS & SOLUÇÕES
+   ═════════════════════════════════════════════════════════════════════════
+
+      ❌ "Acesso Negado" em /admin
+      → Execute no console (F12):
+         localStorage.clear(); location.reload();
+
+      ❌ "Variáveis de ambiente não configuradas"  
+      → Defina antes de rodar:
+         $env:VITE_SUPABASE_URL="sua-url"
+         $env:VITE_SUPABASE_PUBLISHABLE_KEY="sua-chave"
+
+      ❌ "Usuário não encontrado"
+      → Faça sign in na conta novo primeiro
+      → Depois rodar script novamente
+
+      ❌ "Role admin já existe"
+      → Significa que funcionou! ✅
+
+
+   📞 PRECISA DE AJUDA?
+   ═════════════════════════════════════════════════════════════════════════
+
+      1. Leia: QUICK_NEW_ADMIN.txt (super simples)
+      2. Se não funcionar: NEW_ADMIN_GUIDE.md (detalhado)
+      3. Se ainda não: COPY_PASTE_COMMANDS.md (manual)
+      4. Último recurso: README_ADMIN_SETUP_INDEX.md (tudo)
+
+
+═════════════════════════════════════════════════════════════════════════════
+
+                        🎉 VAMOS COMEÇAR AGORA!
+
+                  Execute no terminal:
+
+                     node create-new-admin-user.js
+
+═════════════════════════════════════════════════════════════════════════════
+
+Criado: 2026-02-19
+Script: create-new-admin-user.js  
+Versão: 1.0
+Status: ✅ PRONTO PARA USAR

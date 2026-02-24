@@ -2,6 +2,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
+// Nota sobre tratamento de erros:
+// Componentes UI primitivos como Card raramente falham em produção.
+// Adicionamos tratamento mínimo apenas no CardTitle (mais usado) para balançar
+// segurança vs performance. Para erros mais complexos, use Error Boundary no nível da aplicação.
+
 const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("rounded-lg border bg-card text-card-foreground shadow-sm", className)} {...props} />
 ));
@@ -15,9 +20,17 @@ const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDiv
 CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
-  ({ className, ...props }, ref) => (
-    <h3 ref={ref} className={cn("text-2xl font-semibold leading-none tracking-tight", className)} {...props} />
-  ),
+  ({ className, ...props }, ref) => {
+    try {
+      return (
+        <h3 ref={ref} className={cn("text-2xl font-semibold leading-none tracking-tight", className)} {...props} />
+      );
+    } catch (error) {
+      console.error("CardTitle: Erro ao renderizar", error);
+      // Fallback simples: retorna heading sem estilo
+      return <h3 ref={ref} {...props} />;
+    }
+  },
 );
 CardTitle.displayName = "CardTitle";
 

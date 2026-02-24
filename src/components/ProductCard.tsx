@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, Heart, Star } from "lucide-react";
+import { ShoppingCart, Store, Sparkles } from "lucide-react";
+import ProductPrice from "@/components/ProductPrice";
+import ProductImage from "@/components/ProductImage";
+import { useRating } from "@/hooks/useRating";
+import { useCart } from "@/contexts/CartContext";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface ProductCardProps {
+  id: string;
   title: string;
   price: string;
   oldPrice?: string;
@@ -15,61 +21,92 @@ interface ProductCardProps {
   storeName?: string;
 }
 
-const ProductCard = ({ title, price, oldPrice, image, rating, reviews, badge, storeName }: ProductCardProps) => {
+// Constantes
+const PRODUCT_DETAIL_URL = "/produto/1";
+const CARD_CLASSES = "card-modern hover-lift group relative overflow-hidden bg-card/80 backdrop-blur-sm border-2";
+const TITLE_CLASSES = "font-semibold text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer group-hover:translate-x-1 duration-300";
+const ADD_TO_CART_BUTTON_CLASSES = "w-full bg-gradient-to-r from-primary via-primary-glow to-accent hover:opacity-90 shadow-lg glow-primary transition-all hover:scale-105 active:scale-95";
+const STORE_NAME_CLASSES = "text-xs text-muted-foreground mb-1 font-medium flex items-center gap-1 group-hover:text-primary transition-colors";
+const RATING_CONTAINER_CLASSES = "flex items-center gap-1 mb-3 group-hover:scale-105 transition-transform duration-300";
+
+const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge, storeName }: ProductCardProps) => {
+  const { renderStars, maxRating } = useRating(rating);
+  const { addItem } = useCart();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handleAddToCart = () => {
+    const priceNum = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : parseFloat(price);
+    
+    addItem({
+      id,
+      title,
+      price: priceNum,
+      image,
+      storeName
+    });
+  };
+
+  const handleFavoriteClick = () => {
+    setIsFavorite(!isFavorite);
+    toast.success(isFavorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos');
+  };
+
   return (
-    <Card className="group overflow-hidden hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 bg-card hover:bg-card-hover">
-      <div className="relative aspect-square overflow-hidden bg-secondary/50">
-        <img
-          src={image}
-          alt={title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-        />
-        {badge && (
-          <Badge className="absolute top-3 left-3 bg-gradient-to-r from-accent to-primary text-white shadow-lg">
-            {badge}
-          </Badge>
-        )}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="absolute top-3 right-3 bg-background/90 hover:bg-background backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 hover:text-accent border border-border/50"
-        >
-          <Heart className="h-4 w-4" />
-        </Button>
-      </div>
+    <Card className={CARD_CLASSES}>
+      {/* Efeito de brilho decorativo */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       
-      <div className="p-4">
+      {/* Imagem do produto com badge e botão de favorito */}
+      <ProductImage
+        src={image}
+        alt={title}
+        badge={badge}
+        onFavoriteClick={handleFavoriteClick}
+        isFavorite={isFavorite}
+      />
+      
+      {/* Informações do produto */}
+      <div className="p-4 relative z-10">
         {storeName && (
-          <p className="text-xs text-muted-foreground mb-1 font-medium">Por: {storeName}</p>
+          <p className={STORE_NAME_CLASSES}>
+            <Store className="h-3 w-3" />
+            {storeName}
+          </p>
         )}
-        <Link to="/produto/1">
-          <h3 className="font-semibold text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer">
+        
+        <Link to={PRODUCT_DETAIL_URL}>
+          <h3 className={TITLE_CLASSES}>
             {title}
           </h3>
         </Link>
         
-        <div className="flex items-center gap-1 mb-3">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3.5 w-3.5 ${i < rating ? "fill-primary text-primary" : "text-muted"}`}
-              />
-            ))}
+        {/* Avaliação com estrelas */}
+        <div className={RATING_CONTAINER_CLASSES}>
+          <div className="flex" aria-label={`Avaliação: ${rating} de ${maxRating} estrelas`}>
+            {renderStars()}
           </div>
-          <span className="text-xs text-muted-foreground font-medium">({reviews})</span>
+          <span className="text-xs text-muted-foreground font-medium">
+            ({reviews})
+          </span>
         </div>
 
-        <div className="flex items-baseline gap-2 mb-4">
-          <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">{price}</span>
-          {oldPrice && (
-            <span className="text-sm text-muted-foreground line-through">{oldPrice}</span>
-          )}
-        </div>
+        {/* Preço */}
+        <ProductPrice
+          price={price}
+          oldPrice={oldPrice}
+          className="mb-4"
+        />
 
-        <Button className="w-full bg-gradient-to-r from-primary to-primary-glow hover:opacity-90 shadow-md shadow-primary/20 transition-all hover:shadow-lg hover:shadow-primary/30" size="sm">
+        {/* Botão adicionar ao carrinho */}
+        <Button 
+          className={ADD_TO_CART_BUTTON_CLASSES} 
+          size="sm"
+          aria-label="Adicionar ao carrinho"
+          onClick={handleAddToCart}
+        >
           <ShoppingCart className="h-4 w-4 mr-2" />
           Adicionar
+          <Sparkles className="h-3 w-3 ml-2 opacity-0 group-hover:opacity-100 transition-opacity" />
         </Button>
       </div>
     </Card>

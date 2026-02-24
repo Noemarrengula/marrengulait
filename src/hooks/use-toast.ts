@@ -57,15 +57,23 @@ const addToRemoveQueue = (toastId: string) => {
     return;
   }
 
-  const timeout = setTimeout(() => {
-    toastTimeouts.delete(toastId);
-    dispatch({
-      type: "REMOVE_TOAST",
-      toastId: toastId,
-    });
-  }, TOAST_REMOVE_DELAY);
+  try {
+    const timeout = setTimeout(() => {
+      try {
+        toastTimeouts.delete(toastId);
+        dispatch({
+          type: "REMOVE_TOAST",
+          toastId: toastId,
+        });
+      } catch (error) {
+        console.error("Error removing toast:", error);
+      }
+    }, TOAST_REMOVE_DELAY);
 
-  toastTimeouts.set(toastId, timeout);
+    toastTimeouts.set(toastId, timeout);
+  } catch (error) {
+    console.error("Error adding toast to remove queue:", error);
+  }
 };
 
 export const reducer = (state: State, action: Action): State => {
@@ -167,14 +175,20 @@ function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
 
   React.useEffect(() => {
+    // Adiciona o listener apenas uma vez no mount
+    // IMPORTANTE: Não incluir 'state' nas dependências para evitar loop infinito
+    // O listener (setState) é chamado via dispatch quando o estado global muda
     listeners.push(setState);
+    
+    // Cleanup: Remove o listener no unmount
     return () => {
       const index = listeners.indexOf(setState);
       if (index > -1) {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     ...state,
