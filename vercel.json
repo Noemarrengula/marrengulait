@@ -8,6 +8,5 @@
     "VITE_SUPABASE_PROJECT_ID": "@supabase_project_id",
     "VITE_SUPABASE_URL": "@supabase_url",
     "VITE_SUPABASE_PUBLISHABLE_KEY": "@supabase_publishable_key"
-  },
-  "envPrefix": "VITE_"
+  }
 }
