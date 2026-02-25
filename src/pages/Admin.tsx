@@ -9,6 +9,16 @@ import { Label } from "@/components/ui/label";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -36,6 +46,44 @@ interface User {
   created_at: string;
 }
 
+// additional resource types for admin panel
+interface Question {
+  id: string;
+  question: string;
+  product_id: string;
+  user_id?: string;
+  created_at?: string;
+}
+
+interface PriceAlert {
+  id: string;
+  user_id: string;
+  product_id: string;
+  target_price?: number;
+  created_at?: string;
+}
+
+interface Affiliate {
+  id: string;
+  email: string;
+  balance?: number;
+  created_at?: string;
+}
+
+interface LoyaltyPoint {
+  id: string;
+  user_id: string;
+  points: number;
+  created_at?: string;
+}
+
+interface Badge {
+  id: string;
+  name: string;
+  description?: string;
+  created_at?: string;
+}
+
 const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
@@ -46,11 +94,35 @@ const AdminPanel = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   // extra resources
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [alerts, setAlerts] = useState<any[]>([]);
-  const [affiliates, setAffiliates] = useState<any[]>([]);
-  const [loyalty, setLoyalty] = useState<any[]>([]);
-  const [badges, setBadges] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [alerts, setAlerts] = useState<PriceAlert[]>([]);
+  const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
+  const [loyalty, setLoyalty] = useState<LoyaltyPoint[]>([]);
+  const [badges, setBadges] = useState<Badge[]>([]);
+
+  // filter/search terms for each tab
+  const [productFilter, setProductFilter] = useState<string>("");
+  const [orderFilter, setOrderFilter] = useState<string>("");
+  const [userFilter, setUserFilter] = useState<string>("");
+  const [questionFilter, setQuestionFilter] = useState<string>("");
+  const [alertFilter, setAlertFilter] = useState<string>("");
+  const [affiliateFilter, setAffiliateFilter] = useState<string>("");
+  const [badgeFilter, setBadgeFilter] = useState<string>("");
+
+  // confirmation dialog state
+  const [confirmDelete, setConfirmDelete] = useState<
+    | { type: 'product'; id: string }
+    | { type: 'question'; id: string }
+    | null
+  >(null);
+
+  // deletion confirmation
+  const [confirmDelete, setConfirmDelete] = useState<
+    | { type: 'product'; id: string }
+    | { type: 'question'; id: string }
+    | null
+  >(null);
+
 
   const [loadingData, setLoadingData] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -84,6 +156,7 @@ const AdminPanel = () => {
 
       if (pError) throw pError;
       setProducts(productsData || []);
+      setProductFilter("");
 
       // Carregar pedidos
       const { data: ordersData, error: oError } = await supabase
@@ -201,18 +274,55 @@ const AdminPanel = () => {
     }
   };
 
-  const deleteProduct = async (id: string) => {
-    if (!confirm('Confirmar eliminação?')) return;
+  const deleteProduct = (id: string) => {
+    setConfirmDelete({ type: 'product', id });
+  };
 
+  const performDelete = async () => {
+    if (!confirmDelete) return;
     try {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) throw error;
-      
-      toast({ title: '✅ Produto eliminado!' });
+      if (confirmDelete.type === 'product') {
+        const { error } = await supabase.from('products').delete().eq('id', confirmDelete.id);
+        if (error) throw error;
+        toast({ title: '✅ Produto eliminado!' });
+      } else if (confirmDelete.type === 'question') {
+        const { error } = await supabase.from('product_questions').delete().eq('id', confirmDelete.id);
+        if (error) throw error;
+        toast({ title: '✅ Pergunta eliminada!' });
+      }
       await loadAllData();
-    } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } finally {
+      setConfirmDelete(null);
     }
+  };
+
+  // -- csv export helper -------------------------------------------------
+  const downloadCSV = (rows: any[], columns: string[], filename: string) => {
+    if (rows.length === 0) return;
+    const headerLine = columns.join(",");
+    const body = rows
+      .map(r =>
+        columns
+          .map(c => {
+            const v = r[c as keyof typeof r];
+            if (v === null || v === undefined) return "";
+            // escape quotes
+            return String(v).replace(/"/g, '""');
+          })
+          .map(v => `"${v}"`)
+          .join(",")
+      )
+      .join("\n");
+    const csv = headerLine + "\n" + body;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (loading || loadingData) {
@@ -317,8 +427,14 @@ const AdminPanel = () => {
           {/* PRODUTOS */}
           <TabsContent value="produtos" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Adicionar Novo Produto</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(productFilter?
+                    products.filter(p=>p.title.toLowerCase().includes(productFilter.toLowerCase()))
+                    : products,
+                  ["id","title","price","stock","category","store_name"],
+                  "produtos.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent>
                 {!editingProduct ? (
@@ -412,6 +528,12 @@ const AdminPanel = () => {
                 <CardTitle>Produtos ({products.length})</CardTitle>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar produtos..."
+                  value={productFilter}
+                  onChange={(e) => setProductFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -423,7 +545,9 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => (
+                    {products
+                      .filter(p => p.title.toLowerCase().includes(productFilter.toLowerCase()))
+                      .map((product) => (
                       <tr key={product.id} className="border-b hover:bg-muted">
                         <td className="py-3">{product.title.substring(0, 40)}</td>
                         <td className="py-3">MT {product.price.toFixed(2)}</td>
@@ -457,10 +581,25 @@ const AdminPanel = () => {
           {/* PEDIDOS */}
           <TabsContent value="pedidos">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Pedidos ({orders.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(orderFilter?
+                    orders.filter(o=>
+                        o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
+                        o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
+                      )
+                    : orders,
+                  ["id","customer_name","customer_email","total_amount","status","created_at"],
+                  "pedidos.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar pedidos por cliente/email..."
+                  value={orderFilter}
+                  onChange={(e) => setOrderFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -472,7 +611,12 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {orders.map((order) => (
+                    {orders
+                      .filter(o =>
+                        o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
+                        o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
+                      )
+                      .map((order) => (
                       <tr key={order.id} className="border-b hover:bg-muted">
                         <td className="py-3">{order.customer_name}</td>
                         <td className="py-3">{order.customer_email}</td>
@@ -498,10 +642,22 @@ const AdminPanel = () => {
           {/* UTILIZADORES */}
           <TabsContent value="usuarios">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Utilizadores ({users.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(userFilter?
+                    users.filter(u=>u.email.toLowerCase().includes(userFilter.toLowerCase()))
+                    : users,
+                  ["id","email","created_at"],
+                  "usuarios.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar utilizadores por email..."
+                  value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -511,7 +667,9 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((u) => (
+                    {users
+                      .filter(u => u.email.toLowerCase().includes(userFilter.toLowerCase()))
+                      .map((u) => (
                       <tr key={u.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{u.id.substring(0, 8)}</td>
                         <td className="py-3">{u.email}</td>
@@ -526,10 +684,22 @@ const AdminPanel = () => {
           {/* PERGUNTAS */}
           <TabsContent value="perguntas">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Perguntas ({questions.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(questionFilter?
+                    questions.filter(q=>q.question.toLowerCase().includes(questionFilter.toLowerCase()))
+                    : questions,
+                  ["id","question","product_id","user_id","created_at"],
+                  "perguntas.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar perguntas..."
+                  value={questionFilter}
+                  onChange={(e) => setQuestionFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -540,17 +710,19 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {questions.map((q) => (
+                    {questions
+                      .filter(q => q.question.toLowerCase().includes(questionFilter.toLowerCase()))
+                      .map((q) => (
                       <tr key={q.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{q.id.substring(0,8)}</td>
                         <td className="py-3">{q.question.substring(0,50)}</td>
                         <td className="py-3 font-mono text-xs">{q.product_id.substring(0,8)}</td>
                         <td className="py-3">
-                          <Button size="sm" variant="destructive" onClick={() => {
-                            if(confirm('Excluir pergunta?')){
-                              supabase.from('product_questions').delete().eq('id', q.id).then(()=>loadAllData());
-                            }
-                          }}>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setConfirmDelete({ type: 'question', id: q.id })}
+                          >
                             Apagar
                           </Button>
                         </td>
@@ -564,10 +736,25 @@ const AdminPanel = () => {
           {/* ALERTAS */}
           <TabsContent value="alertas">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Alertas ({alerts.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(alertFilter?
+                    alerts.filter(a=>
+                        a.user_id.toLowerCase().includes(alertFilter.toLowerCase()) ||
+                        a.product_id.toLowerCase().includes(alertFilter.toLowerCase())
+                      )
+                    : alerts,
+                  ["id","user_id","product_id","target_price","created_at"],
+                  "alertas.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar alertas por usuário/ID..."
+                  value={alertFilter}
+                  onChange={(e) => setAlertFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -577,7 +764,12 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {alerts.map((a) => (
+                    {alerts
+                      .filter(a =>
+                        a.user_id.toLowerCase().includes(alertFilter.toLowerCase()) ||
+                        a.product_id.toLowerCase().includes(alertFilter.toLowerCase())
+                      )
+                      .map((a) => (
                       <tr key={a.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{a.id.substring(0,8)}</td>
                         <td className="py-3 font-mono text-xs">{a.user_id.substring(0,8)}</td>
@@ -592,10 +784,22 @@ const AdminPanel = () => {
           {/* AFILIADOS */}
           <TabsContent value="afiliados">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Afiliações ({affiliates.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(affiliateFilter?
+                    affiliates.filter(a=>a.email.toLowerCase().includes(affiliateFilter.toLowerCase()))
+                    : affiliates,
+                  ["id","email","balance","created_at"],
+                  "afiliados.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar afiliados por email..."
+                  value={affiliateFilter}
+                  onChange={(e) => setAffiliateFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -605,7 +809,9 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {affiliates.map((a) => (
+                    {affiliates
+                      .filter(a => a.email.toLowerCase().includes(affiliateFilter.toLowerCase()))
+                      .map((a) => (
                       <tr key={a.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{a.id.substring(0,8)}</td>
                         <td className="py-3">{a.email}</td>
@@ -648,10 +854,22 @@ const AdminPanel = () => {
           {/* BADGES */}
           <TabsContent value="badges">
             <Card>
-              <CardHeader>
+              <CardHeader className="justify-between">
                 <CardTitle>Badges ({badges.length})</CardTitle>
+                <Button size="sm" variant="secondary" onClick={() => downloadCSV(badgeFilter?
+                    badges.filter(b=>b.name.toLowerCase().includes(badgeFilter.toLowerCase()))
+                    : badges,
+                  ["id","name","description","created_at"],
+                  "badges.csv")}
+                >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                <Input
+                  placeholder="Filtrar badges por nome..."
+                  value={badgeFilter}
+                  onChange={(e) => setBadgeFilter(e.target.value)}
+                  className="mb-2"
+                />
                 <table className="w-full text-sm">
                   <thead className="border-b">
                     <tr>
@@ -661,7 +879,9 @@ const AdminPanel = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {badges.map((b) => (
+                    {badges
+                      .filter(b => b.name.toLowerCase().includes(badgeFilter.toLowerCase()))
+                      .map((b) => (
                       <tr key={b.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{b.id.substring(0,8)}</td>
                         <td className="py-3">{b.name}</td>
@@ -696,6 +916,22 @@ const AdminPanel = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {/* delete confirmation dialog */}
+      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Eliminação</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete?.type === 'product' && 'Tem certeza que deseja apagar este produto?'}
+              {confirmDelete?.type === 'question' && 'Tem certeza que deseja apagar esta pergunta?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={performDelete}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Footer />
     </div>
   );
