@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { X, Check, Minus, ShoppingCart } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 import { toast } from "sonner";
 
 interface Product {
@@ -80,7 +81,7 @@ const ProductCompare = () => {
                 {products.map(product => (
                   <td key={product.id} className="p-4 border-t text-center">
                     <span className="text-2xl font-bold text-primary">
-                      {product.price.toLocaleString('pt-MZ')} MT
+                      {product.price.toLocaleString(locale)} {currency}
                     </span>
                   </td>
                 ))}

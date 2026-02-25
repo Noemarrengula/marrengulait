@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
+import { SettingsProvider } from "./context/SettingsContext";
 import "./index.css";
 
 const queryClient = new QueryClient({
@@ -30,7 +31,9 @@ if (!rootElement) {
   try {
     createRoot(rootElement).render(
       <QueryClientProvider client={queryClient}>
-        <App />
+        <SettingsProvider>
+          <App />
+        </SettingsProvider>
       </QueryClientProvider>
     );
   } catch (error) {

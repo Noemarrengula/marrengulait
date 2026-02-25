@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useSettings } from "@/context/SettingsContext";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -12,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 
 const Affiliate = () => {
   const { user } = useAuth();
+  const { locale, currency } = useSettings();
   const navigate = useNavigate();
   const [affiliate, setAffiliate] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -199,7 +201,7 @@ const Affiliate = () => {
               <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-green-600" />
                 <span className="text-2xl font-bold">
-                  {affiliate.total_commission.toLocaleString('pt-MZ')} MT
+                  {affiliate.total_commission.toLocaleString(locale)} {currency}
                 </span>
               </div>
             </CardContent>

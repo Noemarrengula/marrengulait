@@ -125,7 +125,7 @@ const OrderConfirmation = () => {
               <div>
                 <div className="font-semibold">{getStatusText(order.status)}</div>
                 <div className="text-sm text-muted-foreground">
-                  Criado em {new Date(order.created_at).toLocaleDateString('pt-MZ')}
+                  Criado em {new Date(order.created_at).toLocaleDateString(locale)}
                 </div>
               </div>
             </div>

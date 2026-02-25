@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Shield, User, Store as StoreIcon } from 'lucide-react';
@@ -16,6 +17,7 @@ interface UsersTableProps {
 }
 
 const UsersTable = ({ users, onViewUser }: UsersTableProps) => {
+  const { locale } = useSettings();
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'admin': return <Shield className="h-3 w-3" />;
@@ -61,7 +63,7 @@ const UsersTable = ({ users, onViewUser }: UsersTableProps) => {
               </div>
             </TableCell>
             <TableCell className="text-sm">
-              {new Date(user.created_at).toLocaleDateString('pt-MZ')}
+              {new Date(user.created_at).toLocaleDateString(locale)}
             </TableCell>
             <TableCell>
               <Button size="sm" variant="ghost" onClick={() => onViewUser(user)}>

@@ -1,4 +1,5 @@
 import { User, Search, Menu, Heart, LogOut, Settings, ShoppingBag } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -12,6 +13,7 @@ import { useState } from "react";
 
 const Header = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
+  const { locale, currency, setLocale, setCurrency } = useSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
@@ -64,7 +66,28 @@ const Header = () => {
             <div className="flex items-center gap-4">
               <button onClick={() => navigate('/pedidos')} className="hover:text-primary transition-all hover:scale-105">Rastrear Encomenda</button>
               <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-primary transition-all hover:scale-105">Ajuda</button>
-              <span className="hover:text-primary transition-colors cursor-default font-semibold">🇲🇿 PT</span>
+              {/* currency selector */}
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+                className="bg-transparent text-sm text-current border-none focus:ring-0 cursor-pointer"
+                title="Moeda"
+              >
+                <option value="MT">MT</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="ZAR">ZAR</option>
+              </select>
+              {/* language selector */}
+              <select
+                value={locale}
+                onChange={(e) => setLocale(e.target.value)}
+                className="bg-transparent text-sm text-current border-none focus:ring-0 cursor-pointer"
+                title="Idioma"
+              >
+                <option value="pt-MZ">🇲🇿 PT</option>
+                <option value="en-US">🇺🇸 EN</option>
+              </select>
             </div>
           </div>
         </div>

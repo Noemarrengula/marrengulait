@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { useSettings } from '@/context/SettingsContext';
 
 interface ServiceRequest {
   id: string;
@@ -19,6 +20,7 @@ interface ServiceDetailsDialogProps {
 }
 
 const ServiceDetailsDialog = ({ service, open, onClose }: ServiceDetailsDialogProps) => {
+  const { locale } = useSettings();
   if (!service) return null;
 
   return (
@@ -63,7 +65,7 @@ const ServiceDetailsDialog = ({ service, open, onClose }: ServiceDetailsDialogPr
           <div>
             <h3 className="font-semibold mb-2">Data da Solicitação</h3>
             <p className="text-sm">
-              {new Date(service.created_at).toLocaleDateString('pt-MZ', {
+              {new Date(service.created_at).toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',

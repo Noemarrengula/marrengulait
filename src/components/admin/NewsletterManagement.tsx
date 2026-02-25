@@ -4,10 +4,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useSettings } from '@/context/SettingsContext';
 import { supabase } from '@/integrations/supabase/client';
 
 const NewsletterManagement = () => {
   const { toast } = useToast();
+  const { locale } = useSettings();
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +69,7 @@ const NewsletterManagement = () => {
                 <TableRow key={sub.id}>
                   <TableCell className="font-medium">{sub.email}</TableCell>
                   <TableCell className="text-sm">
-                    {new Date(sub.subscribed_at).toLocaleDateString('pt-MZ')}
+                    {new Date(sub.subscribed_at).toLocaleDateString(locale)}
                   </TableCell>
                   <TableCell>
                     <Badge variant={sub.active ? 'default' : 'secondary'}>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Zap, Clock } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -15,6 +16,7 @@ interface FlashSaleProps {
 }
 
 const FlashSale = ({ productName, originalPrice, salePrice, endTime, stockLimit, soldCount }: FlashSaleProps) => {
+  const { locale, currency } = useSettings();
   const [timeLeft, setTimeLeft] = useState("");
   const discount = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
   const stockPercentage = (soldCount / stockLimit) * 100;
@@ -54,8 +56,8 @@ const FlashSale = ({ productName, originalPrice, salePrice, endTime, stockLimit,
         <h3 className="text-xl font-bold mb-4">{productName}</h3>
         
         <div className="flex items-baseline gap-3 mb-4">
-          <span className="text-3xl font-bold text-red-600">{salePrice.toLocaleString('pt-MZ')} MT</span>
-          <span className="text-lg text-muted-foreground line-through">{originalPrice.toLocaleString('pt-MZ')} MT</span>
+          <span className="text-3xl font-bold text-red-600">{salePrice.toLocaleString(locale)} {currency}</span>
+          <span className="text-lg text-muted-foreground line-through">{originalPrice.toLocaleString(locale)} {currency}</span>
         </div>
         
         <div className="space-y-3">

@@ -118,6 +118,7 @@ const PCBuilder = () => {
     // Aqui você pode adicionar a lógica para adicionar ao carrinho
   };
 
+  const { locale, currency } = useSettings();
   const total = calculateTotal();
 
   return (
@@ -148,7 +149,7 @@ const PCBuilder = () => {
                         <CardTitle className="text-lg">{categoryLabels[category]}</CardTitle>
                         {selectedComponents[category] && (
                           <CardDescription className="text-primary font-medium">
-                            {selectedComponents[category]?.price.toLocaleString('pt-MZ')} MT
+                            {selectedComponents[category]?.price.toLocaleString(locale)} {currency}
                           </CardDescription>
                         )}
                       </div>
@@ -162,7 +163,7 @@ const PCBuilder = () => {
                       <SelectContent>
                         {items.map((item) => (
                           <SelectItem key={item.name} value={item.name}>
-                            {item.name} - {item.price.toLocaleString('pt-MZ')} MT
+                            {item.name} - {item.price.toLocaleString(locale)} {currency}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -185,7 +186,7 @@ const PCBuilder = () => {
                   component && (
                     <div key={category} className="flex justify-between text-sm">
                       <span className="text-muted-foreground">{categoryLabels[category]}</span>
-                      <span className="font-medium">{component.price.toLocaleString('pt-MZ')} MT</span>
+                      <span className="font-medium">{component.price.toLocaleString(locale)} {currency}</span>
                     </div>
                   )
                 ))}
@@ -193,7 +194,7 @@ const PCBuilder = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-primary">{total.toLocaleString('pt-MZ')} MT</span>
+                    <span className="text-primary">{total.toLocaleString(locale)} {currency}</span>
                   </div>
                 </div>
 

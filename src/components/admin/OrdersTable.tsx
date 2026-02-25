@@ -7,6 +7,7 @@ import { Eye } from 'lucide-react';
 import { Order, OrderStatus, PaymentStatus } from '@/types/order';
 import { updateOrderStatus, updatePaymentStatus } from '@/services/orderService';
 import { useToast } from '@/hooks/use-toast';
+import { useSettings } from '@/context/SettingsContext';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -16,6 +17,7 @@ interface OrdersTableProps {
 
 const OrdersTable = ({ orders, onOrderUpdate, onViewOrder }: OrdersTableProps) => {
   const { toast } = useToast();
+  const { locale, currency } = useSettings();
   const [updating, setUpdating] = useState<string | null>(null);
 
   const handleStatusChange = async (orderId: string, status: OrderStatus) => {
@@ -67,7 +69,7 @@ const OrdersTable = ({ orders, onOrderUpdate, onViewOrder }: OrdersTableProps) =
                 <div className="text-muted-foreground">{order.customer_phone}</div>
               </div>
             </TableCell>
-            <TableCell className="font-bold">MT {order.total_amount.toFixed(2)}</TableCell>
+            <TableCell className="font-bold">{order.total_amount.toLocaleString(locale, {minimumFractionDigits:2,maximumFractionDigits:2})} {currency}</TableCell>
             <TableCell>
               <Select
                 value={order.status}
@@ -105,7 +107,7 @@ const OrdersTable = ({ orders, onOrderUpdate, onViewOrder }: OrdersTableProps) =
               </Select>
             </TableCell>
             <TableCell className="text-sm">
-              {new Date(order.created_at).toLocaleDateString('pt-MZ')}
+              {new Date(order.created_at).toLocaleDateString(locale)}
             </TableCell>
             <TableCell>
               <Button

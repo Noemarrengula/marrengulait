@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+import { useSettings } from '@/context/SettingsContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,6 +22,7 @@ interface ServicesTableProps {
 }
 
 const ServicesTable = ({ services, onStatusChange, onView }: ServicesTableProps) => {
+  const { locale } = useSettings();
   return (
     <Table>
       <TableHeader>
@@ -56,7 +58,7 @@ const ServicesTable = ({ services, onStatusChange, onView }: ServicesTableProps)
               </Select>
             </TableCell>
             <TableCell className="text-sm">
-              {new Date(service.created_at).toLocaleDateString('pt-MZ')}
+              {new Date(service.created_at).toLocaleDateString(locale)}
             </TableCell>
             <TableCell>
               <Button size="sm" variant="ghost" onClick={() => onView(service)}>

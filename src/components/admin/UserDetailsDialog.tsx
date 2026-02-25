@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
+import { useSettings } from '@/context/SettingsContext';
 
 interface UserData {
   id: string;
@@ -29,6 +30,7 @@ const availableRoles = [
 const UserDetailsDialog = ({ user, open, onClose, onUpdateRoles }: UserDetailsDialogProps) => {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const { locale } = useSettings();
 
   const handleOpen = (isOpen: boolean) => {
     if (isOpen && user) {
@@ -77,7 +79,7 @@ const UserDetailsDialog = ({ user, open, onClose, onUpdateRoles }: UserDetailsDi
           <div>
             <Label className="text-muted-foreground">Data de Registo</Label>
             <p className="font-medium">
-              {new Date(user.created_at).toLocaleDateString('pt-MZ', {
+              {new Date(user.created_at).toLocaleDateString(locale, {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'

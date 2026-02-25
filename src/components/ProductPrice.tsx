@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { useSettings } from "@/context/SettingsContext";
 
 interface ProductPriceProps {
   price: string | number;
@@ -12,11 +13,13 @@ interface ProductPriceProps {
 const ProductPrice = ({ 
   price, 
   oldPrice, 
-  currency = 'MT', 
+  currency: propCurrency,
   size = 'md', 
   showDiscount = true,
   className = ''
 }: ProductPriceProps) => {
+  const { currency: ctxCurrency, locale } = useSettings();
+  const currency = propCurrency || ctxCurrency;
   // Calcula percentual de desconto
   const calculateDiscount = (): number => {
     if (!oldPrice) return 0;
@@ -41,7 +44,8 @@ const ProductPrice = ({
   // Formata preço para exibição
   const formatPrice = (value: string | number): string => {
     if (typeof value === 'number') {
-      return value.toFixed(2);
+      // use locale for formatting
+      return value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
     return value;
   };

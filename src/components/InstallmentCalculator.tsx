@@ -1,4 +1,5 @@
 import { Calculator } from "lucide-react";
+import { useSettings } from "@/context/SettingsContext";
 
 interface InstallmentCalculatorProps {
   price: number;
@@ -10,6 +11,7 @@ const InstallmentCalculator = ({ price, maxInstallments = 12 }: InstallmentCalcu
     return (price / installments).toFixed(2);
   };
 
+  const { locale, currency } = useSettings();
   const bestOption = maxInstallments;
   const installmentValue = calculateInstallment(bestOption);
 
@@ -20,7 +22,7 @@ const InstallmentCalculator = ({ price, maxInstallments = 12 }: InstallmentCalcu
         <span>ou em até</span>
       </div>
       <div className="text-2xl font-bold text-primary">
-        {bestOption}x de {Number(installmentValue).toLocaleString('pt-MZ')} MT
+        {bestOption}x de {Number(installmentValue).toLocaleString(locale)} {currency}
       </div>
       <p className="text-xs text-muted-foreground">sem juros no cartão</p>
     </div>
