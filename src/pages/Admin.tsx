@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
@@ -20,6 +21,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {
@@ -88,6 +90,7 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
+  const { locale } = useSettings();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -328,7 +331,8 @@ const AdminPanel = () => {
     URL.revokeObjectURL(url);
   };
 
-  if (loading || loadingData) {
+  // initial block loader: only when auth is pending
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="animate-spin h-12 w-12" />
@@ -373,48 +377,28 @@ const AdminPanel = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Produtos</p>
-              <p className="text-2xl font-bold">{products.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Pedidos</p>
-              <p className="text-2xl font-bold">{orders.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Utilizadores</p>
-              <p className="text-2xl font-bold">{users.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Vendas Totais</p>
-              <p className="text-2xl font-bold">MT {orders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toFixed(0)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Perguntas</p>
-              <p className="text-2xl font-bold">{questions.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Alertas de Preço</p>
-              <p className="text-2xl font-bold">{alerts.length}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Badges</p>
-              <p className="text-2xl font-bold">{badges.length}</p>
-            </CardContent>
-          </Card>
+          {[
+            {label:'Produtos', value: products.length},
+            {label:'Pedidos', value: orders.length},
+            {label:'Utilizadores', value: users.length},
+            {label:'Vendas Totais', value: orders.reduce((sum, o) => sum + (o.total_amount || 0), 0).toFixed(0)},
+            {label:'Perguntas', value: questions.length},
+            {label:'Alertas de Preço', value: alerts.length},
+            {label:'Badges', value: badges.length},
+          ].map((stat, idx) => (
+            <Card key={idx}>
+              <CardContent className="pt-6">
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                {loadingData ? (
+                  <Skeleton className="h-8 w-24" />
+                ) : (
+                  <p className="text-2xl font-bold">
+                    {stat.label === 'Vendas Totais' ? `MT ${stat.value}` : stat.value}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         <Tabs defaultValue="produtos" className="w-full">
@@ -534,6 +518,7 @@ const AdminPanel = () => {
                 <CardTitle>Produtos ({products.length})</CardTitle>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar produtos..."
                   value={productFilter}
@@ -600,6 +585,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar pedidos por cliente/email..."
                   value={orderFilter}
@@ -636,7 +622,7 @@ const AdminPanel = () => {
                             {order.status}
                           </span>
                         </td>
-                        <td className="py-3">{new Date(order.created_at).toLocaleDateString('pt-PT')}</td>
+                        <td className="py-3">{new Date(order.created_at).toLocaleDateString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -658,6 +644,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar utilizadores por email..."
                   value={userFilter}
@@ -679,7 +666,7 @@ const AdminPanel = () => {
                       <tr key={u.id} className="border-b hover:bg-muted">
                         <td className="py-3 font-mono text-xs">{u.id.substring(0, 8)}</td>
                         <td className="py-3">{u.email}</td>
-                        <td className="py-3">{new Date(u.created_at).toLocaleDateString('pt-PT')}</td>
+                        <td className="py-3">{new Date(u.created_at).toLocaleDateString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -700,6 +687,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar perguntas..."
                   value={questionFilter}
@@ -755,6 +743,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar alertas por usuário/ID..."
                   value={alertFilter}
@@ -800,6 +789,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar afiliados por email..."
                   value={affiliateFilter}
@@ -870,6 +860,7 @@ const AdminPanel = () => {
                 >Exportar CSV</Button>
               </CardHeader>
               <CardContent className="overflow-x-auto">
+                {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar badges por nome..."
                   value={badgeFilter}
