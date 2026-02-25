@@ -126,6 +126,7 @@ const AdminPanel = () => {
 
   const [loadingData, setLoadingData] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
   
   const [newProduct, setNewProduct] = useState({
     title: "",
@@ -212,7 +213,9 @@ const AdminPanel = () => {
       setLoyalty(lRes.data || []);
       setBadges(bRes.data || []);
 
-      toast({ title: '✅ Dados carregados!' });
+      const now = new Date().toLocaleString();
+      setLastUpdated(now);
+      toast({ title: '✅ Dados carregados!', description: `Última atualização: ${now}` });
     } catch (error: any) {
       console.error('Erro:', error);
       toast({ title: '❌ Erro ao carregar', description: error.message, variant: 'destructive' });
@@ -363,6 +366,9 @@ const AdminPanel = () => {
         <div>
           <h1 className="text-3xl font-bold">Painel de Administração</h1>
           <p className="text-muted-foreground">Bem-vindo, {user?.email}</p>
+          {lastUpdated && (
+            <p className="text-sm text-muted-foreground">Última atualização: {lastUpdated}</p>
+          )}
         </div>
 
         {/* Stats */}
