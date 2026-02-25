@@ -66,28 +66,33 @@ const Header = () => {
             <div className="flex items-center gap-4">
               <button onClick={() => navigate('/pedidos')} className="hover:text-primary transition-all hover:scale-105">Rastrear Encomenda</button>
               <button onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })} className="hover:text-primary transition-all hover:scale-105">Ajuda</button>
-              {/* currency selector */}
-              <select
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                className="bg-transparent text-sm text-current border-none focus:ring-0 cursor-pointer"
-                title="Moeda"
-              >
-                <option value="MT">MT</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="ZAR">ZAR</option>
-              </select>
-              {/* language selector */}
-              <select
-                value={locale}
-                onChange={(e) => setLocale(e.target.value)}
-                className="bg-transparent text-sm text-current border-none focus:ring-0 cursor-pointer"
-                title="Idioma"
-              >
-                <option value="pt-MZ">🇲🇿 PT</option>
-                <option value="en-US">🇺🇸 EN</option>
-              </select>
+              {/* currency menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="px-2">
+                    {currency}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {['MT','USD','EUR','ZAR'].map(c => (
+                    <DropdownMenuItem key={c} onClick={() => setCurrency(c)}>
+                      {c}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {/* language menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="px-2">
+                    {locale === 'pt-MZ' ? '🇲🇿 PT' : '🇺🇸 EN'}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => setLocale('pt-MZ')}>🇲🇿 PT</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocale('en-US')}>🇺🇸 EN</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
