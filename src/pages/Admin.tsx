@@ -1,29 +1,16 @@
-import { useEffect, useMemo, memo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Users, Package, Store, BarChart, Loader2, Plus } from "lucide-react";
-import OrdersTable from "@/components/admin/OrdersTable";
-import OrderDetailsDialog from "@/components/admin/OrderDetailsDialog";
-import ProductsTable from "@/components/admin/ProductsTable";
-import ProductFormDialog from "@/components/admin/ProductFormDialog";
-import UsersTable from "@/components/admin/UsersTable";
-import UserDetailsDialog from "@/components/admin/UserDetailsDialog";
-import StoresTable from "@/components/admin/StoresTable";
-import StoreDetailsDialog from "@/components/admin/StoreDetailsDialog";
-import ServicesManagement from "@/components/admin/ServicesManagement";
-import NewsletterManagement from "@/components/admin/NewsletterManagement";
-import { getAllOrders, getOrderById } from "@/services/orderService";
-import { adminService } from "@/services/adminService";
+import { Users, Package, ShoppingCart, BarChart, Loader2, Plus, Trash2, Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { productService } from "@/services/productService";
-import { userService } from "@/services/userService";
 import { useToast } from "@/hooks/use-toast";
-import { Order } from "@/types/order";
 
 const StoresManagement = () => {
   const { toast } = useToast();
