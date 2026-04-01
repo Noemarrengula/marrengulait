@@ -20,6 +20,7 @@ export interface ProductFilters {
   ratings?: number[];
   search?: string;
   featured?: boolean;
+  onSale?: boolean;
 }
 
 export const productService = {
@@ -40,6 +41,9 @@ export const productService = {
     }
     if (filters?.featured !== undefined) {
       query = query.eq('featured', filters.featured);
+    }
+    if (filters?.onSale !== undefined) {
+      query = query.eq('on_sale', filters.onSale);
     }
 
     query = query.order('created_at', { ascending: false });

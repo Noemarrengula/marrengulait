@@ -7,8 +7,12 @@ import { Link } from 'react-router-dom';
 const CartButton = () => {
   const { totalItems } = useCart();
 
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <Link to="/carrinho">
+    <Link to="/carrinho" onClick={handleClick}>
       <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 transition-all">
         <ShoppingCart className="h-5 w-5 transition-transform hover:scale-110" />
         {totalItems > 0 && (

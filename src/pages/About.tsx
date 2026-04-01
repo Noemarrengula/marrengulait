@@ -73,6 +73,10 @@ const About = () => {
               </p>
 
               <p>
+                Em operação desde 2021, estamos focados em oferecer soluções confiáveis, produtos de qualidade e atendimento dedicado.
+              </p>
+
+              <p>
                 Com anos de experiência em desenvolvimento de software, infraestrutura de redes e consultoria em TI, 
                 percebemos que havia uma lacuna no mercado moçambicano. As pessoas precisavam de uma plataforma 
                 confiável onde pudessem encontrar produtos tecnológicos autênticos, com garantia e suporte especializado.

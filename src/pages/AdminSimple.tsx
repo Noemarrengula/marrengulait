@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2, Plus, Trash2, Edit2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {
@@ -40,6 +41,7 @@ const AdminPanel = () => {
   const navigate = useNavigate();
   const { user, isAdmin, loading } = useAuth();
   const { toast } = useToast();
+  const { locale } = useSettings();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -429,7 +431,7 @@ const AdminPanel = () => {
                             {order.status}
                           </span>
                         </td>
-                        <td className="py-3">{new Date(order.created_at).toLocaleDateString('pt-PT')}</td>
+                        <td className="py-3">{new Date(order.created_at).toLocaleDateString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -456,7 +458,7 @@ const AdminPanel = () => {
                     {users.map((u) => (
                       <tr key={u.id} className="border-b hover:bg-muted">
                         <td className="py-3">{u.email}</td>
-                        <td className="py-3">{new Date(u.created_at).toLocaleDateString('pt-PT')}</td>
+                        <td className="py-3">{new Date(u.created_at).toLocaleDateString(locale)}</td>
                       </tr>
                     ))}
                   </tbody>

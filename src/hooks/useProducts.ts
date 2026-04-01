@@ -6,6 +6,10 @@ export const useProducts = (filters?: ProductFilters) => {
   return useQuery({
     queryKey: ['products', filters],
     queryFn: () => productService.getAllProducts(filters),
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 
@@ -14,6 +18,10 @@ export const useProduct = (id: string) => {
     queryKey: ['product', id],
     queryFn: () => productService.getProductById(id),
     enabled: !!id,
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 };
 

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Code, Network, Smartphone, Shield, Palette, TrendingUp, CheckCircle2, ArrowRight, Wifi, Printer, FileText, Server } from "lucide-react";
+import { Code, Network, Smartphone, Shield, Palette, TrendingUp, CheckCircle2, ArrowRight, Wifi, Printer, FileText, Server, Video } from "lucide-react";
 import { toast } from "sonner";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -87,6 +87,12 @@ const Services = () => {
       title: "Segurança Digital",
       description: "Proteção de dados e sistemas contra ameaças cibernéticas",
       features: ["Análise de Vulnerabilidades", "Firewalls", "Antivírus Corporativo", "Monitorização 24/7"]
+    },
+    {
+      icon: Video,
+      title: "CCTV e Segurança Física",
+      description: "Instalação e manutenção de sistemas de videovigilância profissionais",
+      features: ["Câmeras IP e Analógicas", "Gravação 24/7", "Monitoramento Remoto", "Instalação Profissional"]
     },
     {
       icon: Smartphone,

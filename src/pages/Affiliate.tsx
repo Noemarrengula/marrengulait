@@ -59,7 +59,7 @@ const Affiliate = () => {
   };
 
   const copyAffiliateLink = () => {
-    const link = `${window.location.origin}?ref=${affiliate?.affiliate_code}`;
+    const link = `${window.location.origin}?ref=${affiliate?.referral_code}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     toast.success("Link copiado!");
@@ -95,9 +95,9 @@ const Affiliate = () => {
                 <div className="flex items-start gap-3">
                   <DollarSign className="w-6 h-6 text-primary mt-1" />
                   <div>
-                    <h3 className="font-semibold">Comissão de 5%</h3>
+                    <h3 className="font-semibold">Comissão de 15%</h3>
                     <p className="text-sm text-muted-foreground">
-                      Ganhe 5% em cada venda realizada através do seu link
+                      Ganhe 15% em cada projeto vendido através do seu link
                     </p>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ const Affiliate = () => {
     );
   }
 
-  const affiliateLink = `${window.location.origin}?ref=${affiliate.affiliate_code}`;
+  const affiliateLink = `${window.location.origin}?ref=${affiliate.referral_code}`;
   const conversionRate = affiliate.total_clicks > 0 
     ? ((affiliate.total_conversions / affiliate.total_clicks) * 100).toFixed(2)
     : "0.00";
@@ -198,10 +198,10 @@ const Affiliate = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                 <DollarSign className="w-5 h-5 text-green-600" />
                 <span className="text-2xl font-bold">
-                  {affiliate.total_commission.toLocaleString(locale)} {currency}
+                  {Number(affiliate.total_earnings).toLocaleString(locale)} {currency}
                 </span>
               </div>
             </CardContent>
@@ -224,7 +224,7 @@ const Affiliate = () => {
               </Button>
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              Código: <span className="font-mono font-bold">{affiliate.affiliate_code}</span>
+              Código: <span className="font-mono font-bold">{affiliate.referral_code}</span>
             </p>
           </CardContent>
         </Card>
@@ -264,9 +264,9 @@ const Affiliate = () => {
                 </div>
                 <div>
                   <p className="font-medium">Você ganha comissão</p>
-                  <p className="text-sm text-muted-foreground">
-                    Receba {affiliate.commission_rate}% do valor da venda
-                  </p>
+                    <p className="text-sm text-muted-foreground">
+                      Receba {affiliate.commission_rate}% do valor do projeto
+                    </p>
                 </div>
               </div>
             </CardContent>

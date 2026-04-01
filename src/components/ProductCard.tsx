@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Store, Sparkles } from "lucide-react";
+import { ShoppingCart, Store, Sparkles, Heart } from "lucide-react";
 import ProductPrice from "@/components/ProductPrice";
 import ProductImage from "@/components/ProductImage";
 import { useRating } from "@/hooks/useRating";
 import { useCart } from "@/contexts/CartContext";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
+import { useWishlist, useToggleWishlist } from "@/hooks/useWishlist";
 
 interface ProductCardProps {
   id: string;
@@ -22,17 +22,20 @@ interface ProductCardProps {
 }
 
 // Constantes
-const PRODUCT_DETAIL_URL = "/produto/1";
 const CARD_CLASSES = "card-modern hover-lift group relative overflow-hidden bg-card/80 backdrop-blur-sm border-2";
-const TITLE_CLASSES = "font-semibold text-foreground mb-2 line-clamp-2 hover:text-primary transition-colors cursor-pointer group-hover:translate-x-1 duration-300";
-const ADD_TO_CART_BUTTON_CLASSES = "w-full bg-gradient-to-r from-primary via-primary-glow to-accent hover:opacity-90 shadow-lg glow-primary transition-all hover:scale-105 active:scale-95";
-const STORE_NAME_CLASSES = "text-xs text-muted-foreground mb-1 font-medium flex items-center gap-1 group-hover:text-primary transition-colors";
+const TITLE_CLASSES = "font-semibold text-foreground mb-2 line-clamp-2 hover:text-[#FF3131] transition-colors cursor-pointer group-hover:translate-x-1 duration-300";
+const ADD_TO_CART_BUTTON_CLASSES = "w-full bg-gradient-to-r from-[#FF3131] via-[#FF5555] to-[#FF7B7B] hover:opacity-90 shadow-lg glow-primary transition-all hover:scale-105 active:scale-95";
+const STORE_NAME_CLASSES = "text-xs text-muted-foreground mb-1 font-medium flex items-center gap-1 group-hover:text-[#FF3131] transition-colors";
 const RATING_CONTAINER_CLASSES = "flex items-center gap-1 mb-3 group-hover:scale-105 transition-transform duration-300";
 
 const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge, storeName }: ProductCardProps) => {
   const { renderStars, maxRating } = useRating(rating);
   const { addItem } = useCart();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { user } = useAuth();
+  const { isInWishlist } = useWishlist(user?.id);
+  const toggleWishlist = useToggleWishlist();
+
+  const isFavorite = isInWishlist(id);
 
   const handleAddToCart = () => {
     const priceNum = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : parseFloat(price);
@@ -46,15 +49,20 @@ const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge
     });
   };
 
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite);
-    toast.success(isFavorite ? 'Removido dos favoritos' : 'Adicionado aos favoritos');
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    toggleWishlist.mutate({
+      userId: user.id,
+      productId: id,
+      isCurrentlyInWishlist: isFavorite,
+    });
   };
 
   return (
     <Card className={CARD_CLASSES}>
       {/* Efeito de brilho decorativo */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#FF3131]/5 via-transparent to-[#FF5555]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       
       {/* Imagem do produto com badge e botão de favorito */}
       <ProductImage
@@ -74,7 +82,7 @@ const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge
           </p>
         )}
         
-        <Link to={PRODUCT_DETAIL_URL}>
+        <Link to={`/produto/${id}`}>
           <h3 className={TITLE_CLASSES}>
             {title}
           </h3>

@@ -49,7 +49,7 @@ export async function getOrderById(orderId: string) {
 
   if (itemsError) throw itemsError;
 
-  return { order, items };
+  return { ...order, items };
 }
 
 export async function getUserOrders(userId: string) {

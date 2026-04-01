@@ -9,7 +9,7 @@ const ProductCardSkeleton = () => {
       
       {/* Image Skeleton */}
       <Skeleton className="aspect-square w-full relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 animate-pulse" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FF3131]/5 to-[#FF5555]/5 animate-pulse" />
       </Skeleton>
       
       {/* Content Skeleton */}

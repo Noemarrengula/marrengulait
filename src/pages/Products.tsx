@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import Footer from "@/components/Footer";
@@ -8,11 +9,14 @@ import ProductFilters from "@/components/ProductFilters";
 import ProductPagination from "@/components/ProductPagination";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Grid3x3, LayoutGrid, Loader2 } from "lucide-react";
+import { Grid3x3, LayoutGrid, Loader2, Camera } from "lucide-react";
 import { useProducts } from "@/hooks/useProducts";
 import { ProductFilters as FilterType } from "@/services/productService";
 
 const Products = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
   const promoQuery = searchParams.get('promo');
@@ -24,15 +28,20 @@ const Products = () => {
     brands: [],
     ratings: [],
     search: searchQuery,
-    featured: promoQuery === 'true' ? true : undefined
+    onSale: promoQuery === 'true' ? true : undefined
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
-  const { data: products, isLoading, error } = useProducts(filters);
+  const { data: products, isLoading, error, refetch } = useProducts(filters);
   
   const totalItems = products?.length || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+    refetch();
+  }, [location.pathname]);
 
   useEffect(() => {
     setFilters(prev => ({ ...prev, search: searchQuery }));
@@ -89,6 +98,14 @@ const Products = () => {
             <span className="text-sm text-muted-foreground">
               {isLoading ? 'Carregando...' : `${totalItems} produtos encontrados`}
             </span>
+            <Button
+              variant="outline"
+              className="border-[#FF3131] text-[#FF3131] hover:bg-[#FF3131] hover:text-white ml-4"
+              onClick={() => navigate('/kit-cctv')}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              Monte seu Kit CCTV
+            </Button>
           </div>
 
           <div className="flex items-center gap-3">

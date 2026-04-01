@@ -28,7 +28,18 @@ interface ProductFormDialogProps {
   product?: any;
 }
 
-const categories = ['Laptops', 'Hardware', 'Monitores', 'Acessórios', 'Impressoras', 'Redes'];
+const categories = [
+  'Laptops', 
+  'Smartphones', 
+  'Placas Gráficas', 
+  'Periféricos', 
+  'Componentes', 
+  'Monitores', 
+  'Redes', 
+  'Acessórios',
+  'CCTV',
+  'Smart Home'
+];
 
 const ProductFormDialog = ({ open, onClose, onSubmit, product }: ProductFormDialogProps) => {
   const [loading, setLoading] = useState(false);

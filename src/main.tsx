@@ -2,19 +2,30 @@ import { createRoot } from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import App from "./App.tsx";
 import { SettingsProvider } from "./context/SettingsContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
+
+if (!crypto.randomUUID) {
+  crypto.randomUUID = function() {
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
+      const r = Math.random() * 16 | 0;
+      const v = c === "x" ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutos
+      staleTime: 1000 * 60 * 5,
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
-// Validação do elemento root
 const rootElement = document.getElementById("root");
 
 if (!rootElement) {
@@ -30,11 +41,15 @@ if (!rootElement) {
 } else {
   try {
     createRoot(rootElement).render(
-      <QueryClientProvider client={queryClient}>
-        <SettingsProvider>
-          <App />
-        </SettingsProvider>
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <SettingsProvider>
+            <NotificationProvider>
+              <App />
+            </NotificationProvider>
+          </SettingsProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
     );
   } catch (error) {
     console.error("Erro ao renderizar aplicação:", error);

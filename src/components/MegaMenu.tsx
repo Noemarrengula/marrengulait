@@ -1,4 +1,4 @@
-import { ChevronDown, Laptop, HardDrive, Keyboard, Wifi, ShoppingBag, Wrench, Store, Zap, Cpu, Smartphone } from "lucide-react";
+import { ChevronDown, Laptop, HardDrive, Keyboard, Wifi, ShoppingBag, Wrench, Store, Zap, Cpu, Smartphone, Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   NavigationMenu,
@@ -33,6 +33,11 @@ const MegaMenu = () => {
       icon: Wifi,
       items: ["Routers", "Switches", "Cabos", "Segurança", "Access Points"]
     },
+    {
+      title: "CCTV",
+      icon: Camera,
+      items: ["Câmaras", "Kits", "Gravadores", "Acessórios"]
+    },
   ];
 
   // Validação dos dados
@@ -63,15 +68,35 @@ const MegaMenu = () => {
                   <NavigationMenuContent>
                     <div className="w-[400px] p-4">
                       <div className="grid grid-cols-2 gap-2">
-                        {Array.isArray(menu.items) && menu.items.map((item) => (
-                          <NavigationMenuLink
-                            key={item}
-                            onClick={() => navigate(`/produtos?search=${item.toLowerCase()}`)}
-                            className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
-                          >
-                            <span className="text-sm font-medium">{item}</span>
-                          </NavigationMenuLink>
-                        ))}
+                        {Array.isArray(menu.items) && menu.items.map((item) => {
+                          // Links específicos para CCTV
+                          if (menu.title === "CCTV") {
+                            const cctvLinks: Record<string, string> = {
+                              "Câmaras": "/produtos?search=camera",
+                              "Kits": "/kit-cctv",
+                              "Gravadores": "/produtos?search=nvr",
+                              "Acessórios": "/produtos?search=cctv"
+                            };
+                            return (
+                              <NavigationMenuLink
+                                key={item}
+                                onClick={() => navigate(cctvLinks[item] || `/produtos?search=${item.toLowerCase()}`)}
+                                className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
+                              >
+                                <span className="text-sm font-medium">{item}</span>
+                              </NavigationMenuLink>
+                            );
+                          }
+                          return (
+                            <NavigationMenuLink
+                              key={item}
+                              onClick={() => navigate(`/produtos?search=${item.toLowerCase()}`)}
+                              className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
+                            >
+                              <span className="text-sm font-medium">{item}</span>
+                            </NavigationMenuLink>
+                          );
+                        })}
                       </div>
                     </div>
                   </NavigationMenuContent>
@@ -108,9 +133,9 @@ const MegaMenu = () => {
             </NavigationMenuItem>
 
             <NavigationMenuItem>
-              <NavigationMenuLink onClick={() => navigate('/eletronicos')} className="px-4 py-2 bg-gradient-to-r from-accent/10 to-primary/10 hover:from-accent/20 hover:to-primary/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-accent/20">
-                <Smartphone className="h-4 w-4 text-accent" />
-                <span className="font-semibold text-accent">Eletrônicos & IoT</span>
+              <NavigationMenuLink onClick={() => navigate('/eletronicos')} className="px-4 py-2 bg-gradient-to-r from-[#FF3131]/10 to-pink-500/10 hover:from-[#FF3131]/20 hover:to-pink-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-[#FF3131]/20">
+                <Smartphone className="h-4 w-4 text-[#FF3131]" />
+                <span className="font-semibold text-[#FF3131]">Eletrônicos & IoT</span>
               </NavigationMenuLink>
             </NavigationMenuItem>
 

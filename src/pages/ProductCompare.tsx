@@ -20,6 +20,7 @@ interface Product {
 
 const ProductCompare = () => {
   const navigate = useNavigate();
+  const { locale, currency } = useSettings();
   const [products, setProducts] = useState<Product[]>([]);
 
   const removeProduct = (id: string) => {
@@ -90,7 +91,7 @@ const ProductCompare = () => {
                 <td className="p-4 font-semibold border-t">Avaliação</td>
                 {products.map(product => (
                   <td key={product.id} className="p-4 border-t text-center">
-                    ⭐ {product.rating}/5
+                    {product.rating}/5
                   </td>
                 ))}
               </tr>

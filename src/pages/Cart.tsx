@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, Tag, X, Check, Loader2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,8 +11,34 @@ import { useState } from 'react';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { items, removeItem, updateQuantity, clearCart, totalPrice } = useCart();
+  const { 
+    items, 
+    removeItem, 
+    updateQuantity, 
+    clearCart, 
+    totalItems,
+    subtotal,
+    discount,
+    total,
+    coupon,
+    applyCoupon,
+    removeCoupon 
+  } = useCart();
   const [couponCode, setCouponCode] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    await applyCoupon(couponCode);
+    setIsApplyingCoupon(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleApplyCoupon();
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -111,6 +137,7 @@ const Cart = () => {
               className="w-full"
               onClick={clearCart}
             >
+              <Trash2 className="h-4 w-4 mr-2" />
               Limpar Carrinho
             </Button>
           </div>
@@ -121,34 +148,80 @@ const Cart = () => {
               
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span>MT {totalPrice.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Entrega</span>
-                  <span className="text-green-600 font-medium">Grátis</span>
+                  <span>Subtotal ({totalItems} items)</span>
+                  <span>MT {subtotal.toFixed(2)}</span>
                 </div>
                 
-                {/* Coupon Code */}
-                <div className="pt-2 border-t">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Código de cupom"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                    />
-                    <Button variant="outline" size="sm">Aplicar</Button>
+                {discount > 0 && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span className="flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
+                      Desconto ({coupon?.code})
+                    </span>
+                    <span>-MT {discount.toFixed(2)}</span>
                   </div>
+                )}
+                
+                <div className="flex justify-between text-sm">
+                  <span>Entrega</span>
+                  <span className="text-green-600 font-medium flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    Grátis
+                  </span>
                 </div>
+                
+                {coupon ? (
+                  <div className="pt-2 border-t">
+                    <div className="flex items-center justify-between bg-green-50 dark:bg-green-900/20 p-2 rounded-lg">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                        <Check className="h-4 w-4" />
+                        <span className="text-sm font-medium">{coupon.code}</span>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0 text-green-600 hover:text-green-700"
+                        onClick={removeCoupon}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-2 border-t">
+                    <label className="text-sm font-medium mb-2 block">Código de Cupão</label>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Ex: BEMVINDO10"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        onKeyDown={handleKeyDown}
+                        className="uppercase"
+                      />
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleApplyCoupon}
+                        disabled={isApplyingCoupon || !couponCode.trim()}
+                      >
+                        {isApplyingCoupon ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Aplicar'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="border-t pt-3 flex justify-between font-bold text-lg">
                   <span>Total</span>
-                  <span className="text-primary">MT {totalPrice.toFixed(2)}</span>
+                  <span className="text-[#FF3131]">MT {total.toFixed(2)}</span>
                 </div>
               </div>
               
               <Link to="/checkout">
-                <Button className="w-full" size="lg">
+                <Button className="w-full bg-[#FF3131] hover:bg-[#FF5555]" size="lg">
                   Finalizar Compra
                 </Button>
               </Link>

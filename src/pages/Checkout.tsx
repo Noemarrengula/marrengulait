@@ -2,32 +2,100 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { createOrder } from '@/services/orderService';
-import { PaymentMethod } from '@/types/order';
+import { useAuth } from '@/hooks/useAuth';
+import { useSettings } from '@/context/SettingsContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Loader2 } from 'lucide-react';
+import { Loader2, CreditCard, Smartphone, Banknote, Truck, CheckCircle2, ShieldCheck } from 'lucide-react';
+
+type PaymentMethod = 'mpesa' | 'transfer' | 'cod';
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
+  const { user } = useAuth();
+  const { locale, currency } = useSettings();
   const { toast } = useToast();
+  
   const [loading, setLoading] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponError, setCouponError] = useState('');
   
   const [formData, setFormData] = useState({
-    fullName: '',
+    fullName: user?.user_metadata?.full_name || '',
     phone: '',
-    email: '',
+    email: user?.email || '',
     address: '',
-    city: '',
-    paymentMethod: 'mpesa' as PaymentMethod
+    city: 'Maputo',
+    province: 'Maputo',
+    paymentMethod: 'mpesa' as PaymentMethod,
   });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const validateCoupon = async () => {
+    if (!couponCode.trim()) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.toUpperCase())
+        .eq('is_active', true)
+        .single();
+      
+      if (error || !data) {
+        setCouponError('Código de cupom inválido');
+        setCouponDiscount(0);
+        return;
+      }
+
+      if (data.valid_until && new Date(data.valid_until) < new Date()) {
+        setCouponError('Cupom expirado');
+        setCouponDiscount(0);
+        return;
+      }
+
+      if (data.min_order_amount && totalPrice < data.min_order_amount) {
+        setCouponError(`Valor mínimo: ${data.min_order_amount.toLocaleString()} ${currency}`);
+        setCouponDiscount(0);
+        return;
+      }
+
+      if (data.usage_limit && data.used_count >= data.usage_limit) {
+        setCouponError('Cupom esgotado');
+        setCouponDiscount(0);
+        return;
+      }
+
+      let discount = 0;
+      if (data.discount_type === 'percentage') {
+        discount = totalPrice * (data.discount_value / 100);
+        if (data.max_discount_amount) {
+          discount = Math.min(discount, data.max_discount_amount);
+        }
+      } else if (data.discount_type === 'fixed') {
+        discount = data.discount_value;
+      }
+
+      setCouponDiscount(discount);
+      setCouponError('');
+      toast({ title: 'Cupom aplicado!', description: `Desconto de ${discount.toLocaleString()} ${currency}` });
+    } catch (error) {
+      setCouponError('Erro ao validar cupom');
+      setCouponDiscount(0);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,48 +108,111 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast({ title: 'Faça login para continuar', variant: 'destructive' });
-        navigate('/auth');
-        return;
+      // Calculate totals
+      const subtotal = totalPrice;
+      const shippingCost = subtotal >= 5000 ? 0 : 500;
+      const discount = couponDiscount;
+      const total = subtotal + shippingCost - discount;
+
+      // Generate order number
+      const orderNumber = `MARR-${Date.now()}`;
+
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user?.id || null,
+          order_number: orderNumber,
+          status: 'pending',
+          payment_status: 'pending',
+          payment_method: formData.paymentMethod,
+          subtotal: subtotal,
+          shipping_cost: shippingCost,
+          discount_amount: discount,
+          coupon_code: couponCode || null,
+          total_amount: total,
+          currency: 'MZN',
+          customer_name: formData.fullName,
+          customer_email: formData.email || null,
+          customer_phone: formData.phone,
+          delivery_address: formData.address,
+          delivery_city: formData.city,
+          delivery_province: formData.province,
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Create order items
+      const orderItems = items.map(item => ({
+        order_id: order.id,
+        product_id: item.id,
+        product_name: item.title,
+        product_image: item.image,
+        quantity: item.quantity,
+        unit_price: item.price,
+        subtotal: item.price * item.quantity,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // Update coupon usage if applied
+      if (couponCode && couponDiscount > 0) {
+        await supabase.rpc('increment_coupon_usage', { coupon_code: couponCode.toUpperCase() });
       }
 
-      const orderData = {
-        user_id: user.id,
-        total_amount: totalPrice,
-        shipping_address: `${formData.address}, ${formData.city}`,
-        customer_name: formData.fullName,
-        customer_phone: formData.phone,
-        customer_email: formData.email,
-        payment_method: formData.paymentMethod,
-        items: items.map(item => ({
-          product_id: item.id,
-          product_name: item.title,
-          quantity: item.quantity,
-          unit_price: item.price,
-          subtotal: item.price * item.quantity
-        }))
-      };
-
-      const order = await createOrder(orderData);
-      
+      // Clear cart
       clearCart();
+
       toast({ title: 'Pedido criado com sucesso!' });
+      
+      // Simulate M-Pesa payment
+      if (formData.paymentMethod === 'mpesa') {
+        toast({
+          title: 'Pagamento M-Pesa',
+          description: `Envie ${total.toLocaleString()} MT para o número 84XXXXXXX`,
+          duration: 10000,
+        });
+      }
+
       navigate(`/pedido/${order.id}`);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar pedido:', error);
-      toast({ title: 'Erro ao criar pedido', variant: 'destructive' });
+      toast({ 
+        title: 'Erro ao criar pedido', 
+        description: error.message || 'Tente novamente',
+        variant: 'destructive' 
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  const finalTotal = totalPrice - couponDiscount;
+  const shippingCost = finalTotal >= 5000 ? 0 : 500;
+
   if (items.length === 0) {
-    navigate('/carrinho');
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-24 text-center">
+          <h1 className="text-2xl font-bold mb-4">O seu carrinho está vazio</h1>
+          <p className="text-muted-foreground mb-6">
+            Adicione produtos para continuar com a compra.
+          </p>
+          <Button onClick={() => navigate('/produtos')} className="bg-[#FF3131]">
+            Explorar Produtos
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -93,146 +224,240 @@ const Checkout = () => {
         
         <form onSubmit={handleSubmit}>
           <div className="grid lg:grid-cols-3 gap-8">
+            {/* Form Section */}
             <div className="lg:col-span-2 space-y-6">
-              <Card className="p-6">
-                <h2 className="text-xl font-bold mb-4">Dados de Entrega</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="fullName">Nome Completo</Label>
-                    <Input
-                      id="fullName"
-                      required
-                      value={formData.fullName}
-                      onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                    />
-                  </div>
-                  
+              
+              {/* Delivery Info */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Truck className="h-5 w-5 text-[#FF3131]" />
+                    Dados de Entrega
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="phone">Telefone</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Nome Completo *</Label>
+                      <Input
+                        id="fullName"
+                        name="fullName"
+                        value={formData.fullName}
+                        onChange={handleInputChange}
+                        placeholder="Seu nome completo"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Telefone (M-Pesa) *</Label>
                       <Input
                         id="phone"
-                        type="tel"
-                        required
-                        placeholder="+258 84 123 4567"
+                        name="phone"
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
+                        onChange={handleInputChange}
+                        placeholder="+258 84 XXX XXXX"
                         required
-                        value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
                       />
                     </div>
                   </div>
-                  
-                  <div>
-                    <Label htmlFor="address">Endereço</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="seu@email.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Endereço de Entrega *</Label>
                     <Input
                       id="address"
-                      required
-                      placeholder="Rua, número, bairro"
+                      name="address"
                       value={formData.address}
-                      onChange={(e) => setFormData({...formData, address: e.target.value})}
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="city">Cidade</Label>
-                    <Input
-                      id="city"
+                      onChange={handleInputChange}
+                      placeholder="Rua, número, bairro"
                       required
-                      value={formData.city}
-                      onChange={(e) => setFormData({...formData, city: e.target.value})}
                     />
                   </div>
-                </div>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="city">Cidade *</Label>
+                      <Input
+                        id="city"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleInputChange}
+                        placeholder="Cidade"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="province">Província *</Label>
+                      <Input
+                        id="province"
+                        name="province"
+                        value={formData.province}
+                        onChange={handleInputChange}
+                        placeholder="Província"
+                        required
+                      />
+                    </div>
+                  </div>
+                </CardContent>
               </Card>
-              
-              <Card className="p-6">
-                <h2 className="text-xl font-bold mb-4">Método de Pagamento</h2>
-                
-                <RadioGroup
-                  value={formData.paymentMethod}
-                  onValueChange={(value) => setFormData({...formData, paymentMethod: value as PaymentMethod})}
-                >
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="mpesa" id="mpesa" />
-                    <Label htmlFor="mpesa" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">M-Pesa</div>
-                      <div className="text-sm text-muted-foreground">Pagamento via M-Pesa</div>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="bank_transfer" id="bank_transfer" />
-                    <Label htmlFor="bank_transfer" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Transferência Bancária</div>
-                      <div className="text-sm text-muted-foreground">Pagamento via transferência</div>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="cash_on_delivery" id="cash_on_delivery" />
-                    <Label htmlFor="cash_on_delivery" className="flex-1 cursor-pointer">
-                      <div className="font-semibold">Pagamento na Entrega</div>
-                      <div className="text-sm text-muted-foreground">Pague ao receber</div>
-                    </Label>
-                  </div>
-                </RadioGroup>
+
+              {/* Payment Method */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-[#FF3131]" />
+                    Método de Pagamento
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup
+                    value={formData.paymentMethod}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value as PaymentMethod }))}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="mpesa" id="mpesa" />
+                      <Label htmlFor="mpesa" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Smartphone className="h-6 w-6 text-green-600" />
+                        <div>
+                          <p className="font-semibold">M-Pesa</p>
+                          <p className="text-sm text-muted-foreground">Pagamento via telemóvel (preferido)</p>
+                        </div>
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="transfer" id="transfer" />
+                      <Label htmlFor="transfer" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Banknote className="h-6 w-6 text-blue-600" />
+                        <div>
+                          <p className="font-semibold">Transferência Bancária</p>
+                          <p className="text-sm text-muted-foreground">Dados bancários serão enviados após confirmação</p>
+                        </div>
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="cod" id="cod" />
+                      <Label htmlFor="cod" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Banknote className="h-6 w-6 text-orange-600" />
+                        <div>
+                          <p className="font-semibold">Pagamento na Entrega</p>
+                          <p className="text-sm text-muted-foreground">Pague quando receber o produto</p>
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </CardContent>
               </Card>
             </div>
-            
-            <div>
-              <Card className="p-6 sticky top-4">
-                <h2 className="text-xl font-bold mb-4">Resumo</h2>
-                
-                <div className="space-y-2 mb-4">
-                  {items.map(item => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>{item.title} x{item.quantity}</span>
-                      <span>MT {(item.price * item.quantity).toFixed(2)}</span>
+
+            {/* Order Summary */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-24">
+                <CardHeader>
+                  <CardTitle>Resumo do Pedido</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Items */}
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {items.map(item => (
+                      <div key={item.id} className="flex gap-3">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium line-clamp-2">{item.title}</p>
+                          <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
+                          <p className="text-sm font-semibold text-[#FF3131]">
+                            {(item.price * item.quantity).toLocaleString(locale)} {currency}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t pt-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span>{totalPrice.toLocaleString(locale)} {currency}</span>
                     </div>
-                  ))}
-                </div>
-                
-                <div className="border-t pt-4 space-y-2 mb-4">
-                  <div className="flex justify-between">
-                    <span>Subtotal</span>
-                    <span>MT {totalPrice.toFixed(2)}</span>
+                    
+                    {/* Coupon */}
+                    <div className="space-y-2 pt-2">
+                      <div className="flex gap-2">
+                        <Input
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          placeholder="Código do cupom"
+                          className="text-sm"
+                        />
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          onClick={validateCoupon}
+                          disabled={!couponCode.trim()}
+                        >
+                          Aplicar
+                        </Button>
+                      </div>
+                      {couponError && (
+                        <p className="text-xs text-red-500">{couponError}</p>
+                      )}
+                      {couponDiscount > 0 && (
+                        <div className="flex justify-between text-sm text-green-600">
+                          <span>Desconto</span>
+                          <span>-{couponDiscount.toLocaleString(locale)} {currency}</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Frete</span>
+                      <span>{shippingCost === 0 ? 'Grátis' : `${shippingCost.toLocaleString(locale)} ${currency}`}</span>
+                    </div>
+                    
+                    <div className="border-t pt-2 flex justify-between font-bold text-lg">
+                      <span>Total</span>
+                      <span className="text-[#FF3131]">{(finalTotal + shippingCost).toLocaleString(locale)} {currency}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Entrega</span>
-                    <span className="text-green-600">Grátis</span>
+
+                  {/* Trust Badges */}
+                  <div className="flex items-center gap-2 pt-4 text-xs text-muted-foreground">
+                    <ShieldCheck className="h-4 w-4 text-green-500" />
+                    <span>Pagamento seguro e protegido</span>
                   </div>
-                  <div className="flex justify-between font-bold text-lg">
-                    <span>Total</span>
-                    <span>MT {totalPrice.toFixed(2)}</span>
-                  </div>
-                </div>
-                
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Processando...
-                    </>
-                  ) : (
-                    'Confirmar Pedido'
-                  )}
-                </Button>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-gradient-to-r from-[#FF3131] to-[#FF5555] hover:opacity-90"
+                    size="lg"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Processando...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 mr-2" />
+                        Confirmar Pedido
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
               </Card>
             </div>
           </div>

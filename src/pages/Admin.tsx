@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,9 +8,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Loader2, Plus, Trash2, Edit2, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Trash2, Edit2, AlertCircle, Check, FileText, Download, RefreshCw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -23,14 +25,32 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useSettings } from "@/context/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
+import {
+  exportProductsPDF,
+  exportOrdersPDF,
+  exportUsersPDF,
+  exportSalesSummaryPDF,
+  exportAlertsPDF,
+} from "@/utils/exportPDF";
 
 interface Product {
   id: string;
-  title: string;
+  name?: string;
+  title?: string;
   price: number;
+  old_price?: number;
   stock: number;
   category: string;
-  store_name: string;
+  brand?: string;
+  store_name?: string;
+  images?: string[];
+  image_url?: string;
+  description?: string;
+  short_description?: string;
+  featured?: boolean;
+  on_sale?: boolean;
+  is_active?: boolean;
+  vendor_id?: string;
 }
 
 interface Order {
@@ -79,7 +99,7 @@ interface LoyaltyPoint {
   created_at?: string;
 }
 
-interface Badge {
+interface BadgeItem {
   id: string;
   name: string;
   description?: string;
@@ -88,7 +108,8 @@ interface Badge {
 
 const AdminPanel = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, loading } = useAuth();
+  const queryClient = useQueryClient();
+  const { user, isAdmin, loading, roles, forceSync } = useAuth();
   const { toast } = useToast();
   const { locale } = useSettings();
   
@@ -101,7 +122,7 @@ const AdminPanel = () => {
   const [alerts, setAlerts] = useState<PriceAlert[]>([]);
   const [affiliates, setAffiliates] = useState<Affiliate[]>([]);
   const [loyalty, setLoyalty] = useState<LoyaltyPoint[]>([]);
-  const [badges, setBadges] = useState<Badge[]>([]);
+  const [badges, setBadges] = useState<BadgeItem[]>([]);
 
   // filter/search terms for each tab
   const [productFilter, setProductFilter] = useState<string>("");
@@ -119,35 +140,53 @@ const AdminPanel = () => {
     | null
   >(null);
 
-  // deletion confirmation
-  const [confirmDelete, setConfirmDelete] = useState<
-    | { type: 'product'; id: string }
-    | { type: 'question'; id: string }
-    | null
-  >(null);
-
 
   const [loadingData, setLoadingData] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string>("");
   
   const [newProduct, setNewProduct] = useState({
     title: "",
     price: 0,
+    old_price: 0,
     stock: 0,
     category: "Hardware",
+    brand: "",
     store_name: "MarrengulaIT",
+    image_url: "",
+    description: "",
+    featured: false,
+    on_sale: false,
+    is_active: true,
   });
 
   useEffect(() => {
-    if (!loading && !isAdmin) {
+    console.log('🔐 Admin check:', { loading, isAdmin, userEmail: user?.email });
+    
+    // Aguardar que loading termine
+    if (loading) return;
+    
+    // Se ainda não há usuário, ir para auth
+    if (!user) {
       navigate('/auth');
       return;
     }
-    if (!loading && isAdmin) {
+    
+    // Verificar se tem role de admin
+    const hasAdminRole = roles?.includes('admin');
+    
+    if (!hasAdminRole) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Só carregar dados se ainda não foram carregados
+    if (!dataLoaded) {
+      console.log('✅ É admin, a carregar dados');
       loadAllData();
     }
-  }, [loading, isAdmin, navigate]);
+  }, [loading, isAdmin, roles, user, navigate, dataLoaded]);
 
   const loadAllData = async () => {
     setLoadingData(true);
@@ -159,6 +198,12 @@ const AdminPanel = () => {
         .order('created_at', { ascending: false });
 
       if (pError) throw pError;
+      
+      console.log('📦 Produtos carregados do Supabase:', productsData?.length);
+      if (productsData && productsData.length > 0) {
+        console.log('📷 Primeiro produto images:', productsData[0].images);
+      }
+      
       setProducts(productsData || []);
       setProductFilter("");
 
@@ -174,51 +219,42 @@ const AdminPanel = () => {
       // Carregar utilizadores via profiles
       const { data: userData, error: uError } = await supabase
         .from('profiles')
-        .select('id, user_id')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (uError) throw uError;
 
-      // Parse users (lookup emails from auth)
-      let usersData:any[] = [];
-      if (userData) {
-        const { data: authUsers } = await supabase.auth.admin.listUsers();
-        usersData = userData.map(u => {
-          const au = authUsers?.users?.find(a => a.id === u.id);
-          return {
-            id: u.id,
-            email: au?.email || 'Desconhecido',
-            created_at: new Date().toISOString(),
-          };
-        });
-      }
+      // Parse users - mapear profiles para formato de usuário
+      const usersData:any[] = (userData || []).map(u => ({
+        id: u.id,
+        email: u.full_name || 'Utilizador',
+        created_at: u.created_at,
+      }));
       
       setUsers(usersData);
 
       // carregar recursos adicionais
-      const [qRes, aRes, fRes, lRes, bRes] = await Promise.all([
+      const [qRes, aRes, fRes, lRes] = await Promise.all([
         supabase.from('product_questions').select('*'),
         supabase.from('price_alerts').select('*'),
         supabase.from('affiliates').select('*'),
         supabase.from('loyalty_points').select('*'),
-        supabase.from('product_badges').select('*'),
       ]);
 
       if (qRes.error) throw qRes.error;
       if (aRes.error) throw aRes.error;
       if (fRes.error) throw fRes.error;
       if (lRes.error) throw lRes.error;
-      if (bRes.error) throw bRes.error;
 
       setQuestions(qRes.data || []);
       setAlerts(aRes.data || []);
       setAffiliates(fRes.data || []);
       setLoyalty(lRes.data || []);
-      setBadges(bRes.data || []);
+      setBadges([]);
 
       const now = new Date().toLocaleString();
       setLastUpdated(now);
-      toast({ title: '✅ Dados carregados!', description: `Última atualização: ${now}` });
+      setDataLoaded(true);
     } catch (error: any) {
       console.error('Erro:', error);
       toast({ title: '❌ Erro ao carregar', description: error.message, variant: 'destructive' });
@@ -236,20 +272,43 @@ const AdminPanel = () => {
     try {
       const { error } = await supabase.from('products').insert([
         {
-          title: newProduct.title,
+          name: newProduct.title,
+          slug: newProduct.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
           price: newProduct.price,
+          old_price: newProduct.old_price || null,
           stock: newProduct.stock,
           category: newProduct.category,
+          brand: newProduct.brand || null,
           store_name: newProduct.store_name,
-          featured: false,
+          images: newProduct.image_url ? [newProduct.image_url] : [],
+          description: newProduct.description || null,
+          short_description: newProduct.description?.substring(0, 200) || null,
+          featured: newProduct.featured,
+          on_sale: newProduct.on_sale,
+          is_active: newProduct.is_active,
         },
       ]);
 
       if (error) throw error;
       
-      toast({ title: '✅ Produto adicionado!' });
-      setNewProduct({ title: '', price: 0, stock: 0, category: 'Hardware', store_name: 'MarrengulaIT' });
+      toast({ title: '✅ Produto adicionado com sucesso!' });
+      setNewProduct({ 
+        title: '', 
+        price: 0, 
+        old_price: 0,
+        stock: 0, 
+        category: 'Hardware', 
+        brand: '',
+        store_name: 'MarrengulaIT',
+        image_url: '',
+        description: '',
+        featured: false,
+        on_sale: false,
+        is_active: true,
+      });
+      
       await loadAllData();
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     }
@@ -258,25 +317,66 @@ const AdminPanel = () => {
   const updateProduct = async () => {
     if (!editingProduct) return;
 
+    if (!editingProduct.name && !editingProduct.title) {
+      toast({ title: '❌ Erro', description: 'Nome do produto é obrigatório', variant: 'destructive' });
+      return;
+    }
+
+    if (editingProduct.price <= 0) {
+      toast({ title: '❌ Erro', description: 'Preço deve ser maior que 0', variant: 'destructive' });
+      return;
+    }
+
+    const newImages = editingProduct.images?.length ? editingProduct.images : (editingProduct.image_url ? [editingProduct.image_url] : []);
+    
+    console.log('🔄 Atualizando produto:', editingProduct.id);
+    console.log('📷 Nova imagem:', newImages);
+
     try {
-      const { error } = await supabase
+      const { error, status } = await supabase
         .from('products')
         .update({
-          title: editingProduct.title,
+          name: editingProduct.name || editingProduct.title,
+          slug: (editingProduct.name || editingProduct.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
           price: editingProduct.price,
+          old_price: editingProduct.old_price || null,
           stock: editingProduct.stock,
           category: editingProduct.category,
+          brand: editingProduct.brand || null,
           store_name: editingProduct.store_name,
+          images: newImages,
+          description: editingProduct.description || null,
+          short_description: editingProduct.description?.substring(0, 200) || null,
+          featured: editingProduct.featured || false,
+          on_sale: editingProduct.on_sale || false,
+          is_active: editingProduct.is_active !== false,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', editingProduct.id);
 
-      if (error) throw error;
+      console.log('📊 Resultado da atualização:', { error, status });
+
+      if (error) {
+        console.error('❌ Erro ao atualizar:', error);
+        toast({ title: '❌ Erro', description: error.message, variant: 'destructive' });
+        return;
+      }
       
-      toast({ title: '✅ Produto atualizado!' });
+      toast({ 
+        title: '✅ Produto atualizado com sucesso!', 
+        description: 'As alterações foram guardadas no Supabase' 
+      });
       setEditingProduct(null);
+      
       await loadAllData();
+      
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['product', editingProduct.id] });
+      
+      console.log('✅ Cache invalidado, dados recarregados');
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      console.error('❌ Erro completo:', error);
+      toast({ title: '❌ Erro ao atualizar', description: error.message, variant: 'destructive' });
     }
   };
 
@@ -291,6 +391,7 @@ const AdminPanel = () => {
         const { error } = await supabase.from('products').delete().eq('id', confirmDelete.id);
         if (error) throw error;
         toast({ title: '✅ Produto eliminado!' });
+        await queryClient.invalidateQueries({ queryKey: ['products'] });
       } else if (confirmDelete.type === 'question') {
         const { error } = await supabase.from('product_questions').delete().eq('id', confirmDelete.id);
         if (error) throw error;
@@ -367,12 +468,29 @@ const AdminPanel = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto p-4 space-y-6 mb-20">
-        <div>
-          <h1 className="text-3xl font-bold">Painel de Administração</h1>
-          <p className="text-muted-foreground">Bem-vindo, {user?.email}</p>
-          {lastUpdated && (
-            <p className="text-sm text-muted-foreground">Última atualização: {lastUpdated}</p>
-          )}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold">Painel de Administração</h1>
+            <p className="text-muted-foreground">Bem-vindo, {user?.email}</p>
+            {lastUpdated && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <span>Última atualização: {lastUpdated}</span>
+                {loadingData && <Loader2 className="h-3 w-3 animate-spin" />}
+              </p>
+            )}
+          </div>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={async () => {
+              await queryClient.invalidateQueries({ queryKey: ['products'] });
+              await loadAllData();
+            }}
+            disabled={loadingData}
+          >
+            <RefreshCw className={`h-4 w-4 mr-1 ${loadingData ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
         </div>
 
         {/* Stats */}
@@ -402,114 +520,219 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="produtos" className="w-full">
-          <TabsList className="grid w-full grid-cols-9">
-            <TabsTrigger value="produtos">Produtos</TabsTrigger>
-            <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
-            <TabsTrigger value="usuarios">Utilizadores</TabsTrigger>
-            <TabsTrigger value="perguntas">Perguntas</TabsTrigger>
-            <TabsTrigger value="alertas">Alertas</TabsTrigger>
-            <TabsTrigger value="afiliados">Afiliações</TabsTrigger>
-            <TabsTrigger value="fidelidade">Fidelidade</TabsTrigger>
-            <TabsTrigger value="badges">Badges</TabsTrigger>
-            <TabsTrigger value="ferramentas">Ferramentas</TabsTrigger>
-          </TabsList>
+          <div className="relative">
+            <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide">
+              <TabsList className="inline-flex min-w-full whitespace-nowrap bg-muted/50">
+                <TabsTrigger value="produtos" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Produtos</TabsTrigger>
+                <TabsTrigger value="pedidos" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Pedidos</TabsTrigger>
+                <TabsTrigger value="usuarios" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Utilizadores</TabsTrigger>
+                <TabsTrigger value="perguntas" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Perguntas</TabsTrigger>
+                <TabsTrigger value="alertas" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Alertas</TabsTrigger>
+                <TabsTrigger value="afiliados" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Afiliações</TabsTrigger>
+                <TabsTrigger value="fidelidade" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Fidelidade</TabsTrigger>
+                <TabsTrigger value="badges" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Badges</TabsTrigger>
+                <TabsTrigger value="ferramentas" className="data-[state=active]:bg-[#FF3131] data-[state=active]:text-white">Ferramentas</TabsTrigger>
+              </TabsList>
+            </div>
+          </div>
 
           {/* PRODUTOS */}
           <TabsContent value="produtos" className="space-y-4">
-            <Card>
-              <CardHeader className="justify-between">
-                <CardTitle>Adicionar Novo Produto</CardTitle>
-                <Button size="sm" variant="secondary" onClick={() => downloadCSV(productFilter?
-                    products.filter(p=>p.title.toLowerCase().includes(productFilter.toLowerCase()))
-                    : products,
-                  ["id","title","price","stock","category","store_name"],
-                  "produtos.csv")}
-                >Exportar CSV</Button>
+            {/* Formulário de Adicionar/Editar Produto */}
+            <Card className="border-2 border-[#FF3131]">
+              <CardHeader className="justify-between flex-row items-center gap-2">
+                <CardTitle>{editingProduct ? 'Editar Produto' : 'Adicionar Novo Produto'}</CardTitle>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => exportProductsPDF(productFilter?
+                      products.filter(p=>(p.name||p.title||'').toLowerCase().includes(productFilter.toLowerCase()))
+                      : products)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    PDF
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => downloadCSV(productFilter?
+                      products.filter(p=>p.title?.toLowerCase().includes(productFilter.toLowerCase()))
+                      : products,
+                    ["id","name","price","stock","category","store_name"],
+                    "produtos.csv")}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                {!editingProduct ? (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Título</Label>
-                        <Input
-                          value={newProduct.title}
-                          onChange={(e) => setNewProduct({ ...newProduct, title: e.target.value })}
-                          placeholder="Nome do produto"
-                        />
-                      </div>
-                      <div>
-                        <Label>Preço (MT)</Label>
-                        <Input
-                          type="number"
-                          value={newProduct.price}
-                          onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div>
-                        <Label>Stock</Label>
-                        <Input
-                          type="number"
-                          value={newProduct.stock}
-                          onChange={(e) => setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <Label>Categoria</Label>
-                        <Input
-                          value={newProduct.category}
-                          onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                          placeholder="Hardware"
-                        />
-                      </div>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label>Nome do Produto *</Label>
+                      <Input
+                        value={editingProduct ? (editingProduct.name || editingProduct.title || '') : newProduct.title}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, name: e.target.value })
+                          : setNewProduct({ ...newProduct, title: e.target.value })
+                        }
+                        placeholder="Nome do produto"
+                      />
                     </div>
-                    <Button onClick={addProduct} className="w-full">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Produto
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label>Título</Label>
-                        <Input
-                          value={editingProduct.title}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, title: e.target.value })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Preço</Label>
-                        <Input
-                          type="number"
-                          value={editingProduct.price}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Stock</Label>
-                        <Input
-                          type="number"
-                          value={editingProduct.stock}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) })}
-                        />
-                      </div>
-                      <div>
-                        <Label>Categoria</Label>
-                        <Input
-                          value={editingProduct.category}
-                          onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                        />
-                      </div>
+                    <div>
+                      <Label>Marca</Label>
+                      <Input
+                        value={editingProduct ? (editingProduct.brand || '') : newProduct.brand}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, brand: e.target.value })
+                          : setNewProduct({ ...newProduct, brand: e.target.value })
+                        }
+                        placeholder="Ex: Hikvision"
+                      />
                     </div>
-                    <div className="flex gap-2">
-                      <Button onClick={updateProduct} className="flex-1">Salvar Alterações</Button>
-                      <Button onClick={() => setEditingProduct(null)} variant="outline" className="flex-1">Cancelar</Button>
+                    <div>
+                      <Label>Preço (MT) *</Label>
+                      <Input
+                        type="number"
+                        value={editingProduct ? editingProduct.price : newProduct.price}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })
+                          : setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })
+                        }
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label>Preço Antigo (MT)</Label>
+                      <Input
+                        type="number"
+                        value={editingProduct ? (editingProduct.old_price || '') : newProduct.old_price}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, old_price: parseFloat(e.target.value) || 0 })
+                          : setNewProduct({ ...newProduct, old_price: parseFloat(e.target.value) })
+                        }
+                        placeholder="Deixe vazio se não tem"
+                      />
+                    </div>
+                    <div>
+                      <Label>Stock *</Label>
+                      <Input
+                        type="number"
+                        value={editingProduct ? editingProduct.stock : newProduct.stock}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, stock: parseInt(e.target.value) || 0 })
+                          : setNewProduct({ ...newProduct, stock: parseInt(e.target.value) })
+                        }
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <Label>Categoria</Label>
+                      <Input
+                        value={editingProduct ? editingProduct.category : newProduct.category}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, category: e.target.value })
+                          : setNewProduct({ ...newProduct, category: e.target.value })
+                        }
+                        placeholder="Hardware"
+                      />
                     </div>
                   </div>
-                )}
+
+                  <div>
+                    <Label>URL da Imagem Principal</Label>
+                    <Input
+                      value={editingProduct ? (editingProduct.images?.[0] || '') : newProduct.image_url}
+                      onChange={(e) => editingProduct 
+                        ? setEditingProduct({ ...editingProduct, images: [e.target.value] })
+                        : setNewProduct({ ...newProduct, image_url: e.target.value })
+                      }
+                      placeholder="https://exemplo.com/imagem.jpg"
+                    />
+                    {(editingProduct ? editingProduct.images?.[0] : newProduct.image_url) && (
+                      <div className="mt-2">
+                        <img 
+                          src={(editingProduct ? editingProduct.images?.[0] : newProduct.image_url) || ''} 
+                          alt="Preview" 
+                          className="h-32 rounded-lg object-cover border-2 border-[#FF3131]" 
+                          onError={(e) => (e.currentTarget.style.display = 'none')}
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">Pré-visualização da imagem</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label>Descrição do Produto</Label>
+                    <textarea
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={editingProduct ? (editingProduct.description || '') : newProduct.description}
+                      onChange={(e) => editingProduct 
+                        ? setEditingProduct({ ...editingProduct, description: e.target.value })
+                        : setNewProduct({ ...newProduct, description: e.target.value })
+                      }
+                      placeholder="Descrição detalhada do produto..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="featured"
+                        checked={editingProduct ? (editingProduct.featured || false) : newProduct.featured}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, featured: e.target.checked })
+                          : setNewProduct({ ...newProduct, featured: e.target.checked })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="featured">Destaque</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="on_sale"
+                        checked={editingProduct ? (editingProduct.on_sale || false) : newProduct.on_sale}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, on_sale: e.target.checked })
+                          : setNewProduct({ ...newProduct, on_sale: e.target.checked })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="on_sale">Em Promoção</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="is_active"
+                        checked={editingProduct ? (editingProduct.is_active !== false) : newProduct.is_active}
+                        onChange={(e) => editingProduct 
+                          ? setEditingProduct({ ...editingProduct, is_active: e.target.checked })
+                          : setNewProduct({ ...newProduct, is_active: e.target.checked })
+                        }
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="is_active">Ativo</Label>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    {editingProduct ? (
+                      <>
+                        <Button onClick={updateProduct} className="flex-1 bg-[#FF3131] hover:bg-[#FF5555]">
+                          <Check className="h-4 w-4 mr-2" />
+                          Guardar Alterações
+                        </Button>
+                        <Button onClick={() => setEditingProduct(null)} variant="outline" className="flex-1">
+                          Cancelar
+                        </Button>
+                      </>
+                    ) : (
+                      <Button onClick={addProduct} className="w-full bg-[#FF3131] hover:bg-[#FF5555]">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Produto
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
@@ -517,54 +740,97 @@ const AdminPanel = () => {
               <CardHeader>
                 <CardTitle>Produtos ({products.length})</CardTitle>
               </CardHeader>
-              <CardContent className="overflow-x-auto">
+              <CardContent>
                 {loadingData && <Skeleton className="h-6 mb-4" />}
                 <Input
                   placeholder="Filtrar produtos..."
                   value={productFilter}
                   onChange={(e) => setProductFilter(e.target.value)}
-                  className="mb-2"
+                  className="mb-4"
                 />
-                <table className="w-full text-sm">
-                  <thead className="border-b">
-                    <tr>
-                      <th className="text-left py-2">Produto</th>
-                      <th className="text-left py-2">Preço</th>
-                      <th className="text-left py-2">Stock</th>
-                      <th className="text-left py-2">Categoria</th>
-                      <th className="text-left py-2">Ações</th>
-                    </tr>
-                  </thead>
+                <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+                  <table className="w-full text-sm min-w-[640px]">
+                    <thead className="border-b bg-muted/50">
+                      <tr>
+                        <th className="text-left py-2 px-2">Imagem</th>
+                        <th className="text-left py-2">Produto</th>
+                        <th className="text-left py-2 hidden sm:table-cell">Marca</th>
+                        <th className="text-left py-2">Preço</th>
+                        <th className="text-left py-2 hidden md:table-cell">Stock</th>
+                        <th className="text-left py-2 hidden lg:table-cell">Status</th>
+                        <th className="text-left py-2">Ações</th>
+                      </tr>
+                    </thead>
                   <tbody>
                     {products
-                      .filter(p => p.title.toLowerCase().includes(productFilter.toLowerCase()))
+                      .filter(p => (p.name || p.title || '').toLowerCase().includes(productFilter.toLowerCase()))
                       .map((product) => (
-                      <tr key={product.id} className="border-b hover:bg-muted">
-                        <td className="py-3">{product.title.substring(0, 40)}</td>
-                        <td className="py-3">MT {product.price.toFixed(2)}</td>
-                        <td className="py-3">{product.stock}</td>
-                        <td className="py-3">{product.category}</td>
-                        <td className="py-3 flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => setEditingProduct(product)}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => deleteProduct(product.id)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                      <tr key={product.id} className="border-b hover:bg-muted/50">
+                        <td className="py-2 px-2">
+                          {product.images?.[0] ? (
+                            <img 
+                              src={product.images[0]} 
+                              alt="" 
+                              className="w-12 h-12 object-cover rounded" 
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded flex items-center justify-center text-xs">Sem foto</div>
+                          )}
+                        </td>
+                        <td className="py-3">
+                          <span className="font-medium">{(product.name || product.title || '').substring(0, 30)}</span>
+                          <div className="flex gap-1 mt-1">
+                            {product.featured && <Badge variant="outline" className="text-xs">Destaque</Badge>}
+                            {product.on_sale && <Badge variant="outline" className="text-xs text-red-500">Promo</Badge>}
+                          </div>
+                        </td>
+                        <td className="py-3">{product.brand || '-'}</td>
+                        <td className="py-3">
+                          <div>
+                            <span className="font-bold text-[#FF3131]">MT {product.price.toLocaleString()}</span>
+                            {product.old_price && product.old_price > 0 && (
+                              <span className="text-xs text-muted-foreground line-through ml-2">
+                                MT {product.old_price.toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3">
+                          <span className={product.stock > 0 ? 'text-green-600' : 'text-red-600'}>
+                            {product.stock}
+                          </span>
+                        </td>
+                        <td className="py-3">
+                          <Badge variant={product.is_active !== false ? "default" : "secondary"}>
+                            {product.is_active !== false ? 'Ativo' : 'Inativo'}
+                          </Badge>
+                        </td>
+                        <td className="py-3">
+                          <div className="flex gap-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setEditingProduct(product)}
+                              title="Editar"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => deleteProduct(product.id)}
+                              className="text-red-600"
+                              title="Eliminar"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -572,17 +838,32 @@ const AdminPanel = () => {
           {/* PEDIDOS */}
           <TabsContent value="pedidos">
             <Card>
-              <CardHeader className="justify-between">
+              <CardHeader className="justify-between flex-row items-center gap-2">
                 <CardTitle>Pedidos ({orders.length})</CardTitle>
-                <Button size="sm" variant="secondary" onClick={() => downloadCSV(orderFilter?
-                    orders.filter(o=>
-                        o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
-                        o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
-                      )
-                    : orders,
-                  ["id","customer_name","customer_email","total_amount","status","created_at"],
-                  "pedidos.csv")}
-                >Exportar CSV</Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => exportOrdersPDF(orderFilter?
+                      orders.filter(o=>
+                          o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
+                          o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
+                        )
+                      : orders)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    PDF
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => downloadCSV(orderFilter?
+                      orders.filter(o=>
+                          o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
+                          o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
+                        )
+                      : orders,
+                    ["id","customer_name","customer_email","total_amount","status","created_at"],
+                    "pedidos.csv")}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="overflow-x-auto">
                 {loadingData && <Skeleton className="h-6 mb-4" />}
@@ -634,14 +915,26 @@ const AdminPanel = () => {
           {/* UTILIZADORES */}
           <TabsContent value="usuarios">
             <Card>
-              <CardHeader className="justify-between">
+              <CardHeader className="justify-between flex-row items-center gap-2">
                 <CardTitle>Utilizadores ({users.length})</CardTitle>
-                <Button size="sm" variant="secondary" onClick={() => downloadCSV(userFilter?
-                    users.filter(u=>u.email.toLowerCase().includes(userFilter.toLowerCase()))
-                    : users,
-                  ["id","email","created_at"],
-                  "usuarios.csv")}
-                >Exportar CSV</Button>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={() => exportUsersPDF(userFilter?
+                      users.filter(u=>u.email.toLowerCase().includes(userFilter.toLowerCase()))
+                      : users)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    PDF
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => downloadCSV(userFilter?
+                      users.filter(u=>u.email.toLowerCase().includes(userFilter.toLowerCase()))
+                      : users,
+                    ["id","email","created_at"],
+                    "usuarios.csv")}
+                  >
+                    <Download className="h-4 w-4 mr-1" />
+                    CSV
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent className="overflow-x-auto">
                 {loadingData && <Skeleton className="h-6 mb-4" />}
@@ -895,14 +1188,64 @@ const AdminPanel = () => {
           <TabsContent value="ferramentas">
             <Card>
               <CardHeader>
-                <CardTitle>Ferramentas e Configurações</CardTitle>
+                <CardTitle>Ferramentas e Relatórios</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Button onClick={loadAllData} variant="outline" className="w-full">
-                    🔄 Recarregar Dados
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <Button onClick={() => exportSalesSummaryPDF(orders, products, users)} className="bg-[#FF3131] hover:bg-[#FF5555] h-auto py-4 flex-col gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span>Resumo de Vendas</span>
+                    <span className="text-xs opacity-80">Relatório completo com estatísticas</span>
+                  </Button>
+                  <Button onClick={() => exportProductsPDF(products)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span>Lista de Produtos</span>
+                    <span className="text-xs text-muted-foreground">Catálogo completo em PDF</span>
+                  </Button>
+                  <Button onClick={() => exportOrdersPDF(orders)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span>Relatório de Pedidos</span>
+                    <span className="text-xs text-muted-foreground">Todas as vendas em PDF</span>
+                  </Button>
+                  <Button onClick={() => exportUsersPDF(users)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span>Lista de Utilizadores</span>
+                    <span className="text-xs text-muted-foreground">Base de clientes em PDF</span>
+                  </Button>
+                  <Button onClick={() => exportAlertsPDF(alerts, questions)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                    <FileText className="h-6 w-6" />
+                    <span>Alertas e Perguntas</span>
+                    <span className="text-xs text-muted-foreground">Interações de clientes</span>
+                  </Button>
+                  <Button onClick={loadAllData} variant="secondary" className="h-auto py-4 flex-col gap-2">
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                    <span>Recarregar Dados</span>
+                    <span className="text-xs text-muted-foreground">Atualizar informações</span>
                   </Button>
                 </div>
+
+                <div className="border-t pt-4">
+                  <h3 className="font-bold mb-3">Exportar Tudo (CSV)</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <Button size="sm" variant="outline" onClick={() => downloadCSV(products, ["id","name","price","stock","category","brand"], "todos-produtos.csv")}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Produtos
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => downloadCSV(orders, ["id","customer_name","customer_email","total_amount","status","created_at"], "todos-pedidos.csv")}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Pedidos
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => downloadCSV(users, ["id","email","created_at"], "todos-usuarios.csv")}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Utilizadores
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => downloadCSV(affiliates, ["id","email","balance"], "afiliados.csv")}>
+                      <Download className="h-4 w-4 mr-1" />
+                      Afiliados
+                    </Button>
+                  </div>
+                </div>
+
                 <div className="bg-muted p-4 rounded-lg space-y-2">
                   <p className="font-bold">Informações da Conta</p>
                   <p className="text-sm">Email: {user?.email}</p>
@@ -912,9 +1255,8 @@ const AdminPanel = () => {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
-      {/* delete confirmation dialog */}
-      <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
+        {/* delete confirmation dialog */}
+        <AlertDialog open={!!confirmDelete} onOpenChange={(open) => !open && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar Eliminação</AlertDialogTitle>
@@ -930,6 +1272,7 @@ const AdminPanel = () => {
         </AlertDialogContent>
       </AlertDialog>
       <Footer />
+      </div>
     </div>
   );
 };

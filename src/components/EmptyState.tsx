@@ -1,34 +1,68 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
+  className?: string;
 }
 
-const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction }: EmptyStateProps) => {
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  secondaryAction,
+  className = ""
+}: EmptyStateProps) {
   return (
-    <Card className="p-12 text-center">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center">
-          <Icon className="h-10 w-10 text-muted-foreground" />
+    <Card className={`border-dashed ${className}`}>
+      <CardContent className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FF3131]/10 to-[#FF5555]/10 flex items-center justify-center mb-6 animate-in fade-in zoom-in duration-300">
+          <Icon className="h-10 w-10 text-[#FF3131]" />
         </div>
-        <div className="space-y-2">
-          <h3 className="text-2xl font-bold text-foreground">{title}</h3>
-          <p className="text-muted-foreground max-w-md">{description}</p>
-        </div>
-        {actionLabel && onAction && (
-          <Button onClick={onAction} size="lg" className="mt-4">
-            {actionLabel}
-          </Button>
+        
+        <h3 className="text-xl font-semibold mb-2">{title}</h3>
+        
+        {description && (
+          <p className="text-muted-foreground max-w-sm mb-6">
+            {description}
+          </p>
         )}
-      </div>
+        
+        {(actionLabel || secondaryAction) && (
+          <div className="flex flex-col sm:flex-row gap-3 mt-2">
+            {actionLabel && onAction && (
+              <Button 
+                onClick={onAction} 
+                className="bg-gradient-to-r from-[#FF3131] to-[#FF5555] hover:from-[#FF2222] hover:to-[#FF4444] transition-all shadow-lg shadow-[#FF3131]/25"
+              >
+                {actionLabel}
+              </Button>
+            )}
+            
+            {secondaryAction && (
+              <Button 
+                variant="outline" 
+                onClick={secondaryAction.onClick}
+              >
+                {secondaryAction.label}
+              </Button>
+            )}
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
-};
+}
 
 export default EmptyState;

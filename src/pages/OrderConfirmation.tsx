@@ -125,7 +125,7 @@ const OrderConfirmation = () => {
               <div>
                 <div className="font-semibold">{getStatusText(order.status)}</div>
                 <div className="text-sm text-muted-foreground">
-                  Criado em {new Date(order.created_at).toLocaleDateString(locale)}
+                  Criado em {new Date(order.created_at).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -195,7 +195,7 @@ const OrderConfirmation = () => {
               </div>
               <div>
                 <span className="text-muted-foreground">Endereço:</span>{' '}
-                <span className="font-medium">{order.shipping_address}</span>
+                <span className="font-medium">{order.delivery_address}</span>
               </div>
             </div>
           </Card>

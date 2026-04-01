@@ -16,33 +16,34 @@ export interface CheckoutFormData {
 
 export interface Order {
   id: string;
-  userId?: string;
-  orderNumber: string;
+  user_id?: string;
+  order_number: string;
   status: OrderStatus;
-  totalAmount: number;
-  customerName: string;
-  customerEmail: string;
-  customerPhone: string;
-  deliveryAddress: string;
-  deliveryCity: string;
-  deliveryProvince: string;
-  deliveryPostalCode?: string;
-  paymentMethod: PaymentMethod;
-  paymentStatus: PaymentStatus;
-  paymentProof?: string;
+  total_amount: number;
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_province: string;
+  delivery_postal_code?: string;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  payment_proof?: string;
   notes?: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
 }
 
 export interface OrderItem {
   id: string;
-  orderId: string;
-  productId: string;
-  productTitle: string;
-  productImage?: string;
+  order_id: string;
+  product_id: string;
+  product_name: string;
+  product_image?: string;
   quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  storeName?: string;
+  unit_price: number;
+  subtotal: number;
+  store_name?: string;
 }

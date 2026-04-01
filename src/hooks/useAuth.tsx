@@ -203,12 +203,12 @@ export const useAuth = () => {
       }
     });
 
-    // Sync em tempo real: Re-sincronizar a cada 10 segundos
+    // Sync em tempo real: Re-sincronizar a cada 60 segundos
     // Isso garante que sempre temos dados FRESH do Supabase
     const interval = setInterval(() => {
-      console.log('🔄 [AUTO-SYNC] Sincronização automática cada 10s');
+      console.log('🔄 [AUTO-SYNC] Sincronização automática cada 60s');
       syncFromSupabase();
-    }, 10000);
+    }, 60000);
 
     setRefreshInterval(interval);
 
@@ -237,17 +237,30 @@ export const useAuth = () => {
   /**
    * Auth methods (sem dependência de cache)
    */
-  const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const signIn = async (email: string, password?: string) => {
+    // Se tiver password, usa login normal
+    if (password) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    // Sincronizar após login
-    if (!error) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await syncFromSupabase();
+      // Sincronizar após login
+      if (!error) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        await syncFromSupabase();
+      }
+
+      return { data, error };
     }
+    
+    // Magic Link - sem password
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
 
     return { data, error };
   };

@@ -99,31 +99,31 @@ export interface ProductSpecifications {
 export interface Product {
   id: string;
   vendor_id: string;
-  category_id: string | null;
+  category: string | null;
   name: string;
   slug: string;
   description: string | null;
   short_description: string | null;
   price: number;
-  compare_at_price: number | null;
+  old_price: number | null;
   cost_price: number | null;
   sku: string | null;
-  stock_quantity: number;
+  stock: number;
   low_stock_threshold: number;
-  track_inventory: boolean;
-  variants: ProductVariant[];
-  specifications: ProductSpecifications;
+  images: string[];
+  brand: string | null;
+  model: string | null;
+  rating: number;
+  reviews_count: number;
+  sales_count: number;
+  views_count: number;
+  featured: boolean;
+  on_sale: boolean;
+  is_active: boolean;
   meta_title: string | null;
   meta_description: string | null;
-  is_active: boolean;
-  is_featured: boolean;
-  rating: number;
-  review_count: number;
-  view_count: number;
-  sales_count: number;
   created_at: string;
   updated_at: string;
-  published_at: string | null;
 }
 
 export interface ProductImage {
@@ -136,10 +136,10 @@ export interface ProductImage {
   created_at: string;
 }
 
-export interface ProductWithImages extends Product {
+export interface ProductWithImages extends Omit<Product, 'images' | 'category'> {
   images: ProductImage[];
   vendor?: Vendor;
-  category?: Category;
+  category?: string;
 }
 
 // ============================================
