@@ -24,7 +24,7 @@ export default function RelatedProducts({
   title = 'Produtos Relacionados',
   limit = 8,
 }: RelatedProductsProps) {
-  const { currency } = useSettings();
+  const { currency, convertPrice, locale } = useSettings();
   const { user } = useAuth();
   const { isInWishlist } = useWishlist(user?.id);
   const toggleWishlist = useToggleWishlist();
@@ -130,11 +130,11 @@ export default function RelatedProducts({
 
                   <div className="flex items-baseline gap-2">
                     <span className="font-bold text-[#FF3131] text-sm md:text-base">
-                      {product.price.toLocaleString()} {currency}
+                      {convertPrice(product.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                     </span>
                     {product.old_price && product.old_price > product.price && (
                       <span className="text-xs text-muted-foreground line-through">
-                        {product.old_price.toLocaleString()}
+                        {convertPrice(product.old_price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     )}
                   </div>

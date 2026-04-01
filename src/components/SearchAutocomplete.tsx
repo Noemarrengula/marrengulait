@@ -20,7 +20,7 @@ export default function SearchAutocomplete({
   onSelect,
 }: SearchAutocompleteProps) {
   const navigate = useNavigate();
-  const { currency } = useSettings();
+  const { currency, convertPrice, locale } = useSettings();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -187,7 +187,7 @@ export default function SearchAutocomplete({
                         )}
                       </div>
                       <span className="text-sm font-semibold text-[#FF3131]">
-                        {item.price.toLocaleString()} {currency}
+                        {convertPrice(item.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                       </span>
                     </CommandItem>
                   ))}

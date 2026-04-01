@@ -148,7 +148,7 @@ export const useAuth = () => {
   }, [validateUserUUID, fixSessionUUID]);
 
   /**
-   * Sincronização completa: Fetch user + roles
+   * Sincronização completa: Fetch user + roles + ensure profile
    */
   const syncFromSupabase = useCallback(async () => {
     try {
@@ -165,7 +165,10 @@ export const useAuth = () => {
         return;
       }
 
-      // 2. Buscar roles do usuário
+      // 2. Garantir que perfil existe
+      await ensureProfile(currentUser);
+
+      // 3. Buscar roles do usuário
       const userRoles = await fetchRolesFromSupabase(currentUser.id);
       setRoles(userRoles);
 
@@ -235,6 +238,44 @@ export const useAuth = () => {
   const isVendor = hasRole('vendor');
 
   /**
+   * Garantir que perfil existe após login
+   */
+  const ensureProfile = async (authUser: User) => {
+    try {
+      // Verificar se perfil existe
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', authUser.id)
+        .single();
+      
+      if (!existingProfile) {
+        // Criar novo perfil
+        const fullName = authUser.user_metadata?.full_name || 
+                        authUser.user_metadata?.name ||
+                        authUser.email?.split('@')[0] || 
+                        'Utilizador';
+        
+        await supabase.from('profiles').insert({
+          user_id: authUser.id,
+          full_name: fullName,
+        });
+        
+        // Criar loyalty_points
+        await supabase.from('loyalty_points').insert({
+          user_id: authUser.id,
+          points: 0,
+          tier: 'bronze',
+        });
+        
+        console.log('✅ Perfil criado para:', authUser.email);
+      }
+    } catch (error) {
+      console.error('❌ Erro ao garantir perfil:', error);
+    }
+  };
+
+  /**
    * Auth methods (sem dependência de cache)
    */
   const signIn = async (email: string, password?: string) => {
@@ -246,8 +287,9 @@ export const useAuth = () => {
       });
 
       // Sincronizar após login
-      if (!error) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+      if (!error && data.user) {
+        await ensureProfile(data.user);
+        await new Promise(resolve => setTimeout(resolve, 500));
         await syncFromSupabase();
       }
 

@@ -16,9 +16,12 @@ interface FlashSaleProps {
 }
 
 const FlashSale = ({ productName, originalPrice, salePrice, endTime, stockLimit, soldCount }: FlashSaleProps) => {
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
   const [timeLeft, setTimeLeft] = useState("");
-  const discount = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
+  
+  const convertedSalePrice = convertPrice(salePrice);
+  const convertedOriginalPrice = convertPrice(originalPrice);
+  const discount = Math.round(((convertedOriginalPrice - convertedSalePrice) / convertedOriginalPrice) * 100);
   const stockPercentage = (soldCount / stockLimit) * 100;
 
   useEffect(() => {
@@ -56,8 +59,8 @@ const FlashSale = ({ productName, originalPrice, salePrice, endTime, stockLimit,
         <h3 className="text-xl font-bold mb-4">{productName}</h3>
         
         <div className="flex items-baseline gap-3 mb-4">
-          <span className="text-3xl font-bold text-red-600">{salePrice.toLocaleString(locale)} {currency}</span>
-          <span className="text-lg text-muted-foreground line-through">{originalPrice.toLocaleString(locale)} {currency}</span>
+          <span className="text-3xl font-bold text-red-600">{convertedSalePrice.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
+          <span className="text-lg text-muted-foreground line-through">{convertedOriginalPrice.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
         </div>
         
         <div className="space-y-3">

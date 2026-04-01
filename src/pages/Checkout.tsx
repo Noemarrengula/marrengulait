@@ -20,7 +20,9 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { items, totalPrice, clearCart } = useCart();
   const { user } = useAuth();
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
+  
+  const formatPrice = (price: number) => price.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
@@ -67,7 +69,8 @@ const Checkout = () => {
       }
 
       if (data.min_order_amount && totalPrice < data.min_order_amount) {
-        setCouponError(`Valor mínimo: ${data.min_order_amount.toLocaleString()} ${currency}`);
+        const convertedMinAmount = convertPrice(data.min_order_amount);
+        setCouponError(`Valor mínimo: ${formatPrice(convertedMinAmount)} ${currency}`);
         setCouponDiscount(0);
         return;
       }
@@ -90,7 +93,8 @@ const Checkout = () => {
 
       setCouponDiscount(discount);
       setCouponError('');
-      toast({ title: 'Cupom aplicado!', description: `Desconto de ${discount.toLocaleString()} ${currency}` });
+      const convertedDiscount = convertPrice(discount);
+      toast({ title: 'Cupom aplicado!', description: `Desconto de ${formatPrice(convertedDiscount)} ${currency}` });
     } catch (error) {
       setCouponError('Erro ao validar cupom');
       setCouponDiscount(0);
@@ -175,7 +179,7 @@ const Checkout = () => {
       if (formData.paymentMethod === 'mpesa') {
         toast({
           title: 'Pagamento M-Pesa',
-          description: `Envie ${total.toLocaleString()} MT para o número 84XXXXXXX`,
+          description: `Envie ${formatPrice(convertPrice(total))} ${currency} para o número 84XXXXXXX`,
           duration: 10000,
         });
       }
@@ -380,7 +384,7 @@ const Checkout = () => {
                           <p className="text-sm font-medium line-clamp-2">{item.title}</p>
                           <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
                           <p className="text-sm font-semibold text-[#FF3131]">
-                            {(item.price * item.quantity).toLocaleString(locale)} {currency}
+                            {formatPrice(convertPrice(item.price * item.quantity))} {currency}
                           </p>
                         </div>
                       </div>
@@ -390,7 +394,7 @@ const Checkout = () => {
                   <div className="border-t pt-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span>{totalPrice.toLocaleString(locale)} {currency}</span>
+                      <span>{formatPrice(convertPrice(totalPrice))} {currency}</span>
                     </div>
                     
                     {/* Coupon */}
@@ -417,19 +421,19 @@ const Checkout = () => {
                       {couponDiscount > 0 && (
                         <div className="flex justify-between text-sm text-green-600">
                           <span>Desconto</span>
-                          <span>-{couponDiscount.toLocaleString(locale)} {currency}</span>
+                          <span>-{formatPrice(convertPrice(couponDiscount))} {currency}</span>
                         </div>
                       )}
                     </div>
                     
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Frete</span>
-                      <span>{shippingCost === 0 ? 'Grátis' : `${shippingCost.toLocaleString(locale)} ${currency}`}</span>
+                      <span>{shippingCost === 0 ? 'Grátis' : `${formatPrice(convertPrice(shippingCost))} ${currency}`}</span>
                     </div>
                     
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>Total</span>
-                      <span className="text-[#FF3131]">{(finalTotal + shippingCost).toLocaleString(locale)} {currency}</span>
+                      <span className="text-[#FF3131]">{formatPrice(convertPrice(finalTotal + shippingCost))} {currency}</span>
                     </div>
                   </div>
 

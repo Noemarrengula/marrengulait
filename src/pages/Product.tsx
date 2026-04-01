@@ -41,12 +41,16 @@ const Product = () => {
   const queryClient = useQueryClient();
   const { data: product, isLoading, error, refetch } = useProduct(id || '');
   const { addItem } = useCart();
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
   
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageKey, setImageKey] = useState(0);
+  
+  const convertedPrice = product ? convertPrice(product.price) : 0;
+  const convertedOldPrice = product?.old_price ? convertPrice(product.old_price) : undefined;
+  const priceSavings = product?.old_price ? convertPrice(product.old_price - product.price) : 0;
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['product', id] });
@@ -218,17 +222,17 @@ const Product = () => {
             <div className="space-y-1">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-black text-[#FF3131]">
-                  {product.price.toLocaleString(locale)} {currency}
+                  {convertedPrice.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
                 {product.old_price && (
                   <span className="text-xl text-muted-foreground line-through">
-                    {product.old_price.toLocaleString(locale)} {currency}
+                    {convertedOldPrice!.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                   </span>
                 )}
               </div>
               {discount > 0 && (
                 <p className="text-green-600 font-medium">
-                  Poupa {currency} {(product.old_price! - product.price).toLocaleString(locale)}
+                  Poupa {currency} {priceSavings.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
               )}
             </div>

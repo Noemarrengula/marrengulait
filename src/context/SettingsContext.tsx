@@ -10,11 +10,20 @@ export type SettingsContextType = {
   isDarkMode: boolean;
   isSystemPreference: boolean;
   resetToSystem: () => void;
+  convertPrice: (priceInMZN: number) => number;
+  exchangeRates: Record<string, number>;
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'marrengula-settings';
+
+export const EXCHANGE_RATES: Record<string, number> = {
+  MZN: 1,
+  USD: 0.0157,
+  EUR: 0.0144,
+  ZAR: 0.2857,
+};
 
 interface StoredSettings {
   locale: string;
@@ -120,6 +129,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const isDarkMode = settings.theme === 'dark' || 
     (settings.theme === 'system' && systemDarkMode);
 
+  const convertPrice = useCallback((priceInMZN: number): number => {
+    const rate = EXCHANGE_RATES[settings.currency] || 1;
+    return priceInMZN * rate;
+  }, [settings.currency]);
+
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -140,6 +154,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isDarkMode,
         isSystemPreference,
         resetToSystem,
+        convertPrice,
+        exchangeRates: EXCHANGE_RATES,
       }}
     >
       {children}

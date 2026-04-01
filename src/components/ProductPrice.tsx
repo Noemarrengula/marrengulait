@@ -18,18 +18,21 @@ const ProductPrice = ({
   showDiscount = true,
   className = ''
 }: ProductPriceProps) => {
-  const { currency: ctxCurrency, locale } = useSettings();
+  const { currency: ctxCurrency, locale, convertPrice } = useSettings();
   const currency = propCurrency || ctxCurrency;
-  // Calcula percentual de desconto
+  
+  const priceNum = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
+  const oldPriceNum = oldPrice ? (typeof oldPrice === 'string' ? parseFloat(oldPrice.replace(/[^\d.]/g, '')) : oldPrice) : undefined;
+  
+  const convertedPrice = convertPrice(priceNum);
+  const convertedOldPrice = oldPriceNum ? convertPrice(oldPriceNum) : undefined;
+
   const calculateDiscount = (): number => {
-    if (!oldPrice) return 0;
+    if (!convertedOldPrice) return 0;
     
-    const priceNum = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
-    const oldPriceNum = typeof oldPrice === 'string' ? parseFloat(oldPrice.replace(/[^\d.]/g, '')) : oldPrice;
+    if (isNaN(convertedPrice) || isNaN(convertedOldPrice) || convertedOldPrice === 0) return 0;
     
-    if (isNaN(priceNum) || isNaN(oldPriceNum) || oldPriceNum === 0) return 0;
-    
-    return Math.round(((oldPriceNum - priceNum) / oldPriceNum) * 100);
+    return Math.round(((convertedOldPrice - convertedPrice) / convertedOldPrice) * 100);
   };
 
   const discount = calculateDiscount();
@@ -41,31 +44,26 @@ const ProductPrice = ({
     lg: 'text-3xl'
   };
 
-  // Formata preço para exibição
-  const formatPrice = (value: string | number): string => {
-    if (typeof value === 'number') {
-      // use locale for formatting
-      return value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    return value;
+  const formatPrice = (value: number): string => {
+    return value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   return (
     <div className={`flex items-baseline gap-2 ${className}`}>
       <span 
         className={`${sizeClasses[size]} font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent`}
-        aria-label={`Preço: ${currency} ${formatPrice(price)}`}
+        aria-label={`Preço: ${currency} ${formatPrice(convertedPrice)}`}
       >
-        {currency} {formatPrice(price)}
+        {currency} {formatPrice(convertedPrice)}
       </span>
       
       {oldPrice && (
         <>
           <span 
             className="text-sm text-muted-foreground line-through"
-            aria-label={`Preço anterior: ${currency} ${formatPrice(oldPrice)}`}
+            aria-label={`Preço anterior: ${currency} ${formatPrice(convertedOldPrice!)}`}
           >
-            {currency} {formatPrice(oldPrice)}
+            {currency} {formatPrice(convertedOldPrice!)}
           </span>
           
           {showDiscount && discount > 0 && (

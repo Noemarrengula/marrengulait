@@ -47,7 +47,7 @@ interface KitOption {
 
 const CCTVKitBuilder = () => {
   const { addItem } = useCart();
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
   const [selectedCameras, setSelectedCameras] = useState<KitCamera[]>([]);
   const [phone, setPhone] = useState("");
   const [kitOptions, setKitOptions] = useState<KitOption>({
@@ -242,7 +242,7 @@ const CCTVKitBuilder = () => {
                           </p>
                         </div>
                         <p className="font-bold text-[#FF3131]">
-                          {camera.price.toLocaleString()} {currency}
+                          {convertPrice(camera.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                         </p>
                       </div>
                       <Button
@@ -293,7 +293,7 @@ const CCTVKitBuilder = () => {
                           </div>
                         </div>
                         <p className="font-bold">
-                          {option.price.toLocaleString()} {currency}
+                          {convertPrice(option.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                         </p>
                       </div>
                     </div>
@@ -323,7 +323,7 @@ const CCTVKitBuilder = () => {
                       {hddOption.name} - {hddOption.spec}
                     </p>
                     <p className="font-bold">
-                      {hddOption.price.toLocaleString()} {currency}
+                      {convertPrice(hddOption.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                     </p>
                   </div>
                   <div className="border rounded-lg p-4">
@@ -337,7 +337,7 @@ const CCTVKitBuilder = () => {
                       {cableOption.name} - {cableOption.spec}
                     </p>
                     <p className="font-bold">
-                      {cableOption.price.toLocaleString()} {currency}
+                      {convertPrice(cableOption.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                     </p>
                   </div>
                 </div>
@@ -400,20 +400,20 @@ const CCTVKitBuilder = () => {
                       <div className="flex justify-between text-sm">
                         <span>Gravador:</span>
                         <span>
-                          {kitOptions.options[kitOptions.selected].price.toLocaleString()}{" "}
+                          {convertPrice(kitOptions.options[kitOptions.selected].price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
                           {currency}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>HDD:</span>
                         <span>
-                          {hddOption.price.toLocaleString()} {currency}
+                          {convertPrice(hddOption.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span>Cabo:</span>
                         <span>
-                          {cableOption.price.toLocaleString()} {currency}
+                          {convertPrice(cableOption.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                         </span>
                       </div>
                     </div>
@@ -442,7 +442,7 @@ const CCTVKitBuilder = () => {
                       {withInstallation && (
                         <div className="flex justify-between text-sm text-muted-foreground">
                           <span>Instalação ({selectedCameras.reduce((acc, c) => acc + c.quantity, 0)} câmaras):</span>
-                          <span>+{getInstallationPrice().toLocaleString()} {currency}</span>
+                          <span>+{convertPrice(getInstallationPrice()).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
                         </div>
                       )}
                     </div>
@@ -451,7 +451,7 @@ const CCTVKitBuilder = () => {
                       <div className="flex justify-between text-xl font-bold">
                         <span>Total:</span>
                         <span className="text-[#FF3131]">
-                          {getTotal().toLocaleString()} {currency}
+                          {convertPrice(getTotal()).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                         </span>
                       </div>
                     </div>

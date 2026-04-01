@@ -1,4 +1,4 @@
-import { User, Menu, Heart, LogOut, Settings, ShoppingBag, Phone, Mail, HelpCircle, Package, X, Home, ShoppingCart, Tag, Laptop, Smartphone, Wrench, Users, FileText } from "lucide-react";
+import { User, Menu, Heart, LogOut, Settings, ShoppingBag, Phone, Mail, HelpCircle, Package, X, Home, ShoppingCart, Tag, Laptop, Smartphone, Wrench, Users, FileText, Search, ChevronDown } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,8 +13,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 
 const Header = () => {
-  const { user, isAdmin, loading, signOut } = useAuth();
-  const { locale, currency, setLocale, setCurrency, isSystemPreference } = useSettings();
+  const { user, isAdmin, signOut } = useAuth();
+  const { locale, currency, setLocale, setCurrency } = useSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -41,60 +41,45 @@ const Header = () => {
     try {
       const { error } = await signOut();
       if (error) {
-        toast({
-          title: 'Erro ao fazer logout',
-          description: error.message,
-          variant: 'destructive'
-        });
+        toast({ title: 'Erro ao fazer logout', description: error.message, variant: 'destructive' });
         return;
       }
-      
-      toast({
-        title: 'Logout realizado!',
-        description: 'Você foi desconectado com sucesso'
-      });
-      
-      // Redirecionar para home após logout
+      toast({ title: 'Logout realizado!' });
       scrollAndNavigate('/');
     } catch (error) {
-      toast({
-        title: 'Erro inesperado',
-        description: 'Tente novamente mais tarde',
-        variant: 'destructive'
-      });
+      toast({ title: 'Erro inesperado', variant: 'destructive' });
     }
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60 shadow-sm">
-      {/* Top Bar */}
-      <div className="border-b border-border/50 bg-gradient-to-r from-[#FF3131]/5 via-transparent to-[#FF5555]/5">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur-xl shadow-sm">
+      {/* Top Bar - Escondida no mobile */}
+      <div className="border-b border-border/50 bg-gradient-to-r from-[#FF3131]/5 via-transparent to-[#FF5555]/5 hidden md:block">
         <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between text-sm text-foreground/70">
             <div className="flex items-center gap-6">
-              <a href="tel:+258864738133" className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all hover:scale-105">
+              <a href="tel:+258864738133" className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all">
                 <Phone className="h-3.5 w-3.5" />
                 <span>+258 864738133</span>
               </a>
-              <a href="mailto:marrengulait@gmail.com" className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all hover:scale-105">
+              <a href="mailto:marrengulait@gmail.com" className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all">
                 <Mail className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">marrengulait@gmail.com</span>
+                <span className="hidden lg:inline">marrengulait@gmail.com</span>
               </a>
             </div>
             <div className="flex items-center gap-4">
-              <button onClick={() => scrollAndNavigate('/rastrear')} className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all hover:scale-105 font-medium">
+              <button onClick={() => scrollAndNavigate('/rastrear')} className="flex items-center gap-1.5 hover:text-[#FF3131] font-medium">
                 <Package className="h-4 w-4" />
-                <span className="hidden md:inline">Rastrear</span>
+                <span className="hidden lg:inline">Rastrear</span>
               </button>
-              <button onClick={() => scrollAndNavigate('/sobre')} className="flex items-center gap-1.5 hover:text-[#FF3131] transition-all hover:scale-105 font-medium">
+              <button onClick={() => scrollAndNavigate('/sobre')} className="flex items-center gap-1.5 hover:text-[#FF3131] font-medium">
                 <HelpCircle className="h-4 w-4" />
-                <span className="hidden md:inline">Ajuda</span>
+                <span className="hidden xl:inline">Ajuda</span>
               </button>
-              {/* currency menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="px-2">
-                    {currency}
+                  <Button variant="ghost" size="sm" className="px-2 text-xs">
+                    {currency} <ChevronDown className="h-3 w-3 ml-1" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
@@ -105,29 +90,16 @@ const Header = () => {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-              {/* language menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="px-2 relative">
-                    {locale === 'pt-MZ' ? '🇲🇿 PT' : locale === 'en-US' ? '🇺🇸 EN' : '🇪🇸 ES'}
-                    {isSystemPreference && (
-                      <span className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full" />
-                    )}
+                  <Button variant="ghost" size="sm" className="px-2 text-xs">
+                    {locale === 'pt-MZ' ? '🇲🇿 PT' : '🇺🇸 EN'}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                    Idioma
-                  </div>
-                  <DropdownMenuItem onClick={() => setLocale('pt-MZ')}>
-                    <span className="mr-2">🇲🇿</span> Português
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocale('en-US')}>
-                    <span className="mr-2">🇺🇸</span> English
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setLocale('es-MX')}>
-                    <span className="mr-2">🇪🇸</span> Español
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocale('pt-MZ')}>🇲🇿 Português</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocale('en-US')}>🇺🇸 English</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocale('es-MX')}>🇪🇸 Español</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -135,96 +107,98 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Main Header */}
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="group relative">
-            <div className="absolute inset-0 bg-[#FF3131]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="relative z-10 transition-all duration-300 group-hover:scale-105">
-              <Logo showText={true} />
-            </div>
+      {/* Main Header - Mobile Optimizado */}
+      <div className="container mx-auto px-3 py-2 md:py-4">
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          {/* Mobile: Logo compacta, Desktop: Logo completa */}
+          <Link to="/" className="flex-shrink-0">
+            <Logo showText={false} className="h-8 w-auto md:h-10" />
           </Link>
 
-          {/* Search Bar */}
+          {/* Search - Desktop only */}
           <SearchAutocomplete 
-            className="flex-1 max-w-2xl"
-            placeholder="Pesquisar produtos, categorias ou serviços..."
+            className="hidden md:flex flex-1 max-w-2xl"
+            placeholder="Pesquisar produtos..."
           />
 
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-            
-            {/* Favoritos */}
+          {/* Actions - Mobile Optimizado */}
+          <div className="flex items-center gap-1 md:gap-3">
+            {/* Search Button - Mobile only */}
             <Button 
               variant="ghost" 
-              size="icon" 
-              className="relative hover:bg-accent/10 hover:scale-110 transition-all group"
-              onClick={() => scrollAndNavigate('/favoritos')}
-              title="Favoritos"
+              size="icon"
+              className="md:hidden hover:bg-accent/10"
+              onClick={() => scrollAndNavigate('/produtos')}
             >
-              <Heart className="h-5 w-5 group-hover:fill-red-500 group-hover:text-red-500 transition-all" />
+              <Search className="h-5 w-5" />
             </Button>
 
-            {/* Notificações */}
-            <NotificationBell />
+            <div className="hidden md:block"><ThemeToggle /></div>
+            
+            {/* Favoritos - Desktop only */}
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="hidden md:flex hover:bg-accent/10"
+              onClick={() => scrollAndNavigate('/favoritos')}
+            >
+              <Heart className="h-5 w-5" />
+            </Button>
+
+            {/* Notificações - Desktop only */}
+            <div className="hidden md:block">
+              <NotificationBell />
+            </div>
             
             {/* Carrinho */}
             <CartButton />
             
-            {/* Menu do Usuário */}
+            {/* User Menu */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hover:bg-accent/10 hover:scale-110 transition-all relative group">
+                  <Button variant="ghost" size="icon" className="hover:bg-accent/10">
                     <User className="h-5 w-5" />
-                    <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background animate-pulse" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 glass-effect">
-                  <div className="px-2 py-1.5 text-sm font-semibold">
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="px-2 py-1.5 text-sm font-semibold truncate">
                     {user.email}
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => scrollAndNavigate('/pedidos')} className="cursor-pointer">
-                    <ShoppingBag className="mr-2 h-4 w-4" />
-                    Meus Pedidos
+                  <DropdownMenuItem onClick={() => scrollAndNavigate('/pedidos')}>
+                    <ShoppingBag className="mr-2 h-4 w-4" /> Meus Pedidos
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => scrollAndNavigate('/favoritos')} className="cursor-pointer">
-                    <Heart className="mr-2 h-4 w-4" />
-                    Favoritos
+                  <DropdownMenuItem onClick={() => scrollAndNavigate('/favoritos')}>
+                    <Heart className="mr-2 h-4 w-4" /> Favoritos
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem onClick={() => scrollAndNavigate('/admin')} className="cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Painel Admin
+                    <DropdownMenuItem onClick={() => scrollAndNavigate('/admin')}>
+                      <Settings className="mr-2 h-4 w-4" /> Painel Admin
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sair
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                    <LogOut className="mr-2 h-4 w-4" /> Sair
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button 
                 variant="ghost" 
-                size="icon" 
-                className="hover:bg-accent/10 hover:scale-110 transition-all"
+                size="sm"
+                className="hidden md:flex text-xs px-3"
                 onClick={() => scrollAndNavigate('/auth')}
-                title="Entrar"
               >
-                <User className="h-5 w-5" />
+                Entrar
               </Button>
             )}
             
-            {/* Menu Mobile */}
+            {/* Menu Mobile - Desktop: esconde, Mobile: mostra */}
             <Button 
               variant="ghost" 
-              size="icon" 
-              className="md:hidden hover:bg-[#FF3131]/10 hover:text-[#FF3131] transition-all"
+              size="icon"
+              className="md:hidden hover:bg-[#FF3131]/10"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="h-5 w-5" />
@@ -236,28 +210,20 @@ const Header = () => {
       {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-[60] md:hidden">
-          {/* Backdrop */}
           <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
           
-          {/* Menu Panel */}
-          <div className="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-background shadow-2xl animate-in slide-in-from-right duration-300">
-            {/* Header */}
+          <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[320px] bg-background shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <Logo showText={true} />
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => setMobileMenuOpen(false)}
-              >
+              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
             
-            {/* Navigation */}
-            <nav className="p-4 space-y-1">
+            <nav className="p-4 space-y-1 overflow-y-auto max-h-[calc(100vh-180px)]">
               {mobileNavItems.map((item) => (
                 <button
                   key={item.path}
@@ -273,34 +239,20 @@ const Header = () => {
               ))}
             </nav>
 
-            {/* Quick Actions */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background">
-              <div className="space-y-2">
-                {user ? (
-                  <Button 
-                    variant="destructive" 
-                    className="w-full"
-                    onClick={() => {
-                      handleLogout();
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
-                  </Button>
-                ) : (
-                  <Button 
-                    className="w-full bg-gradient-to-r from-[#FF3131] to-[#FF5555]"
-                    onClick={() => {
-                      scrollAndNavigate('/auth');
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Entrar / Criar Conta
-                  </Button>
-                )}
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-background space-y-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4" />
+                <a href="tel:+258864738133">+258 864738133</a>
               </div>
+              {user ? (
+                <Button variant="destructive" className="w-full" onClick={() => { handleLogout(); setMobileMenuOpen(false); }}>
+                  <LogOut className="h-4 w-4 mr-2" /> Sair
+                </Button>
+              ) : (
+                <Button className="w-full bg-gradient-to-r from-[#FF3131] to-[#FF5555]" onClick={() => { scrollAndNavigate('/auth'); setMobileMenuOpen(false); }}>
+                  <User className="h-4 w-4 mr-2" /> Entrar / Criar Conta
+                </Button>
+              )}
             </div>
           </div>
         </div>

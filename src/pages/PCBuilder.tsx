@@ -23,7 +23,7 @@ interface PCComponent {
 const PCBuilder = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
   
   const [selectedComponents, setSelectedComponents] = useState<Record<string, PCComponent | null>>({
     processor: null,
@@ -210,7 +210,7 @@ const PCBuilder = () => {
                           <CardTitle className="text-lg">{categoryLabels[category]}</CardTitle>
                           {selected && (
                             <CardDescription className="text-[#FF3131] font-semibold">
-                              {selected.price.toLocaleString(locale)} {currency}
+                              {convertPrice(selected.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                             </CardDescription>
                           )}
                         </div>
@@ -238,7 +238,7 @@ const PCBuilder = () => {
                             <div className="flex items-center justify-between w-full">
                               <span>{item.name}</span>
                               <span className="ml-4 text-muted-foreground">
-                                {item.price === 0 ? 'Grátis' : `${item.price.toLocaleString(locale)} ${currency}`}
+                                {item.price === 0 ? 'Grátis' : `${convertPrice(item.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`}
                               </span>
                             </div>
                           </SelectItem>
@@ -269,7 +269,7 @@ const PCBuilder = () => {
                       <span className="font-medium text-right flex-1 ml-4 text-end">
                         {component.name}
                         <span className="text-[#FF3131] ml-2">
-                          {component.price === 0 ? 'Grátis' : `${component.price.toLocaleString(locale)}`}
+                          {component.price === 0 ? 'Grátis' : `${convertPrice(component.price).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                         </span>
                       </span>
                     ) : (
@@ -281,7 +281,7 @@ const PCBuilder = () => {
                 <div className="border-t pt-4">
                   <div className="flex justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="text-[#FF3131]">{total.toLocaleString(locale)} {currency}</span>
+                    <span className="text-[#FF3131]">{convertPrice(total).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}</span>
                   </div>
                 </div>
 

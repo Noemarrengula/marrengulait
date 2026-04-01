@@ -73,7 +73,7 @@ export function RecentlyViewed({
   onClear 
 }: RecentlyViewedProps) {
   const [items, setItems] = useState<RecentlyViewedItem[]>([]);
-  const { locale, currency } = useSettings();
+  const { locale, currency, convertPrice } = useSettings();
   
   useEffect(() => {
     setItems(getRecentlyViewed());
@@ -97,6 +97,7 @@ export function RecentlyViewed({
   };
   
   const formatPrice = (price: number) => {
+    const convertedPrice = convertPrice(price);
     return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency,
