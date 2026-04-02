@@ -4,6 +4,7 @@ import { getStripe, STRIPE_APPEARANCE, IS_STRIPE_CONFIGURED } from '@/lib/stripe
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Lock } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StripeCardFormProps {
   amount: number;
@@ -29,6 +30,8 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
     setError(null);
 
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       const { data: clientSecret, error: intentError } = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-payment-intent`,
         {
@@ -36,7 +39,7 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
           headers: {
             'Content-Type': 'application/json',
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
-            'Authorization': `Bearer ${localStorage.getItem('supabase-auth-token')}`,
+            'Authorization': `Bearer ${session?.access_token || ''}`,
           },
           body: JSON.stringify({
             amount: Math.round(amount * 100),

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,12 +15,25 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user, signIn, signUp } = useAuth();
   const { toast } = useToast();
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [isLoading, setIsLoading] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loginPasswordError, setLoginPasswordError] = useState("");
   const [loginShake, setLoginShake] = useState(false);
+
+  const handleRecaptcha = async (action: string) => {
+    if (!executeRecaptcha) {
+      return null;
+    }
+    try {
+      const token = await executeRecaptcha(action);
+      return token;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -78,6 +92,7 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
+      await handleRecaptcha('login');
       const { error } = await signIn(loginEmail, loginPassword);
       
       if (!error) {
@@ -106,6 +121,7 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
+      await handleRecaptcha('magic_link');
       const { error } = await signIn(loginEmail);
       
       if (error) {
@@ -139,6 +155,7 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
+      await handleRecaptcha('signup');
       const { error } = await signUp(signupEmail, signupPassword, signupFullName);
       
       if (!error) {

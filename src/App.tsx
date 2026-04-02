@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { CartProvider } from "@/contexts/CartContext";
 import { Loader2 } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { CaptchaProvider } from "@/providers/CaptchaProvider";
 
 const Index = lazy(() => import("./pages/Index"));
 const Product = lazy(() => import("./pages/Product"));
@@ -51,43 +52,45 @@ const App = () => (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
       <TooltipProvider>
         <CartProvider>
-          <Toaster />
-          <Sonner />
-          <Suspense fallback={<LoadingFallback />}>
-            <ChatBot />
-          </Suspense>
-          <BrowserRouter>
+          <CaptchaProvider>
+            <Toaster />
+            <Sonner />
             <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/produto/:id" element={<Product />} />
-                <Route path="/produtos" element={<Products />} />
-                <Route path="/servicos" element={<Services />} />
-                <Route path="/carrinho" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/pedido/:id" element={<OrderConfirmation />} />
-                <Route path="/favoritos" element={<Favorites />} />
-                <Route path="/pedidos" element={<Orders />} />
-                <Route path="/sobre" element={<About />} />
-                <Route path="/afiliados" element={<Affiliate />} />
-                <Route path="/monte-seu-pc" element={<PCBuilder />} />
-                <Route path="/eletronicos" element={<Electronics />} />
-                <Route path="/celulares" element={<Smartphones />} />
-                <Route path="/comparar" element={<ProductCompare />} />
-                <Route path="/kit-cctv" element={<CCTVKitBuilder />} />
-                <Route path="/calculadora-cctv" element={<StorageCalculator />} />
-                <Route path="/guia-cctv" element={<CCTVTutorial />} />
-                <Route path="/rastrear" element={<Tracking />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/manutencao" element={<Maintenance />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <MobileBottomNav />
+              <ChatBot />
             </Suspense>
-          </BrowserRouter>
+            <BrowserRouter>
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/produto/:id" element={<Product />} />
+                  <Route path="/produtos" element={<Products />} />
+                  <Route path="/servicos" element={<Services />} />
+                  <Route path="/carrinho" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/pedido/:id" element={<OrderConfirmation />} />
+                  <Route path="/favoritos" element={<Favorites />} />
+                  <Route path="/pedidos" element={<Orders />} />
+                  <Route path="/sobre" element={<About />} />
+                  <Route path="/afiliados" element={<Affiliate />} />
+                  <Route path="/monte-seu-pc" element={<PCBuilder />} />
+                  <Route path="/eletronicos" element={<Electronics />} />
+                  <Route path="/celulares" element={<Smartphones />} />
+                  <Route path="/comparar" element={<ProductCompare />} />
+                  <Route path="/kit-cctv" element={<CCTVKitBuilder />} />
+                  <Route path="/calculadora-cctv" element={<StorageCalculator />} />
+                  <Route path="/guia-cctv" element={<CCTVTutorial />} />
+                  <Route path="/rastrear" element={<Tracking />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
+                  <Route path="/manutencao" element={<Maintenance />} />
+                  <Route path="/admin" element={<Admin />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <MobileBottomNav />
+              </Suspense>
+            </BrowserRouter>
+          </CaptchaProvider>
         </CartProvider>
       </TooltipProvider>
     </ThemeProvider>
