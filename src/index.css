@@ -274,3 +274,103 @@
     50% { transform: scale(1.05); }
   }
 }
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  /* Use transform instead of layout properties for animations */
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.15);
+  }
+  
+  .card-modern:hover {
+    transform: translateY(-2px);
+  }
+  
+  /* Disable heavy effects on mobile */
+  .glass,
+  .glass-dark {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  /* Faster transitions on mobile */
+  .card-modern {
+    transition: all 0.2s ease;
+  }
+}
+
+/* GPU acceleration for animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Smooth scrolling with momentum on iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  .overflow-auto,
+  .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Optimize paint areas */
+.optimize-paint {
+    contain: layout style paint;
+}
+
+/* Reduce repaints */
+.no-repaint {
+    transform: translateZ(0);
+    isolation: isolate;
+}
+
+/* Fast tap highlight removal for mobile */
+@media (hover: none) {
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Font display optimization */
+@font-face {
+  font-display: swap;
+}
+
+/* Optimize image rendering */
+img {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Contain layout for complex components */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-strict {
+  contain: strict;
+}
+
+/* Content visibility for below-fold content */
+.content-visible {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
