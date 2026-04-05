@@ -20,14 +20,23 @@ interface ProductFiltersProps {
   activeFiltersCount: number;
 }
 
-const ProductFilters = ({ onFilterChange, activeFiltersCount }: ProductFiltersProps) => {
+  const ProductFilters = ({ onFilterChange, activeFiltersCount }: ProductFiltersProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
 
-  const categories = ["Laptops", "Hardware", "Acessórios", "Monitores", "Redes", "Smartphones"];
-  const brands = ["HP", "Dell", "Lenovo", "Apple", "Samsung", "ASUS"];
+  const categories = [
+    "Laptops", "Desktops", "Workstations", "All-in-One", "Mini PCs",
+    "GPUs", "CPUs", "RAM", "Armazenamento", "Motherboards", "Fontes", "Caixas",
+    "Routers", "Switches", "Access Points", "Cabos", "Adaptadores",
+    "Câmaras", "Gravadores", "Kits CCTV", "Discos CCTV",
+    "Smartphones", "Tablets", "Acessórios Mobile",
+    "Monitores", "Teclados", "Ratos", "Headsets", "Webcams", "Impressoras",
+    "Componentes", "Arduino", "Raspberry Pi", "IoT",
+    "Software", "Licenças", "UPS", "Cabos", "Outros"
+  ];
+  const brands = ["HP", "Dell", "Lenovo", "Apple", "Samsung", "ASUS", "Acer", "MSI", "Logitech", "Microsoft", "Intel", "AMD", "NVIDIA", "Seagate", "Western Digital", "Kingston", "Corsair"];
   const ratings = [5, 4, 3, 2, 1];
 
   const handleCategoryToggle = (category: string) => {

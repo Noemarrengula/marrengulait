@@ -5,8 +5,12 @@ import { toast } from 'sonner';
 export const useProducts = (filters?: ProductFilters) => {
   const queryClient = useQueryClient();
   
+  const queryKey = filters 
+    ? ['products', JSON.stringify(filters)]
+    : ['products'];
+  
   return useQuery({
-    queryKey: ['products', filters],
+    queryKey,
     queryFn: () => productService.getAllProducts(filters),
     staleTime: 0,
     gcTime: 1000 * 60 * 1,

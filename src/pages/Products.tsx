@@ -57,6 +57,7 @@ const Products = () => {
   const handleFilterChange = (newFilters: any) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
     setCurrentPage(1);
+    queryClient.invalidateQueries({ queryKey: ['products'] });
   };
 
   const handlePageChange = (page: number) => {
