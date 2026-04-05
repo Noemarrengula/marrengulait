@@ -27,17 +27,17 @@ export const productService = {
   async getAllProducts(filters?: ProductFilters) {
     let query = supabase.from('products').select('*');
 
-    if (filters?.categories?.length) {
+    if (filters?.categories && filters.categories.length > 0) {
       query = query.in('category', filters.categories);
     }
-    if (filters?.brands?.length) {
+    if (filters?.brands && filters.brands.length > 0) {
       query = query.in('brand', filters.brands);
     }
     if (filters?.priceRange) {
       query = query.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
     }
     if (filters?.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
     }
     if (filters?.featured !== undefined) {
       query = query.eq('featured', filters.featured);
@@ -50,7 +50,7 @@ export const productService = {
 
     const { data, error } = await query;
     if (error) throw error;
-    return data;
+    return data || [];
   },
 
   async getProductById(id: string) {
