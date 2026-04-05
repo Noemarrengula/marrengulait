@@ -79,35 +79,45 @@ ALTER TABLE coupons ENABLE ROW LEVEL SECURITY;
 -- ============================================
 -- PASSO 4: POLÍTICAS PARA PRODUCTS
 -- ============================================
+DROP POLICY IF EXISTS "Public read all products" ON products;
 CREATE POLICY "Public read all products" ON products FOR SELECT USING (true);
 
 -- ============================================
 -- PASSO 5: POLÍTICAS PARA PROFILES
 -- ============================================
+DROP POLICY IF EXISTS "Public read profiles" ON profiles;
 CREATE POLICY "Public read profiles" ON profiles FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow all access to profiles" ON profiles;
 CREATE POLICY "Allow all access to profiles" ON profiles FOR ALL USING (true);
 
 -- ============================================
 -- PASSO 6: POLÍTICAS PARA CATEGORIES
 -- ============================================
+DROP POLICY IF EXISTS "Public read categories" ON categories;
 CREATE POLICY "Public read categories" ON categories FOR SELECT USING (true);
 
 -- ============================================
 -- PASSO 7: POLÍTICAS PARA WISHLIST
 -- ============================================
+DROP POLICY IF EXISTS "Public read wishlist" ON wishlist;
 CREATE POLICY "Public read wishlist" ON wishlist FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Allow all access wishlist" ON wishlist;
 CREATE POLICY "Allow all access wishlist" ON wishlist FOR ALL USING (true);
 
 -- ============================================
 -- PASSO 8: POLÍTICAS PARA ORDERS
 -- ============================================
+DROP POLICY IF EXISTS "Users read own orders" ON orders;
 CREATE POLICY "Users read own orders" ON orders FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create orders" ON orders;
 CREATE POLICY "Users create orders" ON orders FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own orders" ON orders;
 CREATE POLICY "Users update own orders" ON orders FOR UPDATE USING (auth.uid() = user_id);
 
 -- ============================================
 -- PASSO 9: POLÍTICAS PARA ORDER_ITEMS
 -- ============================================
+DROP POLICY IF EXISTS "Users read own order items" ON order_items;
 CREATE POLICY "Users read own order items" ON order_items FOR SELECT USING (
   EXISTS (
     SELECT 1 FROM orders 
@@ -119,26 +129,34 @@ CREATE POLICY "Users read own order items" ON order_items FOR SELECT USING (
 -- ============================================
 -- PASSO 10: POLÍTICAS PARA REVIEWS
 -- ============================================
+DROP POLICY IF EXISTS "Public read reviews" ON reviews;
 CREATE POLICY "Public read reviews" ON reviews FOR SELECT USING (true);
+DROP POLICY IF EXISTS "Users create reviews" ON reviews;
 CREATE POLICY "Users create reviews" ON reviews FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own reviews" ON reviews;
 CREATE POLICY "Users update own reviews" ON reviews FOR UPDATE USING (auth.uid() = user_id);
 
 -- ============================================
 -- PASSO 11: POLÍTICAS PARA FAVORITES
 -- ============================================
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users read own favorites" ON favorites;
 CREATE POLICY "Users read own favorites" ON favorites FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users add favorites" ON favorites;
 CREATE POLICY "Users add favorites" ON favorites FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users remove own favorites" ON favorites;
 CREATE POLICY "Users remove own favorites" ON favorites FOR DELETE USING (auth.uid() = user_id);
 
 -- ============================================
 -- PASSO 12: POLÍTICAS PARA VENDORS
 -- ============================================
+DROP POLICY IF EXISTS "Public read vendors" ON vendors;
 CREATE POLICY "Public read vendors" ON vendors FOR SELECT USING (true);
 
 -- ============================================
 -- PASSO 13: POLÍTICAS PARA COUPONS
 -- ============================================
+DROP POLICY IF EXISTS "Public read coupons" ON coupons;
 CREATE POLICY "Public read coupons" ON coupons FOR SELECT USING (true);
 
 -- ============================================
