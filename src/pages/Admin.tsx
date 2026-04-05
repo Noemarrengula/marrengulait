@@ -162,18 +162,13 @@ const AdminPanel = () => {
   });
 
   useEffect(() => {
-    console.log('🔐 Admin check:', { loading, isAdmin, userEmail: user?.email });
-    
-    // Aguardar que loading termine
     if (loading) return;
     
-    // Se ainda não há usuário, ir para auth
     if (!user) {
       navigate('/auth');
       return;
     }
     
-    // Verificar se tem role de admin
     const hasAdminRole = roles?.includes('admin');
     
     if (!hasAdminRole) {
@@ -181,9 +176,7 @@ const AdminPanel = () => {
       return;
     }
     
-    // Só carregar dados se ainda não foram carregados
     if (!dataLoaded) {
-      console.log('✅ É admin, a carregar dados');
       loadAllData();
     }
   }, [loading, isAdmin, roles, user, navigate, dataLoaded]);
@@ -191,18 +184,12 @@ const AdminPanel = () => {
   const loadAllData = async () => {
     setLoadingData(true);
     try {
-      // Carregar produtos
       const { data: productsData, error: pError } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (pError) throw pError;
-      
-      console.log('📦 Produtos carregados do Supabase:', productsData?.length);
-      if (productsData && productsData.length > 0) {
-        console.log('📷 Primeiro produto images:', productsData[0].images);
-      }
       
       setProducts(productsData || []);
       setProductFilter("");
@@ -307,8 +294,11 @@ const AdminPanel = () => {
         is_active: true,
       });
       
-      await loadAllData();
       await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['product'] });
+      await loadAllData();
+      
+      setTimeout(() => window.location.href = '/', 1500);
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });
     }
@@ -328,9 +318,6 @@ const AdminPanel = () => {
     }
 
     const newImages = editingProduct.images?.length ? editingProduct.images : (editingProduct.image_url ? [editingProduct.image_url] : []);
-    
-    console.log('🔄 Atualizando produto:', editingProduct.id);
-    console.log('📷 Nova imagem:', newImages);
 
     try {
       const { error, status } = await supabase
@@ -354,28 +341,23 @@ const AdminPanel = () => {
         })
         .eq('id', editingProduct.id);
 
-      console.log('📊 Resultado da atualização:', { error, status });
-
       if (error) {
-        console.error('❌ Erro ao atualizar:', error);
         toast({ title: '❌ Erro', description: error.message, variant: 'destructive' });
         return;
       }
       
       toast({ 
-        title: '✅ Produto atualizado com sucesso!', 
-        description: 'As alterações foram guardadas no Supabase' 
+        title: '✅ Produto atualizado!', 
+        description: 'A aparecer no site em segundos...' 
       });
       setEditingProduct(null);
       
+      await queryClient.invalidateQueries({ queryKey: ['products'] });
+      await queryClient.invalidateQueries({ queryKey: ['product'] });
       await loadAllData();
       
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
-      await queryClient.invalidateQueries({ queryKey: ['product', editingProduct.id] });
-      
-      console.log('✅ Cache invalidado, dados recarregados');
+      setTimeout(() => window.location.href = '/', 1500);
     } catch (error: any) {
-      console.error('❌ Erro completo:', error);
       toast({ title: '❌ Erro ao atualizar', description: error.message, variant: 'destructive' });
     }
   };

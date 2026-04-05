@@ -35,6 +35,7 @@ const Index = () => {
   useEffect(() => {
     if (location.pathname === '/') {
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product'] });
       refetchFeatured();
       refetchLatest();
     }

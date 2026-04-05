@@ -3,13 +3,16 @@ import { productService, ProductFilters, ProductFormData } from '@/services/prod
 import { toast } from 'sonner';
 
 export const useProducts = (filters?: ProductFilters) => {
+  const queryClient = useQueryClient();
+  
   return useQuery({
     queryKey: ['products', filters],
     queryFn: () => productService.getAllProducts(filters),
     staleTime: 0,
-    gcTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 1,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    refetchInterval: 30000,
   });
 };
 
