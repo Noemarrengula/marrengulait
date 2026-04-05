@@ -1,4 +1,4 @@
-import { ChevronDown, Laptop, HardDrive, Keyboard, Wifi, ShoppingBag, Wrench, Store, Zap, Cpu, Smartphone, Camera } from "lucide-react";
+import { ChevronDown, Laptop, HardDrive, Keyboard, Wifi, ShoppingBag, Wrench, Store, Zap, Cpu, Smartphone, Camera, Radio, Brain } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
   NavigationMenu,
@@ -42,6 +42,12 @@ const MegaMenu = () => {
       icon: Camera,
       link: "/kit-cctv",
       items: ["Câmaras", "Kits", "Gravadores", "Acessórios"]
+    },
+    {
+      title: "Walkie Talkie",
+      icon: Radio,
+      link: "/produtos?search=radio",
+      items: ["PMR446", "UHF", "VHF", "Táticos", "Acessórios", "Configuração"]
     },
   ];
 
@@ -156,6 +162,20 @@ const MegaMenu = () => {
               <NavigationMenuLink onClick={() => navigate('/celulares')} className="px-4 py-2 bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-blue-500/20">
                 <Smartphone className="h-4 w-4 text-blue-500" />
                 <span className="font-semibold text-blue-500">Smartphones</span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink onClick={() => navigate('/produtos?search=radio')} className="px-4 py-2 bg-gradient-to-r from-orange-500/10 to-amber-500/10 hover:from-orange-500/20 hover:to-amber-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-orange-500/20">
+                <Radio className="h-4 w-4 text-orange-500" />
+                <span className="font-semibold text-orange-500">Walkie Talkie</span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink onClick={() => navigate('/produtos?search=n8n')} className="px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 hover:from-purple-500/20 hover:to-indigo-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-purple-500/20">
+                <Brain className="h-4 w-4 text-purple-500" />
+                <span className="font-semibold text-purple-500">IA & Automação</span>
               </NavigationMenuLink>
             </NavigationMenuItem>
 

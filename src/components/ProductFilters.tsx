@@ -34,6 +34,8 @@ interface ProductFiltersProps {
     "Smartphones", "Tablets", "Acessórios Mobile",
     "Monitores", "Teclados", "Ratos", "Headsets", "Webcams", "Impressoras",
     "Componentes", "Arduino", "Raspberry Pi", "IoT",
+    "Rádios PMR", "Rádios UHF", "Rádios VHF", "Rádios Táticos", "Acessórios Rádio", "Configuração Rádio",
+    "N8N", "Chatbot IA", "Automação N8N", "Integração IA", "RPA",
     "Software", "Licenças", "UPS", "Cabos", "Outros"
   ];
   const brands = ["HP", "Dell", "Lenovo", "Apple", "Samsung", "ASUS", "Acer", "MSI", "Logitech", "Microsoft", "Intel", "AMD", "NVIDIA", "Seagate", "Western Digital", "Kingston", "Corsair"];

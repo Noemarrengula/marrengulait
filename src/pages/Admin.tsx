@@ -675,6 +675,24 @@ const AdminPanel = () => {
                           <option value="Manutenção">Manutenção de Computadores</option>
                           <option value="Backup">Soluções de Backup</option>
                         </optgroup>
+                        <optgroup label="Walkie Talkie / Rádios">
+                          <option value="Rádios PMR">Rádios PMR446</option>
+                          <option value="Rádios UHF">Rádios UHF</option>
+                          <option value="Rádios VHF">Rádios VHF</option>
+                          <option value="Rádios Táticos">Rádios Táticos/Militares</option>
+                          <option value="Rádios Marítimos">Rádios Marítimos (VHF)</option>
+                          <option value="Acessórios Rádio">Acessórios (Antenas, Baterias, Microfones)</option>
+                          <option value="Configuração Rádio">Serviço de Configuração de Rádios</option>
+                          <option value="Programação Rádio">Programação e Repetidores</option>
+                        </optgroup>
+                        <optgroup label="Inteligência Artificial / Automação">
+                          <option value="N8N">N8N - Automação de Workflows</option>
+                          <option value="Chatbot IA">Chatbots e Assistentes Virtuais</option>
+                          <option value="Automação N8N">Configuração N8N</option>
+                          <option value="Integração IA">Integração com APIs de IA</option>
+                          <option value="RPA">Automação de Processos (RPA)</option>
+                          <option value="Gestão IA">Gestão e Monitorização de IA</option>
+                        </optgroup>
                         <optgroup label="Outros">
                           <option value="Software">Software</option>
                           <option value="Licenças">Licenças</option>
