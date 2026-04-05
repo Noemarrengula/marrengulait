@@ -41,11 +41,12 @@ const Products = () => {
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['products'] });
     refetch();
-  }, [location.pathname]);
+  }, [location.pathname, searchQuery, promoQuery]);
 
   useEffect(() => {
-    setFilters(prev => ({ ...prev, search: searchQuery }));
-  }, [searchQuery]);
+    setFilters(prev => ({ ...prev, search: searchQuery, onSale: promoQuery === 'true' ? true : undefined }));
+    setCurrentPage(1);
+  }, [searchQuery, promoQuery]);
 
   const activeFiltersCount = 
     (filters.categories?.length || 0) + 

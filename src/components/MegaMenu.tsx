@@ -16,26 +16,31 @@ const MegaMenu = () => {
     {
       title: "Computadores",
       icon: Laptop,
+      link: "/produtos?search=computador",
       items: ["Laptops", "Desktops", "Workstations", "All-in-One", "Mini PCs"]
     },
     {
       title: "Hardware",
       icon: HardDrive,
+      link: "/produtos?search=hardware",
       items: ["GPUs", "CPUs", "SSDs", "HDDs", "Motherboards", "RAM", "Fontes"]
     },
     {
       title: "Acessórios",
       icon: Keyboard,
+      link: "/produtos?search=acessorios",
       items: ["Teclados", "Ratos", "Headsets", "Monitores", "Webcams", "Hubs USB"]
     },
     {
       title: "Redes",
       icon: Wifi,
+      link: "/produtos?search=rede",
       items: ["Routers", "Switches", "Cabos", "Segurança", "Access Points"]
     },
     {
       title: "CCTV",
       icon: Camera,
+      link: "/kit-cctv",
       items: ["Câmaras", "Kits", "Gravadores", "Acessórios"]
     },
   ];
@@ -61,45 +66,53 @@ const MegaMenu = () => {
               
               return (
                 <NavigationMenuItem key={menu.title}>
-                  <NavigationMenuTrigger className="bg-transparent hover:bg-secondary">
-                    <menu.icon className="h-4 w-4 mr-2" />
-                    {menu.title}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-[400px] p-4">
-                      <div className="grid grid-cols-2 gap-2">
-                        {Array.isArray(menu.items) && menu.items.map((item) => {
-                          // Links específicos para CCTV
-                          if (menu.title === "CCTV") {
-                            const cctvLinks: Record<string, string> = {
-                              "Câmaras": "/produtos?search=camera",
-                              "Kits": "/kit-cctv",
-                              "Gravadores": "/produtos?search=nvr",
-                              "Acessórios": "/produtos?search=cctv"
-                            };
-                            return (
-                              <NavigationMenuLink
-                                key={item}
-                                onClick={() => navigate(cctvLinks[item] || `/produtos?search=${item.toLowerCase()}`)}
-                                className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
-                              >
-                                <span className="text-sm font-medium">{item}</span>
-                              </NavigationMenuLink>
-                            );
-                          }
-                          return (
-                            <NavigationMenuLink
-                              key={item}
-                              onClick={() => navigate(`/produtos?search=${item.toLowerCase()}`)}
-                              className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
-                            >
-                              <span className="text-sm font-medium">{item}</span>
-                            </NavigationMenuLink>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
+                  {menu.link ? (
+                    <NavigationMenuLink onClick={() => navigate(menu.link!)} className="px-4 py-2 hover:bg-secondary rounded-md transition-colors flex items-center gap-2 cursor-pointer">
+                      <menu.icon className="h-4 w-4" />
+                      {menu.title}
+                    </NavigationMenuLink>
+                  ) : (
+                    <>
+                      <NavigationMenuTrigger className="bg-transparent hover:bg-secondary">
+                        <menu.icon className="h-4 w-4 mr-2" />
+                        {menu.title}
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent>
+                        <div className="w-[400px] p-4">
+                          <div className="grid grid-cols-2 gap-2">
+                            {Array.isArray(menu.items) && menu.items.map((item) => {
+                              if (menu.title === "CCTV") {
+                                const cctvLinks: Record<string, string> = {
+                                  "Câmaras": "/produtos?search=camera",
+                                  "Kits": "/kit-cctv",
+                                  "Gravadores": "/produtos?search=nvr",
+                                  "Acessórios": "/produtos?search=cctv"
+                                };
+                                return (
+                                  <NavigationMenuLink
+                                    key={item}
+                                    onClick={() => navigate(cctvLinks[item] || `/produtos?search=${item.toLowerCase()}`)}
+                                    className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
+                                  >
+                                    <span className="text-sm font-medium">{item}</span>
+                                  </NavigationMenuLink>
+                                );
+                              }
+                              return (
+                                <NavigationMenuLink
+                                  key={item}
+                                  onClick={() => navigate(`/produtos?search=${item.toLowerCase()}`)}
+                                  className="block p-3 rounded-md hover:bg-secondary transition-colors cursor-pointer"
+                                >
+                                  <span className="text-sm font-medium">{item}</span>
+                                </NavigationMenuLink>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </NavigationMenuContent>
+                    </>
+                  )}
                 </NavigationMenuItem>
               );
             })}

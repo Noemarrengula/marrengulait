@@ -37,7 +37,10 @@ export const productService = {
       query = query.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
     }
     if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      const searchLower = filters.search.toLowerCase();
+      query = query.or(
+        `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,category.ilike.%${searchLower}%,brand.ilike.%${searchLower}%,tags.cs.{"${searchLower}"}`
+      );
     }
     if (filters?.featured !== undefined) {
       query = query.eq('featured', filters.featured);
