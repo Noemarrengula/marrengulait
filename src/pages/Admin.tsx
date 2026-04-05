@@ -151,7 +151,7 @@ const AdminPanel = () => {
     price: 0,
     old_price: 0,
     stock: 0,
-    category: "Hardware",
+    category: "",
     brand: "",
     store_name: "MarrengulaIT",
     image_url: "",
@@ -252,7 +252,12 @@ const AdminPanel = () => {
 
   const addProduct = async () => {
     if (!newProduct.title || newProduct.price <= 0) {
-      toast({ title: 'Preencha os campos obrigatórios', variant: 'destructive' });
+      toast({ title: 'Preencha o nome e preço do produto', variant: 'destructive' });
+      return;
+    }
+    
+    if (!newProduct.category) {
+      toast({ title: 'Selecione uma categoria', variant: 'destructive' });
       return;
     }
 
@@ -284,7 +289,7 @@ const AdminPanel = () => {
         price: 0, 
         old_price: 0,
         stock: 0, 
-        category: 'Hardware', 
+        category: '', 
         brand: '',
         store_name: 'MarrengulaIT',
         image_url: '',
@@ -606,14 +611,78 @@ const AdminPanel = () => {
                     </div>
                     <div>
                       <Label>Categoria</Label>
-                      <Input
+                      <select
                         value={editingProduct ? editingProduct.category : newProduct.category}
                         onChange={(e) => editingProduct 
                           ? setEditingProduct({ ...editingProduct, category: e.target.value })
                           : setNewProduct({ ...newProduct, category: e.target.value })
                         }
-                        placeholder="Hardware"
-                      />
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        <option value="">Selecionar categoria...</option>
+                        <optgroup label="Computadores">
+                          <option value="Laptops">Laptops</option>
+                          <option value="Desktops">Desktops</option>
+                          <option value="Workstations">Workstations</option>
+                          <option value="All-in-One">All-in-One</option>
+                          <option value="Mini PCs">Mini PCs</option>
+                        </optgroup>
+                        <optgroup label="Hardware">
+                          <option value="GPUs">GPUs / Placas Gráficas</option>
+                          <option value="CPUs">CPUs / Processadores</option>
+                          <option value="RAM">RAM / Memórias</option>
+                          <option value="Armazenamento">SSDs / HDDs</option>
+                          <option value="Motherboards">Motherboards</option>
+                          <option value="Fontes">Fontes de Alimentação</option>
+                          <option value="Caixas">Caixas / Chassis</option>
+                        </optgroup>
+                        <optgroup label="Redes">
+                          <option value="Routers">Routers</option>
+                          <option value="Switches">Switches</option>
+                          <option value="Access Points">Access Points</option>
+                          <option value="Cabos">Cabos de Rede</option>
+                          <option value="Adaptadores">Adaptadores WiFi</option>
+                        </optgroup>
+                        <optgroup label="CCTV">
+                          <option value="Câmaras">Câmaras de Segurança</option>
+                          <option value="Gravadores">Gravadores NVR/DVR</option>
+                          <option value="Kits CCTV">Kits CCTV</option>
+                          <option value="Discos CCTV">Discos para CCTV</option>
+                          <option value="Cabos CCTV">Cabos e Conectores</option>
+                        </optgroup>
+                        <optgroup label="Smartphones">
+                          <option value="Smartphones">Smartphones</option>
+                          <option value="Tablets">Tablets</option>
+                          <option value="Acessórios Mobile">Acessórios Mobile</option>
+                        </optgroup>
+                        <optgroup label="Periféricos">
+                          <option value="Monitores">Monitores</option>
+                          <option value="Teclados">Teclados</option>
+                          <option value="Ratos">Ratos</option>
+                          <option value="Headsets">Headsets / Auscultadores</option>
+                          <option value="Webcams">Webcams</option>
+                          <option value="Impressoras">Impressoras</option>
+                        </optgroup>
+                        <optgroup label="Eletrónica">
+                          <option value="Componentes">Componentes Eletrónicos</option>
+                          <option value="Arduino">Arduino</option>
+                          <option value="Raspberry Pi">Raspberry Pi</option>
+                          <option value="IoT">IoT / Smart Home</option>
+                        </optgroup>
+                        <optgroup label="Serviços">
+                          <option value="Consultoria TI">Consultoria TI</option>
+                          <option value="Instalação de Rede">Instalação de Rede</option>
+                          <option value="Manutenção">Manutenção de Computadores</option>
+                          <option value="Backup">Soluções de Backup</option>
+                        </optgroup>
+                        <optgroup label="Outros">
+                          <option value="Software">Software</option>
+                          <option value="Licenças">Licenças</option>
+                          <option value="Cabos">Cabos e Adaptadores</option>
+                          <option value="UPS">UPS / Energia</option>
+                          <option value="Outros">Outros</option>
+                        </optgroup>
+                      </select>
                     </div>
                   </div>
 
