@@ -3,8 +3,8 @@ import { useLocation } from 'react-router-dom';
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
@@ -57,7 +57,7 @@ export const trackEvent = (action: string, category: string, label?: string, val
   }
 };
 
-export const trackPurchase = (transactionId: string, value: number, items: any[]) => {
+export const trackPurchase = (transactionId: string, value: number, items: Record<string, unknown>[]) => {
   if (typeof window.gtag !== 'undefined') {
     window.gtag('event', 'purchase', {
       transaction_id: transactionId,
@@ -68,11 +68,18 @@ export const trackPurchase = (transactionId: string, value: number, items: any[]
   }
 };
 
-export const trackAddToCart = (item: any) => {
+interface TrackItem {
+  id?: string;
+  name?: string;
+  price?: number;
+  quantity?: number;
+}
+
+export const trackAddToCart = (item: TrackItem) => {
   if (typeof window.gtag !== 'undefined') {
     window.gtag('event', 'add_to_cart', {
       currency: 'MZN',
-      value: item.price,
+      value: item.price || 0,
       items: [item],
     });
   }

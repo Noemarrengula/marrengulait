@@ -41,7 +41,9 @@ const OrderDetailsDialog = ({ order, open, onClose }: OrderDetailsDialogProps) =
           <div>
             <h3 className="font-semibold mb-2">Entrega</h3>
             <div className="text-sm">
-              {order.shipping_address}
+              {order.delivery_address}
+              {order.delivery_city && <span> - {order.delivery_city}</span>}
+              {order.delivery_province && <span>, {order.delivery_province}</span>}
             </div>
           </div>
 

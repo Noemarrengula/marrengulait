@@ -25,7 +25,7 @@ interface ProductFormDialogProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ProductFormData) => Promise<void>;
-  product?: any;
+  product?: Record<string, unknown>;
 }
 
 const categories = [

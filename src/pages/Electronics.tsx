@@ -98,9 +98,9 @@ const Electronics = () => {
                           </div>
                           <Button
                             className="bg-gradient-to-r from-primary to-accent glow-primary"
-                            onClick={() => navigate(product.link || `/produto/${product.id}`)}
+                            onClick={() => navigate(`/produto/${product.id}`)}
                           >
-                            {product.link ? "Ver Loja" : "Ver Detalhes"}
+                            Ver Detalhes
                           </Button>
                         </div>
                       </div>

@@ -5,6 +5,10 @@ import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import Footer from "@/components/Footer";
 import RelatedProducts from "@/components/RelatedProducts";
+import ProductReviews from "@/components/ProductReviews";
+import DynamicSEO from "@/components/DynamicSEO";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import StockBadge from "@/components/StockBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -31,7 +35,8 @@ import {
   Loader2,
   Package,
   Clock,
-  MapPin
+  MapPin,
+  Zap
 } from "lucide-react";
 
 const Product = () => {
@@ -98,6 +103,7 @@ const Product = () => {
       title: product.name,
       price: product.price,
       image: product.images?.[0] || "",
+      storeName: "Marrengula-IT",
     });
     toast.success("Produto adicionado ao carrinho!");
   };
@@ -134,13 +140,10 @@ const Product = () => {
       
       {/* Breadcrumb */}
       <div className="container mx-auto px-4 py-4">
-        <nav className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-[#FF3131]">Início</Link>
-          <ChevronLeft className="h-4 w-4 rotate-180" />
-          <Link to="/produtos" className="hover:text-[#FF3131]">Produtos</Link>
-          <ChevronLeft className="h-4 w-4 rotate-180" />
-          <span className="text-foreground truncate">{product.name}</span>
-        </nav>
+        <Breadcrumbs items={[
+          { label: "Produtos", href: "/produtos" },
+          { label: product.name }
+        ]} />
       </div>
 
       {/* Main Content */}
@@ -270,6 +273,8 @@ const Product = () => {
 
             {/* Quantity & Actions */}
             <div className="space-y-4">
+              <StockBadge stock={product.stock} />
+              
               {product.stock > 0 && (
                 <div className="flex items-center gap-4">
                   <span className="font-medium">Quantidade:</span>
@@ -298,12 +303,25 @@ const Product = () => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   size="lg"
+                  onClick={() => {
+                    handleAddToCart();
+                    navigate('/checkout');
+                  }}
+                  disabled={product.stock === 0}
+                  className="flex-1 bg-gradient-to-r from-[#FF3131] via-[#FF5555] to-[#FF7B7B] hover:opacity-90 shadow-lg"
+                >
+                  <Zap className="h-5 w-5 mr-2" />
+                  {product.stock > 0 ? 'Comprar Agora' : 'Esgotado'}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
                   onClick={handleAddToCart}
                   disabled={product.stock === 0}
-                  className="flex-1 bg-gradient-to-r from-[#FF3131] to-[#FF5555] hover:opacity-90"
+                  className="flex-1 border-2 border-[#FF3131] text-[#FF3131] hover:bg-[#FF3131] hover:text-white"
                 >
                   <ShoppingCart className="h-5 w-5 mr-2" />
-                  {product.stock > 0 ? 'Adicionar ao Carrinho' : 'Esgotado'}
+                  Adicionar
                 </Button>
                 <Button
                   size="lg"
@@ -311,8 +329,7 @@ const Product = () => {
                   onClick={handleToggleFavorite}
                   className={isFavorite ? 'bg-red-50 border-red-200 text-red-500' : ''}
                 >
-                  <Heart className={`h-5 w-5 mr-2 ${isFavorite ? 'fill-current' : ''}`} />
-                  {isFavorite ? 'Favorito' : 'Favoritar'}
+                  <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
                 </Button>
               </div>
 
@@ -413,11 +430,7 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="reviews" className="mt-6">
-              <div className="text-center py-12 text-muted-foreground">
-                <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Ainda não há avaliações para este produto.</p>
-                <p className="text-sm">Seja o primeiro a avaliar!</p>
-              </div>
+              <ProductReviews productId={product.id} />
             </TabsContent>
           </Tabs>
         </div>

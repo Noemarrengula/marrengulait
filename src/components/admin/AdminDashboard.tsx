@@ -9,7 +9,10 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Star,
+  Check,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +23,9 @@ import { StatsGrid } from '@/components/admin/StatsCard';
 import { SalesChart, OrdersChart } from '@/components/admin/Charts';
 import { useSettings } from '@/context/SettingsContext';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 const SIDEBAR_TABS = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -27,6 +33,7 @@ const SIDEBAR_TABS = [
   { id: 'products', label: 'Produtos', icon: Package },
   { id: 'users', label: 'Utilizadores', icon: Users },
   { id: 'analytics', label: 'Estatísticas', icon: BarChart3 },
+  { id: 'reviews', label: 'Reviews', icon: Star, badge: true },
   { id: 'alerts', label: 'Alertas', icon: Bell, badge: true },
   { id: 'settings', label: 'Configurações', icon: Settings },
 ];
@@ -35,11 +42,59 @@ export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [collapsed, setCollapsed] = useState(false);
   const { locale } = useSettings();
+  const queryClient = useQueryClient();
   
   const { data: stats, isLoading: statsLoading } = useAdminStats();
   const { data: salesData, isLoading: salesLoading } = useDailySales(30);
   const { data: recentOrders, isLoading: ordersLoading } = useRecentOrders(5);
   const { data: lowStock, isLoading: lowStockLoading } = useLowStockProducts();
+  
+  const { data: pendingReviews, isLoading: reviewsLoading } = useQuery({
+    queryKey: ['pendingReviews'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*, profiles(full_name, email), products(name)')
+        .eq('is_approved', false)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
+  
+  const approveReview = useMutation({
+    mutationFn: async (reviewId: string) => {
+      const { error } = await supabase
+        .from('reviews')
+        .update({ is_approved: true })
+        .eq('id', reviewId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Review aprovado!');
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+    },
+    onError: (error: any) => {
+      toast.error(`Erro: ${error.message}`);
+    }
+  });
+  
+  const rejectReview = useMutation({
+    mutationFn: async (reviewId: string) => {
+      const { error } = await supabase
+        .from('reviews')
+        .delete()
+        .eq('id', reviewId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success('Review rejeitado!');
+      queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
+    },
+    onError: (error: any) => {
+      toast.error(`Erro: ${error.message}`);
+    }
+  });
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat(locale, {
@@ -221,7 +276,7 @@ export function AdminDashboard() {
                     </div>
                   ) : lowStock && lowStock.length > 0 ? (
                     <div className="space-y-3">
-                      {lowStock.slice(0, 5).map((product: any) => (
+                      {lowStock.slice(0, 5).map((product: Record<string, unknown>) => (
                         <div 
                           key={product.id}
                           className="flex items-center justify-between p-3 rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 dark:border-red-900"
@@ -337,7 +392,7 @@ export function AdminDashboard() {
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y divide-border">
-                    {lowStock.map((product: any) => (
+                    {lowStock.map((product: Record<string, unknown>) => (
                       <div 
                         key={product.id}
                         className="flex items-center justify-between p-4"
@@ -369,6 +424,85 @@ export function AdminDashboard() {
                   <Bell className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p className="text-lg font-medium">Sem alertas</p>
                   <p>Tudo está funcionando bem!</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
+        
+        {activeTab === 'reviews' && (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold mb-1">Reviews Pendentes</h1>
+              <p className="text-muted-foreground">Aprovar ou rejeitar reviews de clientes</p>
+            </div>
+            
+            {reviewsLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map(i => (
+                  <Skeleton key={i} className="h-24 w-full" />
+                ))}
+              </div>
+            ) : pendingReviews && pendingReviews.length > 0 ? (
+              <div className="space-y-4">
+                {pendingReviews.map((review: any) => (
+                  <Card key={review.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-medium">{review.profiles?.full_name || 'Anónimo'}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(review.created_at).toLocaleDateString('pt-MZ')}
+                            </span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-1">
+                            Produto: {(review as any).products?.name || review.product_id}
+                          </p>
+                          <div className="flex items-center gap-1 mb-2">
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <Star
+                                key={star}
+                                className={`w-4 h-4 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                              />
+                            ))}
+                          </div>
+                          {review.title && (
+                            <p className="font-medium mb-1">{review.title}</p>
+                          )}
+                          <p className="text-sm text-muted-foreground">{review.comment}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={() => approveReview.mutate(review.id)}
+                            disabled={approveReview.isPending}
+                          >
+                            <Check className="w-4 h-4 mr-1" />
+                            Aprovar
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => rejectReview.mutate(review.id)}
+                            disabled={rejectReview.isPending}
+                          >
+                            <X className="w-4 h-4 mr-1" />
+                            Rejeitar
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Card>
+                <CardContent className="p-12 text-center text-muted-foreground">
+                  <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">Sem reviews pendentes</p>
+                  <p>Todos os reviews foram moderado!</p>
                 </CardContent>
               </Card>
             )}

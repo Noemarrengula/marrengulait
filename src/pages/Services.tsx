@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Code, Network, Smartphone, Shield, Palette, TrendingUp, CheckCircle2, ArrowRight, Wifi, Printer, FileText, Server, Video } from "lucide-react";
+import { Code, Network, Smartphone, Shield, Palette, TrendingUp, CheckCircle2, ArrowRight, Wifi, Printer, FileText, Server, Video, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 
@@ -123,6 +123,12 @@ const Services = () => {
       title: "Marketing Digital",
       description: "Estratégias para aumentar a presença online do seu negócio",
       features: ["SEO", "Redes Sociais", "Email Marketing", "Análise de Dados"]
+    },
+    {
+      icon: Bot,
+      title: "Automação & IA",
+      description: "Soluções inteligentes para automatizar processos e potenciar o seu negócio",
+      features: ["Chatbots Inteligentes", "Automação de Processos", "Machine Learning", "Integração com APIs"]
     }
   ];
 
@@ -145,10 +151,16 @@ const Services = () => {
             <p className="text-xl text-muted-foreground mb-8">
               Soluções completas de tecnologia para impulsionar o seu negócio
             </p>
-            <Button size="lg" className="bg-gradient-to-r from-primary to-primary-glow hover:scale-105 transition-all shadow-lg">
-              Solicitar Consulta Gratuita
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="bg-gradient-to-r from-primary to-primary-glow hover:scale-105 transition-all shadow-lg">
+                Solicitar Consulta Gratuita
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/10" onClick={() => window.location.href = '/automacao-ia'}>
+                <Bot className="mr-2 h-5 w-5" />
+                IA & Automação
+              </Button>
+            </div>
           </div>
         </div>
       </div>

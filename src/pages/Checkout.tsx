@@ -12,9 +12,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/context/SettingsContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Loader2, CreditCard, Smartphone, Banknote, Truck, CheckCircle2, ShieldCheck } from 'lucide-react';
+import PaymentProofUpload from '@/components/checkout/PaymentProofUpload';
+import { Loader2, CreditCard, Smartphone, Banknote, Truck, CheckCircle2, ShieldCheck, ArrowLeft } from 'lucide-react';
 
-type PaymentMethod = 'mpesa' | 'transfer' | 'cod';
+type PaymentMethod = 'mpesa' | 'emola' | 'transfer' | 'cod';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -29,6 +30,15 @@ const Checkout = () => {
   const [couponCode, setCouponCode] = useState('');
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponError, setCouponError] = useState('');
+  
+  // Payment proof state
+  interface CreatedOrder {
+    id: string;
+    order_number?: string;
+  }
+  const [createdOrder, setCreatedOrder] = useState<CreatedOrder | null>(null);
+  const [showPaymentProof, setShowPaymentProof] = useState(false);
+  const [orderTotal, setOrderTotal] = useState(0);
   
   const [formData, setFormData] = useState({
     fullName: user?.user_metadata?.full_name || '',
@@ -112,16 +122,13 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      // Calculate totals
       const subtotal = totalPrice;
       const shippingCost = subtotal >= 5000 ? 0 : 500;
       const discount = couponDiscount;
       const total = subtotal + shippingCost - discount;
 
-      // Generate order number
       const orderNumber = `MARR-${Date.now()}`;
 
-      // Create order
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -148,7 +155,6 @@ const Checkout = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
       const orderItems = items.map(item => ({
         order_id: order.id,
         product_id: item.id,
@@ -165,32 +171,30 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
-      // Update coupon usage if applied
       if (couponCode && couponDiscount > 0) {
         await supabase.rpc('increment_coupon_usage', { coupon_code: couponCode.toUpperCase() });
       }
 
-      // Clear cart
-      clearCart();
-
-      toast({ title: 'Pedido criado com sucesso!' });
-      
-      // Simulate M-Pesa payment
-      if (formData.paymentMethod === 'mpesa') {
-        toast({
-          title: 'Pagamento M-Pesa',
-          description: `Envie ${formatPrice(convertPrice(total))} ${currency} para o número 84XXXXXXX`,
-          duration: 10000,
-        });
+      // For M-Pesa and E-Mola, show payment proof upload
+      if (formData.paymentMethod === 'mpesa' || formData.paymentMethod === 'emola') {
+        setCreatedOrder(order);
+        setOrderTotal(total);
+        setShowPaymentProof(true);
+        setLoading(false);
+        return;
       }
 
+      // For other methods, complete order immediately
+      clearCart();
+      toast({ title: 'Pedido criado com sucesso!' });
       navigate(`/pedido/${order.id}`);
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao criar pedido:', error);
+      const message = error instanceof Error ? error.message : 'Tente novamente';
       toast({ 
         title: 'Erro ao criar pedido', 
-        description: error.message || 'Tente novamente',
+        description: message,
         variant: 'destructive' 
       });
     } finally {
@@ -198,10 +202,47 @@ const Checkout = () => {
     }
   };
 
+  const handlePaymentProofUploaded = async (proofUrl: string, proofData: { method: string; reference: string; message: string }) => {
+    if (!createdOrder) return;
+    
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          payment_proof_url: proofUrl || null,
+          payment_proof_data: proofData,
+          payment_reference: proofData.reference || null,
+        })
+        .eq('id', createdOrder.id);
+
+      if (error) throw error;
+
+      clearCart();
+      toast({ 
+        title: '✅ Pedido e comprovativo enviados!',
+        description: 'O seu pagamento será confirmado em breve. Tempo médio: 15-30 minutos.'
+      });
+      navigate(`/pedido/${createdOrder.id}`);
+      
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ 
+        title: 'Erro ao enviar comprovativo', 
+        description: message,
+        variant: 'destructive' 
+      });
+    } finally {
+      setLoading(false);
+      setShowPaymentProof(false);
+    }
+  };
+
   const finalTotal = totalPrice - couponDiscount;
   const shippingCost = finalTotal >= 5000 ? 0 : 500;
 
-  if (items.length === 0) {
+  if (items.length === 0 && !showPaymentProof) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -213,6 +254,48 @@ const Checkout = () => {
           <Button onClick={() => navigate('/produtos')} className="bg-[#FF3131]">
             Explorar Produtos
           </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (showPaymentProof && createdOrder) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setShowPaymentProof(false);
+              navigate('/checkout');
+            }}
+            className="mb-6"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar ao checkout
+          </Button>
+          
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold mb-2">Confirmação de Pagamento</h1>
+              <p className="text-muted-foreground">
+                Pedido #{createdOrder.order_number} criado. Agora envie o comprovativo.
+              </p>
+            </div>
+            
+            <PaymentProofUpload
+              paymentMethod={formData.paymentMethod as "mpesa" | "emola"}
+              amount={orderTotal}
+              orderId={createdOrder.id}
+              onProofUploaded={handlePaymentProofUploaded}
+              onCancel={() => {
+                setShowPaymentProof(false);
+                navigate('/checkout');
+              }}
+            />
+          </div>
         </div>
         <Footer />
       </div>
@@ -333,7 +416,18 @@ const Checkout = () => {
                         <Smartphone className="h-6 w-6 text-green-600" />
                         <div>
                           <p className="font-semibold">M-Pesa</p>
-                          <p className="text-sm text-muted-foreground">Pagamento via telemóvel (preferido)</p>
+                          <p className="text-sm text-muted-foreground">Pagamento rápido via telemóvel</p>
+                        </div>
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
+                      <RadioGroupItem value="emola" id="emola" />
+                      <Label htmlFor="emola" className="flex items-center gap-3 cursor-pointer flex-1">
+                        <Smartphone className="h-6 w-6 text-orange-600" />
+                        <div>
+                          <p className="font-semibold">E-Mola</p>
+                          <p className="text-sm text-muted-foreground">Pagamento via telemóvel Vodacom</p>
                         </div>
                       </Label>
                     </div>
@@ -352,7 +446,7 @@ const Checkout = () => {
                     <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                       <RadioGroupItem value="cod" id="cod" />
                       <Label htmlFor="cod" className="flex items-center gap-3 cursor-pointer flex-1">
-                        <Banknote className="h-6 w-6 text-orange-600" />
+                        <Banknote className="h-6 w-6 text-purple-600" />
                         <div>
                           <p className="font-semibold">Pagamento na Entrega</p>
                           <p className="text-sm text-muted-foreground">Pague quando receber o produto</p>

@@ -100,8 +100,7 @@ const Footer = () => {
             <ul className="space-y-2">
               <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Sobre Nós</button></li>
               <li><a href="mailto:marrengulait@gmail.com" className="text-muted-foreground hover:text-[#FF3131] transition-colors">Contacto</a></li>
-              <li><a href="https://web.facebook.com/MarrengulaHomeTech/" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-[#FF3131] transition-colors">Blog</a></li>
-              <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Carreiras</button></li>
+              <li><button onClick={() => navigate('/download-app')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Baixar App</button></li>
               <li><button onClick={() => navigate('/afiliados')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Parcerias</button></li>
             </ul>
           </div>
@@ -110,11 +109,11 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold text-foreground mb-4">Atendimento</h4>
             <ul className="space-y-2">
-              <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Central de Ajuda</button></li>
+              <li><button onClick={() => navigate('/faq')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Central de Ajuda</button></li>
               <li><button onClick={() => navigate('/rastrear')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Rastrear Encomenda</button></li>
-              <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Devoluções</button></li>
-              <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Garantias</button></li>
-              <li><button onClick={() => navigate('/sobre')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">FAQ</button></li>
+              <li><button onClick={() => navigate('/faq')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Devoluções</button></li>
+              <li><button onClick={() => navigate('/faq')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">Garantias</button></li>
+              <li><button onClick={() => navigate('/faq')} className="text-muted-foreground hover:text-[#FF3131] transition-colors">FAQ</button></li>
             </ul>
           </div>
 
@@ -142,6 +141,13 @@ const Footer = () => {
                 <ShieldCheck className="h-4 w-4 text-green-500" />
                 <span>Pagamento Seguro</span>
               </div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-4 mt-3 text-xs text-muted-foreground">
+              <button onClick={() => navigate('/termos')} className="hover:text-primary transition-colors">Termos e Condições</button>
+              <span>•</span>
+              <button onClick={() => navigate('/privacidade')} className="hover:text-primary transition-colors">Política de Privacidade</button>
+              <span>•</span>
+              <button onClick={() => navigate('/faq')} className="hover:text-primary transition-colors">FAQ</button>
             </div>
             <div className="flex gap-3">
               <a 

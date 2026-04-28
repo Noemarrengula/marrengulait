@@ -54,7 +54,7 @@ export const useSearchSuggestions = (query: string, debounceMs = 300) => {
         return [];
       }
 
-      const productSuggestions: SearchSuggestion[] = (data || []).map((p: any) => ({
+      const productSuggestions: SearchSuggestion[] = (data || []).map((p: { id: string; name: string; price: number; images?: string[]; categories?: { name?: string } }) => ({
         id: p.id,
         name: p.name,
         category: p.categories?.name,

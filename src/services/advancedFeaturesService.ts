@@ -115,7 +115,7 @@ export const advancedFeaturesService = {
     return data;
   },
 
-  async createPaymentMethod(type: string, details: any) {
+  async createPaymentMethod(type: string, details: Record<string, unknown>) {
     const { data, error } = await supabase
       .from('payment_methods')
       .insert([{ type, details }])

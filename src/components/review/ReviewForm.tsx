@@ -63,9 +63,10 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
       setComment('');
       
       if (onSubmit) onSubmit();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao submeter review:', error);
-      toast.error(error.message || 'Erro ao submeter avaliação');
+      const message = error instanceof Error ? error.message : 'Erro ao submeter avaliação';
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }

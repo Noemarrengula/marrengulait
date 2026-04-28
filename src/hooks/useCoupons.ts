@@ -82,9 +82,10 @@ export function useCoupons(subtotal: number): UseCouponReturn {
       toast.success(`Cupão aplicado: ${result.discount_type === 'percentage' ? `${result.discount_value}% OFF` : `-${result.discount_value} MT`}`);
 
       return result;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao validar cupão';
       console.error('Erro ao validar cupão:', err);
-      setError(err.message || 'Erro ao validar cupão');
+      setError(message);
       setCurrentCoupon(null);
       setDiscount(0);
       return null;
@@ -103,7 +104,7 @@ export function useCoupons(subtotal: number): UseCouponReturn {
 
       if (error) throw error;
       return data as boolean;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao aplicar cupão:', err);
       return false;
     }
@@ -159,9 +160,10 @@ export function useCouponValidation() {
       }
 
       return result;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao validar cupão';
       console.error('Erro ao validar cupão:', err);
-      setError(err.message || 'Erro ao validar cupão');
+      setError(message);
       return null;
     } finally {
       setIsValidating(false);
@@ -232,8 +234,9 @@ export function useAdminCoupons() {
     onSuccess: () => {
       toast.success('Cupão atualizado!');
     },
-    onError: (err: any) => {
-      toast.error(`Erro: ${err.message}`);
+    onError: (err: unknown) => {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      toast.error(`Erro: ${errorMessage}`);
     },
   });
 
@@ -251,8 +254,9 @@ export function useAdminCoupons() {
     onSuccess: () => {
       toast.success('Cupão eliminado!');
     },
-    onError: (err: any) => {
-      toast.error(`Erro: ${err.message}`);
+    onError: (err: unknown) => {
+      const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
+      toast.error(`Erro: ${errorMessage}`);
     },
   });
 

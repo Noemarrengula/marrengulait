@@ -5,15 +5,23 @@ import { toast } from 'sonner';
 interface PayPalButtonProps {
   amount: number;
   currency?: string;
-  onSuccess: (order: any) => void;
+  onSuccess: (order: Record<string, unknown>) => void;
   onError: (error: string) => void;
   onCancel?: () => void;
+}
+
+interface PayPalOrder {
+  id?: string;
+  status?: string;
+  purchase_units?: Array<{
+    amount?: { value?: string };
+  }>;
 }
 
 declare global {
   interface Window {
     paypal?: {
-      Buttons: (config: any) => {
+      Buttons: (config: Record<string, unknown>) => {
         render: (selector: string) => void;
       };
     };
@@ -69,7 +77,7 @@ export function PayPalButton({ amount, currency = 'USD', onSuccess, onError, onC
         shape: 'rect',
         label: 'pay',
       },
-      createOrder: (data: any, actions: any) => {
+      createOrder: (_data: Record<string, unknown>, actions: { order: { create: (config: Record<string, unknown>) => Promise<string> } }) => {
         setIsLoading(true);
         return actions.order.create({
           intent: 'CAPTURE',
@@ -83,18 +91,20 @@ export function PayPalButton({ amount, currency = 'USD', onSuccess, onError, onC
           ],
         });
       },
-      onApprove: async (data: any, actions: any) => {
+      onApprove: async (_data: Record<string, unknown>, actions: { order: { capture: () => Promise<PayPalOrder> } }) => {
         try {
           const order = await actions.order.capture();
-          onSuccess(order);
-        } catch (err: any) {
-          onError(err.message || 'Erro ao processar pagamento PayPal');
+          onSuccess(order as Record<string, unknown>);
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : 'Erro ao processar pagamento PayPal';
+          onError(message);
         } finally {
           setIsLoading(false);
         }
       },
-      onError: (err: any) => {
-        onError(err.message || 'Erro no PayPal');
+      onError: (err: unknown) => {
+        const message = err instanceof Error ? err.message : 'Erro no PayPal';
+        onError(message);
         setIsLoading(false);
       },
       onCancel: () => {

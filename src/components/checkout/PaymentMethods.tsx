@@ -9,9 +9,9 @@ export type PaymentMethod = 'stripe' | 'paypal' | 'mpesa';
 interface PaymentMethodsProps {
   amount: number;
   currency?: string;
-  onStripeSuccess: (paymentIntent: any) => void;
+  onStripeSuccess: (paymentIntent: Record<string, unknown>) => void;
   onStripeError: (error: string) => void;
-  onPayPalSuccess: (order: any) => void;
+  onPayPalSuccess: (order: Record<string, unknown>) => void;
   onPayPalError: (error: string) => void;
   onPayPalCancel?: () => void;
   selectedMethod: PaymentMethod | null;

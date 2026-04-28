@@ -175,7 +175,8 @@ export function useRevenueByCategory() {
       const categoryRevenue: Record<string, number> = {};
       
       data?.forEach(item => {
-        const categoryName = (item.product as any)?.category || 'Sem categoria';
+        const product = item.product as { category?: string } | null;
+        const categoryName = product?.category || 'Sem categoria';
         categoryRevenue[categoryName] = (categoryRevenue[categoryName] || 0) + (item.subtotal || 0);
       });
       

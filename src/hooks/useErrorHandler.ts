@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 import { toast } from 'sonner';
 
+interface EnhancedError extends Error {
+  code?: string;
+  status?: number;
+}
+
 export interface ApiError {
   message: string;
   code?: string;
@@ -86,9 +91,9 @@ export const useErrorHandler = () => {
   }, []);
 
   const handleApiError = useCallback((error: ApiError, context?: string) => {
-    const enhancedError = new Error(error.message);
-    (enhancedError as any).code = error.code;
-    (enhancedError as any).status = error.status;
+    const enhancedError = new Error(error.message) as EnhancedError;
+    enhancedError.code = error.code;
+    enhancedError.status = error.status;
     return handleError(enhancedError, context);
   }, [handleError]);
 

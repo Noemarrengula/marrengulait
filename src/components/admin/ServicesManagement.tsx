@@ -5,10 +5,21 @@ import { supabase } from '@/integrations/supabase/client';
 import ServicesTable from './ServicesTable';
 import ServiceDetailsDialog from './ServiceDetailsDialog';
 
+interface ServiceRequest {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  service_type: string;
+  status: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+
 const ServicesManagement = () => {
   const { toast } = useToast();
-  const [services, setServices] = useState<any[]>([]);
-  const [selectedService, setSelectedService] = useState<any>(null);
+  const [services, setServices] = useState<ServiceRequest[]>([]);
+  const [selectedService, setSelectedService] = useState<ServiceRequest | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -44,7 +55,7 @@ const ServicesManagement = () => {
     }
   };
 
-  const handleView = (service: any) => {
+  const handleView = (service: ServiceRequest) => {
     setSelectedService(service);
     setDialogOpen(true);
   };

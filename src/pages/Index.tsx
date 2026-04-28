@@ -5,12 +5,13 @@ import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import HeroSection from "@/components/HeroSection";
 import PromoBanners from "@/components/PromoBanners";
-import AprilBanner from "@/components/AprilBanner";
+import MayBanner from "@/components/MayBanner";
 import PartnersSection from "@/components/PartnersSection";
 import Categories from "@/components/Categories";
 import ProductGrid from "@/components/ProductGrid";
 import ServicesSection from "@/components/ServicesSection";
 import MarketplaceSection from "@/components/MarketplaceSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import Footer from "@/components/Footer";
 import { useProducts } from "@/hooks/useProducts";
 import { Loader2 } from "lucide-react";
@@ -46,7 +47,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <MegaMenu />
-      <AprilBanner />
+      <MayBanner />
       <HeroSection />
       <Categories />
       <ProductGrid 
@@ -67,6 +68,7 @@ const Index = () => {
         viewAllLink="/produtos"
       />
       <MarketplaceSection />
+      <TestimonialsSection />
       <PartnersSection />
       <div className="container mx-auto px-4 py-12">
         <Suspense fallback={<LoadingFallback />}>

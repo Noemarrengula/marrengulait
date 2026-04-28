@@ -87,7 +87,7 @@ const Tracking = () => {
 
       const formattedOrder: OrderTracking = {
         ...data,
-        items: (data.order_items || []).map((item: any) => ({
+        items: (data.order_items || []).map((item: { id: string; product_name: string; quantity: number; price: number; image_url?: string }) => ({
           ...item,
           image: item.image_url,
         })),

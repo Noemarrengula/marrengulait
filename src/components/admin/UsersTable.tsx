@@ -52,7 +52,7 @@ const UsersTable = ({ users, onViewUser }: UsersTableProps) => {
               <div className="flex gap-1">
                 {user.roles.length > 0 ? (
                   user.roles.map((role) => (
-                    <Badge key={role} variant={getRoleBadgeVariant(role) as any}>
+                    <Badge key={role} variant={getRoleBadgeVariant(role)}>
                       {getRoleIcon(role)}
                       <span className="ml-1">{role}</span>
                     </Badge>

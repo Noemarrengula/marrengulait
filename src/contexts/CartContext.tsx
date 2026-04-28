@@ -145,7 +145,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      const result = data as any;
+      interface CouponResult {
+        is_valid: boolean;
+        error_message?: string;
+        coupon_id?: string;
+        code?: string;
+        discount_type?: string;
+        discount_value?: number;
+        discount_amount?: number;
+      }
+
+      const result = data as CouponResult;
 
       if (!result.is_valid) {
         toast.error(result.error_message || 'Cupão inválido');
@@ -155,7 +165,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setCoupon({
         id: result.coupon_id,
         code: result.code,
-        discount_type: result.discount_type,
+        discount_type: result.discount_type as 'percentage' | 'fixed',
         discount_value: result.discount_value,
         discount_amount: result.discount_amount,
       });
@@ -166,9 +176,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       
       toast.success(`Cupão aplicado: ${discountText}`);
       return true;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao aplicar cupão';
       console.error('Erro ao aplicar cupão:', err);
-      toast.error(err.message || 'Erro ao aplicar cupão');
+      toast.error(message);
       return false;
     }
   }, [items]);

@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface StripeCardFormProps {
   amount: number;
   currency?: string;
-  onSuccess: (paymentIntent: any) => void;
+  onSuccess: (paymentIntent: Record<string, unknown>) => void;
   onError: (error: string) => void;
 }
 
@@ -71,12 +71,12 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
       }
 
       if (paymentIntent?.status === 'succeeded') {
-        onSuccess(paymentIntent);
+        onSuccess(paymentIntent as unknown as Record<string, unknown>);
       } else {
         throw new Error('Pagamento não foi processado');
       }
-    } catch (err: any) {
-      const errorMessage = err.message || 'Erro ao processar pagamento';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao processar pagamento';
       setError(errorMessage);
       onError(errorMessage);
     } finally {
@@ -145,7 +145,7 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
 interface StripeCardWrapperProps {
   amount: number;
   currency?: string;
-  onSuccess: (paymentIntent: any) => void;
+  onSuccess: (paymentIntent: Record<string, unknown>) => void;
   onError: (error: string) => void;
 }
 

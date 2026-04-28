@@ -1,269 +1,273 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { User } from '@supabase/supabase-js';
-
-const isDev = import.meta.env.DEV;
+import { User, Session, AuthError } from '@supabase/supabase-js';
 
 type UserRole = 'admin' | 'vendor' | 'user';
+
+const QUERY_TIMEOUT = 10000;
+
+interface RoleResult {
+  data: { role: string }[];
+  error: AuthError | null;
+}
+
+interface ProfileResult {
+  data: { user_id: string }[];
+  error: AuthError | null;
+}
+
+const withTimeout = <T,>(
+  promise: Promise<T>,
+  timeoutMs: number
+): Promise<T> => {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Query timeout')), timeoutMs)
+    ),
+  ]);
+};
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [initialized, setInitialized] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const fetchRolesFromSupabase = useCallback(async (userId: string): Promise<UserRole[]> => {
-    if (!userId) return [];
-
+  const fetchUserData = useCallback(async (userId: string) => {
     try {
-      if (isDev) console.log('Fetching roles for user:', userId);
-      
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
+      const [rolesResult, profileResult] = await Promise.all([
+        withTimeout(
+          supabase.from('user_roles').select('role').eq('user_id', userId),
+          QUERY_TIMEOUT
+        ),
+        withTimeout(
+          supabase.from('profiles').select('user_id').eq('user_id', userId),
+          QUERY_TIMEOUT
+        ),
+      ]);
 
-      if (error) {
-        console.error('Error loading roles:', error.message);
-        return ['user'];
+      const rolesData = (rolesResult as RoleResult)?.data;
+      const profileData = (profileResult as ProfileResult)?.data;
+
+      let userRoles: UserRole[] = ['user'];
+      if (rolesData && rolesData.length > 0) {
+        userRoles = rolesData.map((r: { role: string }) => r.role as UserRole);
       }
 
-      const userRoles = (data || []).map(r => r.role as UserRole);
-      return userRoles.length > 0 ? userRoles : ['user'];
-    } catch (error) {
-      console.error('Critical error fetching roles');
+      if (!profileData) {
+        const sessionResult = await supabase.auth.getSession();
+        const currentUser = sessionResult.data.session?.user;
+        const fullName =
+          currentUser?.user_metadata?.full_name ||
+          currentUser?.user_metadata?.name ||
+          currentUser?.email?.split('@')[0] ||
+          'User';
+
+        await supabase.from('profiles').insert({
+          user_id: userId,
+          full_name: fullName,
+        }).select().single();
+      }
+
+      setRoles(userRoles);
+      return userRoles;
+    } catch (err) {
+      console.error('[Auth] Error fetching user data:', err);
+      setRoles(['user']);
       return ['user'];
     }
   }, []);
 
-  const validateUserUUID = useCallback(async (sessionUser: User): Promise<boolean> => {
+  const initializeAuth = useCallback(async () => {
+    console.log('[Auth] Initializing...');
+    setLoading(true);
+    setError(null);
+
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', sessionUser.email)
-        .single();
-
-      if (error || !data) {
-        return true;
-      }
-
-      if (sessionUser.id !== data.id) {
-        console.error('UUID MISMATCH DETECTED');
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      return true;
-    }
-  }, []);
-
-  const fixSessionUUID = useCallback(async () => {
-    try {
-      await supabase.auth.signOut();
-      
-      const keysToRemove = Object.keys(localStorage).filter(k => 
-        k.includes('supabase') || k.includes('auth') || k.includes('sb-')
+      const sessionResult = await withTimeout(
+        supabase.auth.getSession(),
+        QUERY_TIMEOUT
       );
-      keysToRemove.forEach(k => localStorage.removeItem(k));
 
-      setTimeout(() => window.location.reload(), 1000);
-    } catch (error) {
-      console.error('Error fixing session:', error);
-    }
-  }, []);
-
-  const fetchUserFromSupabase = useCallback(async (): Promise<User | null> => {
-    try {
-      if (isDev) console.log('Fetching user data...');
-      
-      const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (error) {
-        console.error('Error fetching user:', error.message);
-        return null;
-      }
-
-      if (user) {
-        if (isDev) console.log('User authenticated');
-        
-        const isValid = await validateUserUUID(user);
-        if (!isValid) {
-          await fixSessionUUID();
-          return null;
-        }
-        
-        return user;
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Critical error fetching user');
-      return null;
-    }
-  }, [validateUserUUID, fixSessionUUID]);
-
-  const syncFromSupabase = useCallback(async () => {
-    try {
-      if (isDev) console.log('Starting sync...');
-      
-      const currentUser = await fetchUserFromSupabase();
-      setUser(currentUser);
-
-      if (!currentUser) {
+      if (sessionResult.error) {
+        console.error('[Auth] Session error:', sessionResult.error);
+        setUser(null);
         setRoles([]);
+        setError('Erro ao verificar sessão');
         setLoading(false);
+        setInitialized(true);
         return;
       }
 
-      await ensureProfile(currentUser);
+      const session = sessionResult.data?.session;
 
-      const userRoles = await fetchRolesFromSupabase(currentUser.id);
-      setRoles(userRoles);
-
-      if (isDev) console.log('Sync completed');
-    } catch (error) {
-      console.error('Sync error:', error);
-      setRoles(['user']);
-    } finally {
-      setLoading(false);
-    }
-  }, [fetchUserFromSupabase, fetchRolesFromSupabase]);
-
-  useEffect(() => {
-    syncFromSupabase();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED' || _event === 'INITIAL_SESSION') {
-        syncFromSupabase();
-      } else if (_event === 'SIGNED_OUT') {
+      if (!session?.user) {
+        console.log('[Auth] No session');
         setUser(null);
         setRoles([]);
         setLoading(false);
-      }
-    });
-
-    const interval = setInterval(() => {
-      syncFromSupabase();
-    }, 60000);
-
-    setRefreshInterval(interval);
-
-    return () => {
-      subscription.unsubscribe();
-      if (interval) clearInterval(interval);
-    };
-  }, [syncFromSupabase]);
-
-  const forceSync = useCallback(async () => {
-    await syncFromSupabase();
-  }, [syncFromSupabase]);
-
-  const hasRole = (role: UserRole) => roles.includes(role);
-  const isAdmin = hasRole('admin');
-  const isVendor = hasRole('vendor');
-
-  const ensureProfile = async (authUser: User) => {
-    try {
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', authUser.id)
-        .single();
-      
-      if (!existingProfile) {
-        const fullName = authUser.user_metadata?.full_name || 
-                        authUser.user_metadata?.name ||
-                        authUser.email?.split('@')[0] || 
-                        'Utilizador';
-        
-        await supabase.from('profiles').insert({
-          user_id: authUser.id,
-          full_name: fullName,
-        });
-        
-        await supabase.from('loyalty_points').insert({
-          user_id: authUser.id,
-          points: 0,
-          tier: 'bronze',
-        });
-      }
-    } catch (error) {
-      console.error('Error ensuring profile:', error);
-    }
-  };
-
-  const signIn = async (email: string, password?: string) => {
-    if (password) {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (!error && data.user) {
-        await ensureProfile(data.user);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        await syncFromSupabase();
+        setInitialized(true);
+        return;
       }
 
-      return { data, error };
-    }
-    
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
-    });
+      console.log('[Auth] User found:', session.user.email);
+      setUser(session.user);
 
-    return { data, error };
-  };
+      await fetchUserData(session.user.id);
 
-  const signUp = async (email: string, password: string, fullName: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    if (!error) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await syncFromSupabase();
-    }
-
-    return { data, error };
-  };
-
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (!error) {
+      setLoading(false);
+      setInitialized(true);
+    } catch (err) {
+      console.error('[Auth] Init error:', err);
       setUser(null);
       setRoles([]);
-      const keys = Object.keys(localStorage).filter(k => 
-        k.includes('supabase') || k.includes('auth')
-      );
-      keys.forEach(k => localStorage.removeItem(k));
+      setError('Erro ao inicializar');
+      setLoading(false);
+      setInitialized(true);
+    }
+  }, [fetchUserData]);
+
+  useEffect(() => {
+    console.log('[Auth] Setting up listener');
+    initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[Auth] State changed:', event);
+
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user);
+          await fetchUserData(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+          setRoles([]);
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          setUser(session.user);
+        } else if (event === 'USER_UPDATED' && session?.user) {
+          setUser(session.user);
+        }
+      }
+    );
+
+    return () => {
+      console.log('[Auth] Cleanup');
+      subscription.unsubscribe();
+    };
+  }, [initializeAuth, fetchUserData]);
+
+  const signIn = useCallback(async (email: string, password?: string) => {
+    if (!password) {
+      return { data: null, error: new Error('Password required') };
     }
 
-    return { error };
-  };
+    console.log('[Auth] Signing in:', email);
+    setLoading(true);
+    setError(null);
 
-  return {
+    try {
+      const result = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        QUERY_TIMEOUT
+      );
+
+      if (result.error) {
+        console.error('[Auth] Sign in error:', result.error.message);
+        setError(result.error.message);
+        setLoading(false);
+        return { data: result.data, error: result.error };
+      }
+
+      console.log('[Auth] Sign in success');
+      setLoading(false);
+      return { data: result.data, error: null };
+    } catch (err) {
+      console.error('[Auth] Sign in exception:', err);
+      const message = err instanceof Error ? err.message : 'Erro ao fazer login';
+      setError(message);
+      setLoading(false);
+      return { data: null, error: new Error(message) };
+    }
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, fullName: string) => {
+    console.log('[Auth] Signing up:', email);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await withTimeout(
+        supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName } },
+        }),
+        QUERY_TIMEOUT
+      );
+
+      if (result.error) {
+        console.error('[Auth] Sign up error:', result.error.message);
+        setError(result.error.message);
+        setLoading(false);
+        return { data: result.data, error: result.error };
+      }
+
+      console.log('[Auth] Sign up success');
+      setLoading(false);
+      return { data: result.data, error: null };
+    } catch (err) {
+      console.error('[Auth] Sign up exception:', err);
+      const message = err instanceof Error ? err.message : 'Erro ao criar conta';
+      setError(message);
+      setLoading(false);
+      return { data: null, error: new Error(message) };
+    }
+  }, []);
+
+  const signOut = useCallback(async () => {
+    console.log('[Auth] Signing out...');
+    setLoading(true);
+
+    try {
+      const result = await withTimeout(
+        supabase.auth.signOut(),
+        QUERY_TIMEOUT
+      );
+
+      setUser(null);
+      setRoles([]);
+      setLoading(false);
+      return { error: result?.error };
+    } catch (err) {
+      console.error('[Auth] Sign out exception:', err);
+      setLoading(false);
+      return { error: err instanceof Error ? err : new Error('Erro ao fazer logout') };
+    }
+  }, []);
+
+  const forceSync = useCallback(async () => {
+    console.log('[Auth] Force sync...');
+    await initializeAuth();
+  }, [initializeAuth]);
+
+  const hasRole = useCallback(
+    (role: UserRole) => roles.includes(role),
+    [roles]
+  );
+
+  return useMemo(() => ({
     user,
     roles,
     loading,
+    initialized,
+    error,
     hasRole,
-    isAdmin,
-    isVendor,
+    isAdmin: roles.includes('admin'),
+    isVendor: roles.includes('vendor'),
     signIn,
     signUp,
     signOut,
     forceSync,
-  };
+  }), [user, roles, loading, initialized, error, hasRole, signIn, signUp, signOut, forceSync]);
 };

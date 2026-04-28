@@ -17,7 +17,44 @@ export const formatDate = (date: string | Date): string => {
   });
 };
 
-export const exportProductsPDF = (products: any[], companyName = 'Marrengula-IT') => {
+interface ProductRow {
+  name?: string;
+  title?: string;
+  brand?: string;
+  price: number;
+  stock: number;
+  category?: string;
+  is_active?: boolean;
+}
+
+interface OrderRow {
+  customer_name?: string;
+  customer_email?: string;
+  total_amount?: number;
+  status?: string;
+  created_at?: string;
+}
+
+interface UserRow {
+  email?: string;
+  id?: string;
+  created_at?: string;
+}
+
+interface AlertRow {
+  user_id?: string;
+  product_id?: string;
+  target_price?: number;
+  created_at?: string;
+}
+
+interface QuestionRow {
+  question?: string;
+  product_id?: string;
+  created_at?: string;
+}
+
+export const exportProductsPDF = (products: ProductRow[], companyName = 'Marrengula-IT') => {
   const doc = new jsPDF();
   
   doc.setFontSize(20);
@@ -36,7 +73,7 @@ export const exportProductsPDF = (products: any[], companyName = 'Marrengula-IT'
   const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
   doc.text(`Valor Total em Stock: ${formatCurrency(totalValue)}`, 14, 50);
 
-  const tableData = products.map((p, index) => [
+  const tableData = products.map((p: ProductRow, index: number) => [
     (index + 1).toString(),
     (p.name || p.title || 'N/A').substring(0, 40),
     p.brand || '-',
@@ -67,7 +104,7 @@ export const exportProductsPDF = (products: any[], companyName = 'Marrengula-IT'
   doc.save(`produtos-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportOrdersPDF = (orders: any[], companyName = 'Marrengula-IT') => {
+export const exportOrdersPDF = (orders: OrderRow[], companyName = 'Marrengula-IT') => {
   const doc = new jsPDF();
   
   doc.setFontSize(20);
@@ -99,13 +136,13 @@ export const exportOrdersPDF = (orders: any[], companyName = 'Marrengula-IT') =>
     yPos += 6;
   });
 
-  const tableData = orders.map((o, index) => [
+  const tableData = orders.map((o: OrderRow, index: number) => [
     (index + 1).toString(),
     o.customer_name || 'N/A',
     o.customer_email || 'N/A',
     formatCurrency(o.total_amount || 0),
     o.status || 'pending',
-    formatDate(o.created_at),
+    formatDate(o.created_at || ''),
   ]);
 
   autoTable(doc, {
@@ -129,7 +166,7 @@ export const exportOrdersPDF = (orders: any[], companyName = 'Marrengula-IT') =>
   doc.save(`pedidos-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportUsersPDF = (users: any[], companyName = 'Marrengula-IT') => {
+export const exportUsersPDF = (users: UserRow[], companyName = 'Marrengula-IT') => {
   const doc = new jsPDF();
   
   doc.setFontSize(20);
@@ -145,10 +182,10 @@ export const exportUsersPDF = (users: any[], companyName = 'Marrengula-IT') => {
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
   doc.text(`Total de Utilizadores: ${users.length}`, 14, 44);
 
-  const tableData = users.map((u, index) => [
+  const tableData = users.map((u: UserRow, index: number) => [
     (index + 1).toString(),
     u.email || 'N/A',
-    formatDate(u.created_at),
+    formatDate(u.created_at || ''),
     u.id?.substring(0, 8) || '-',
   ]);
 
@@ -174,9 +211,9 @@ export const exportUsersPDF = (users: any[], companyName = 'Marrengula-IT') => {
 };
 
 export const exportSalesSummaryPDF = (
-  orders: any[],
-  products: any[],
-  users: any[],
+  orders: OrderRow[],
+  products: ProductRow[],
+  users: UserRow[],
   companyName = 'Marrengula-IT'
 ) => {
   const doc = new jsPDF();
@@ -205,8 +242,8 @@ export const exportSalesSummaryPDF = (
 
   const totalSales = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
   const avgOrder = orders.length > 0 ? totalSales / orders.length : 0;
-  const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+  const deliveredOrders = orders.filter((o: OrderRow) => o.status === 'delivered').length;
+  const pendingOrders = orders.filter((o: OrderRow) => o.status === 'pending').length;
 
   const stats = [
     ['Total de Vendas', formatCurrency(totalSales)],
@@ -216,7 +253,7 @@ export const exportSalesSummaryPDF = (
     ['Pedidos Pendentes', pendingOrders.toString()],
     ['Total de Produtos', products.length.toString()],
     ['Total de Utilizadores', users.length.toString()],
-    ['Valor em Stock', formatCurrency(products.reduce((sum, p) => sum + (p.price * p.stock), 0))],
+    ['Valor em Stock', formatCurrency(products.reduce((sum, p: ProductRow) => sum + (p.price * p.stock), 0))],
   ];
 
   autoTable(doc, {
@@ -237,7 +274,8 @@ export const exportSalesSummaryPDF = (
     },
   });
 
-  const finalY = (doc as any).lastAutoTable.finalY + 15;
+  const jsPDFInstance = doc as jsPDF & { lastAutoTable?: { finalY: number } };
+  const finalY = jsPDFInstance.lastAutoTable?.finalY + 15 || 80;
   
   if (finalY > 250) {
     doc.addPage();
@@ -256,7 +294,7 @@ export const exportSalesSummaryPDF = (
   const statusData = Object.entries(statusCounts).map(([status, count]) => [
     status,
     count.toString(),
-    formatCurrency(orders.filter(o => o.status === status).reduce((sum, o) => sum + (o.total_amount || 0), 0)),
+    formatCurrency(orders.filter((o: OrderRow) => o.status === status).reduce((sum, o) => sum + (o.total_amount || 0), 0)),
   ]);
 
   autoTable(doc, {
@@ -276,8 +314,9 @@ export const exportSalesSummaryPDF = (
   doc.save(`resumo-vendas-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportAlertsPDF = (alerts: any[], questions: any[], companyName = 'Marrengula-IT') => {
+export const exportAlertsPDF = (alerts: AlertRow[], questions: QuestionRow[], companyName = 'Marrengula-IT') => {
   const doc = new jsPDF();
+  const jsPDFInstance = doc as jsPDF & { lastAutoTable?: { finalY: number } };
   
   doc.setFontSize(20);
   doc.setTextColor(255, 49, 49);
@@ -300,7 +339,7 @@ export const exportAlertsPDF = (alerts: any[], questions: any[], companyName = '
     doc.text('Alertas de Preço', 14, yPos);
     yPos += 5;
 
-    const alertData = alerts.slice(0, 50).map((a, index) => [
+    const alertData = alerts.slice(0, 50).map((a: AlertRow, index: number) => [
       (index + 1).toString(),
       a.user_id?.substring(0, 8) || '-',
       a.product_id?.substring(0, 8) || '-',
@@ -323,7 +362,7 @@ export const exportAlertsPDF = (alerts: any[], questions: any[], companyName = '
       styles: { fontSize: 8, cellPadding: 2 },
     });
 
-    yPos = (doc as any).lastAutoTable.finalY + 15;
+    yPos = jsPDFInstance.lastAutoTable?.finalY + 15 || yPos + 15;
   }
 
   if (questions.length > 0 && yPos < 200) {
@@ -337,7 +376,7 @@ export const exportAlertsPDF = (alerts: any[], questions: any[], companyName = '
     doc.text('Perguntas de Produtos', 14, yPos);
     yPos += 5;
 
-    const questionData = questions.slice(0, 50).map((q, index) => [
+    const questionData = questions.slice(0, 50).map((q: QuestionRow, index: number) => [
       (index + 1).toString(),
       (q.question || 'N/A').substring(0, 50),
       q.product_id?.substring(0, 8) || '-',

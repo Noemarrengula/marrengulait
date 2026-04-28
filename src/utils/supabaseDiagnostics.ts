@@ -101,6 +101,6 @@ export const runSupabaseDiagnostics = async () => {
 
 // Executar diagnóstico no console
 if (typeof window !== 'undefined') {
-  (window as any).runSupabaseDiagnostics = runSupabaseDiagnostics;
+  (window as unknown as { runSupabaseDiagnostics: typeof runSupabaseDiagnostics }).runSupabaseDiagnostics = runSupabaseDiagnostics;
   console.log('💡 Dica: Execute "runSupabaseDiagnostics()" no console para testar a integração');
 }

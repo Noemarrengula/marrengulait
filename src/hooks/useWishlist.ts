@@ -44,25 +44,18 @@ export const useWishlist = (userId?: string) => {
             rating,
             reviews_count,
             on_sale,
-            stock,
-            store_id,
-            stores (
-              name
-            )
+            stock
           )
         `)
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Wishlist query error:', error);
+        return [];
+      }
       
-      return (data || []).map(item => ({
-        ...item,
-        product: item.product ? {
-          ...item.product,
-          store_name: (item.product as any)?.stores?.name
-        } : undefined
-      })) as WishlistItem[];
+      return (data || []) as WishlistItem[];
     },
     enabled: !!userId,
     staleTime: 0,
