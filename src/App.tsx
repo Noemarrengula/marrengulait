@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import { Loader2 } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { CaptchaProvider } from "@/providers/CaptchaProvider";
+import WhatsAppBanner from "@/components/WhatsAppBanner";
 
 const Index = lazy(() => import("./pages/Index"));
 const Product = lazy(() => import("./pages/Product"));
@@ -28,7 +29,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Maintenance = lazy(() => import("./pages/Maintenance"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const Admin = lazy(() => import("./pages/Admin"));
+const Admin = lazy(() => import("./pages/AdminPremium"));
 const PCBuilder = lazy(() => import("./pages/PCBuilder"));
 const Electronics = lazy(() => import("./pages/Electronics"));
 const Smartphones = lazy(() => import("./pages/Smartphones"));
@@ -36,6 +37,18 @@ const ProductCompare = lazy(() => import("./pages/ProductCompare"));
 const CCTVKitBuilder = lazy(() => import("./pages/CCTVKitBuilder"));
 const StorageCalculator = lazy(() => import("./pages/StorageCalculator"));
 const CCTVTutorial = lazy(() => import("./pages/CCTVTutorial"));
+const AutomationIA = lazy(() => import("./pages/AutomationIA"));
+const Switches = lazy(() => import("./pages/Switches"));
+const Perifericos = lazy(() => import("./pages/Perifericos"));
+const Computadores = lazy(() => import("./pages/Computadores"));
+const Armazenamento = lazy(() => import("./pages/Armazenamento"));
+const Redes = lazy(() => import("./pages/Redes"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const PublicWishlist = lazy(() => import("./pages/PublicWishlist"));
+const DownloadApp = lazy(() => import("./pages/DownloadApp"));
+const ServicosTI = lazy(() => import("./pages/ServicosTI"));
 
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 
@@ -53,12 +66,12 @@ const App = () => (
       <TooltipProvider>
         <CartProvider>
           <CaptchaProvider>
-            <Toaster />
-            <Sonner />
-            <Suspense fallback={<LoadingFallback />}>
-              <ChatBot />
-            </Suspense>
             <BrowserRouter>
+              <Toaster />
+              <Sonner />
+              <Suspense fallback={<LoadingFallback />}>
+                <ChatBot />
+              </Suspense>
               <Suspense fallback={<LoadingFallback />}>
                 <Routes>
                   <Route path="/" element={<Index />} />
@@ -85,9 +98,22 @@ const App = () => (
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/manutencao" element={<Maintenance />} />
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/automacao-ia" element={<AutomationIA />} />
+                  <Route path="/switches" element={<Switches />} />
+                  <Route path="/perifericos" element={<Perifericos />} />
+                  <Route path="/computadores" element={<Computadores />} />
+                  <Route path="/armazenamento" element={<Armazenamento />} />
+                  <Route path="/redes" element={<Redes />} />
+                  <Route path="/termos" element={<Terms />} />
+                  <Route path="/privacidade" element={<Privacy />} />
+                  <Route path="/faq" element={<FAQ />} />
+                  <Route path="/wishlist/:id" element={<PublicWishlist />} />
+                  <Route path="/download-app" element={<DownloadApp />} />
+                  <Route path="/servicos-ti" element={<ServicosTI />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <MobileBottomNav />
+                <WhatsAppBanner />
               </Suspense>
             </BrowserRouter>
           </CaptchaProvider>
