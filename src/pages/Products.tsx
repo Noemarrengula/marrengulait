@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
 import ProductFilters from "@/components/ProductFilters";
 import ProductPagination from "@/components/ProductPagination";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Grid3x3, LayoutGrid, Loader2, Camera } from "lucide-react";
@@ -74,6 +75,15 @@ const Products = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <MegaMenu />
+      
+      {/* Breadcrumbs */}
+      <div className="container mx-auto px-4 py-4">
+        <Breadcrumbs 
+          items={[
+            { label: promoQuery ? 'Promoções' : searchQuery ? `Pesquisa: ${searchQuery}` : 'Todos os Produtos' }
+          ]} 
+        />
+      </div>
       
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 border-b border-border">
@@ -157,6 +167,8 @@ const Products = () => {
           <ProductGrid 
             title="" 
             subtitle=""
+            products={products || []}
+            loading={isLoading}
           />
         )}
 

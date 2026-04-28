@@ -242,9 +242,10 @@ const AdminPanel = () => {
       const now = new Date().toLocaleString();
       setLastUpdated(now);
       setDataLoaded(true);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro:', error);
-      toast({ title: '❌ Erro ao carregar', description: error.message, variant: 'destructive' });
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ title: '❌ Erro ao carregar', description: message, variant: 'destructive' });
     } finally {
       setLoadingData(false);
     }
@@ -304,8 +305,9 @@ const AdminPanel = () => {
       await loadAllData();
       
       setTimeout(() => window.location.href = '/', 1500);
-    } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ title: 'Erro', description: message, variant: 'destructive' });
     }
   };
 
@@ -362,8 +364,9 @@ const AdminPanel = () => {
       await loadAllData();
       
       setTimeout(() => window.location.href = '/', 1500);
-    } catch (error: any) {
-      toast({ title: '❌ Erro ao atualizar', description: error.message, variant: 'destructive' });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ title: '❌ Erro ao atualizar', description: message, variant: 'destructive' });
     }
   };
 
@@ -385,8 +388,9 @@ const AdminPanel = () => {
         toast({ title: '✅ Pergunta eliminada!' });
       }
       await loadAllData();
-    } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro desconhecido';
+      toast({ title: 'Erro', description: message, variant: 'destructive' });
     } finally {
       setConfirmDelete(null);
     }
