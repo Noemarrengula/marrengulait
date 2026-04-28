@@ -13,6 +13,7 @@ interface FilterOptions {
   priceRange: [number, number];
   brands: string[];
   ratings: number[];
+  inStock?: boolean;
 }
 
 interface ProductFiltersProps {
@@ -20,11 +21,12 @@ interface ProductFiltersProps {
   activeFiltersCount: number;
 }
 
-  const ProductFilters = ({ onFilterChange, activeFiltersCount }: ProductFiltersProps) => {
+const ProductFilters = ({ onFilterChange, activeFiltersCount }: ProductFiltersProps) => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 200000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedRatings, setSelectedRatings] = useState<number[]>([]);
+  const [inStockOnly, setInStockOnly] = useState(false);
 
   const categories = [
     "Laptops", "Desktops", "Workstations", "All-in-One", "Mini PCs",
@@ -71,12 +73,19 @@ interface ProductFiltersProps {
     applyFilters({ priceRange: range });
   };
 
+  const handleInStockToggle = () => {
+    const newValue = !inStockOnly;
+    setInStockOnly(newValue);
+    applyFilters({ inStock: newValue || undefined });
+  };
+
   const applyFilters = (updates: Partial<FilterOptions>) => {
     onFilterChange({
       categories: updates.categories ?? selectedCategories,
       priceRange: updates.priceRange ?? priceRange,
       brands: updates.brands ?? selectedBrands,
       ratings: updates.ratings ?? selectedRatings,
+      inStock: updates.inStock ?? (inStockOnly ? true : undefined),
     });
   };
 
@@ -85,7 +94,8 @@ interface ProductFiltersProps {
     setPriceRange([0, 200000]);
     setSelectedBrands([]);
     setSelectedRatings([]);
-    onFilterChange({ categories: [], priceRange: [0, 200000], brands: [], ratings: [] });
+    setInStockOnly(false);
+    onFilterChange({ categories: [], priceRange: [0, 200000], brands: [], ratings: [], inStock: undefined });
   };
 
   return (
@@ -115,6 +125,26 @@ interface ProductFiltersProps {
         </SheetHeader>
 
         <div className="space-y-6 mt-6">
+          {/* Availability */}
+          <div>
+            <h3 className="font-semibold mb-3">Disponibilidade</h3>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="in-stock"
+                  checked={inStockOnly}
+                  onCheckedChange={handleInStockToggle}
+                />
+                <Label htmlFor="in-stock" className="cursor-pointer flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500" />
+                  Apenas produtos em stock
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
           {/* Categories */}
           <div>
             <h3 className="font-semibold mb-3">Categorias</h3>

@@ -67,6 +67,7 @@ const ProductGrid = ({
                   reviews={product.reviews_count}
                   badge={product.on_sale ? `-${Math.round((1 - product.price / (product.old_price || product.price)) * 100)}%` : product.featured ? "Destaque" : undefined}
                   storeName="Marrengula-IT"
+                  stock={product.stock}
                 />
               </div>
             ))

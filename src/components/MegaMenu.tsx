@@ -16,25 +16,25 @@ const MegaMenu = () => {
     {
       title: "Computadores",
       icon: Laptop,
-      link: "/produtos?search=computador",
+      link: "/computadores",
       items: ["Laptops", "Desktops", "Workstations", "All-in-One", "Mini PCs"]
     },
     {
       title: "Hardware",
       icon: HardDrive,
-      link: "/produtos?search=hardware",
-      items: ["GPUs", "CPUs", "SSDs", "HDDs", "Motherboards", "RAM", "Fontes"]
+      link: "/armazenamento",
+      items: ["SSDs", "HDDs", "Pendrives", "Cartões de Memória", "NAS"]
     },
     {
-      title: "Acessórios",
+      title: "Periféricos",
       icon: Keyboard,
-      link: "/produtos?search=acessorios",
+      link: "/perifericos",
       items: ["Teclados", "Ratos", "Headsets", "Monitores", "Webcams", "Hubs USB"]
     },
     {
       title: "Redes",
       icon: Wifi,
-      link: "/produtos?search=rede",
+      link: "/redes",
       items: ["Routers", "Switches", "Cabos", "Segurança", "Access Points"]
     },
     {
@@ -44,10 +44,16 @@ const MegaMenu = () => {
       items: ["Câmaras", "Kits", "Gravadores", "Acessórios"]
     },
     {
-      title: "Walkie Talkie",
-      icon: Radio,
-      link: "/produtos?search=radio",
-      items: ["PMR446", "UHF", "VHF", "Táticos", "Acessórios", "Configuração"]
+      title: "Switches",
+      icon: Zap,
+      link: "/switches",
+      items: ["Gerenciáveis", "Não-Gerenciáveis", "PoE", "Industriais"]
+    },
+    {
+      title: "Automação & IA",
+      icon: Brain,
+      link: "/automacao-ia",
+      items: ["IoT", "Automação", "Machine Learning", "Chatbots"]
     },
   ];
 
@@ -176,6 +182,13 @@ const MegaMenu = () => {
               <NavigationMenuLink onClick={() => navigate('/produtos?search=n8n')} className="px-4 py-2 bg-gradient-to-r from-purple-500/10 to-indigo-500/10 hover:from-purple-500/20 hover:to-indigo-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-purple-500/20">
                 <Brain className="h-4 w-4 text-purple-500" />
                 <span className="font-semibold text-purple-500">IA & Automação</span>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
+
+            <NavigationMenuItem>
+              <NavigationMenuLink onClick={() => navigate('/servicos-ti')} className="px-4 py-2 bg-gradient-to-r from-green-500/10 to-teal-500/10 hover:from-green-500/20 hover:to-teal-500/20 rounded-md transition-colors flex items-center gap-2 cursor-pointer border border-green-500/20">
+                <Wrench className="h-4 w-4 text-green-500" />
+                <span className="font-semibold text-green-500">Serviços TI</span>
               </NavigationMenuLink>
             </NavigationMenuItem>
 

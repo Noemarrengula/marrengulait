@@ -1,4 +1,4 @@
-import { User, Menu, Heart, LogOut, Settings, ShoppingBag, Phone, Mail, HelpCircle, Package, X, Home, ShoppingCart, Tag, Laptop, Smartphone, Wrench, Users, FileText, Search, ChevronDown } from "lucide-react";
+import { User, Menu, Heart, LogOut, Settings, ShoppingBag, Phone, Mail, HelpCircle, Package, X, Home, ShoppingCart, Tag, Laptop, Smartphone, Wrench, Users, FileText, Search, ChevronDown, Loader2 } from "lucide-react";
 import { useSettings } from "@/context/SettingsContext";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -13,7 +13,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
 
 const Header = () => {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, signOut, loading } = useAuth();
   const { locale, currency, setLocale, setCurrency } = useSettings();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -154,7 +154,12 @@ const Header = () => {
             <CartButton />
             
             {/* User Menu */}
-            {user ? (
+            {loading ? (
+              <div className="flex items-center gap-2 px-3 py-2">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                <span className="text-xs text-muted-foreground hidden md:inline">A carregar...</span>
+              </div>
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="hover:bg-accent/10">
