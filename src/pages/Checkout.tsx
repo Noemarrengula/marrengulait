@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminSettings } from '@/hooks/useAdminSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSettings } from '@/context/SettingsContext';
@@ -25,6 +26,7 @@ const Checkout = () => {
   
   const formatPrice = (price: number) => price.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const { toast } = useToast();
+  const { paymentMethods } = useAdminSettings();
   
   const [loading, setLoading] = useState(false);
   const [couponCode, setCouponCode] = useState('');
@@ -410,6 +412,7 @@ const Checkout = () => {
                     onValueChange={(value) => setFormData(prev => ({ ...prev, paymentMethod: value as PaymentMethod }))}
                     className="space-y-3"
                   >
+                    {paymentMethods.mpesa && (
                     <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                       <RadioGroupItem value="mpesa" id="mpesa" />
                       <Label htmlFor="mpesa" className="flex items-center gap-3 cursor-pointer flex-1">
@@ -420,7 +423,9 @@ const Checkout = () => {
                         </div>
                       </Label>
                     </div>
+                    )}
                     
+                    {paymentMethods.emola && (
                     <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                       <RadioGroupItem value="emola" id="emola" />
                       <Label htmlFor="emola" className="flex items-center gap-3 cursor-pointer flex-1">
@@ -431,7 +436,10 @@ const Checkout = () => {
                         </div>
                       </Label>
                     </div>
+                    )}
                     
+                    {paymentMethods.cash && (
+                    <>
                     <div className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer">
                       <RadioGroupItem value="transfer" id="transfer" />
                       <Label htmlFor="transfer" className="flex items-center gap-3 cursor-pointer flex-1">
@@ -453,6 +461,8 @@ const Checkout = () => {
                         </div>
                       </Label>
                     </div>
+                    </>
+                    )}
                   </RadioGroup>
                 </CardContent>
               </Card>

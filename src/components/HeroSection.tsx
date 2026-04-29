@@ -1,9 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Truck, Shield, Headphones, Zap, ArrowRight, Sparkles, Star, Users, Package, Clock } from "lucide-react";
+import { useAdminSettings } from "@/hooks/useAdminSettings";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const { settings } = useAdminSettings();
+
+  const heroTitle = settings.heroTitle || "TECNOLOGIA DE PONTA";
+  const heroSubtitle = settings.heroSubtitle || "Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique";
+
+  const titleParts = heroTitle.split(" ");
 
   return (
     <div className="relative overflow-hidden">
@@ -13,10 +20,10 @@ const HeroSection = () => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent z-10" />
         <div className="cyber-grid opacity-20" />
         
-        {/* Animated floating particles */}
+        {/* Animated floating particles — optimized with smaller size + lower opacity */}
         <div className="absolute inset-0 z-5 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#FF5555]/20 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#FF3131]/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-1/4 left-1/4 w-48 h-48 bg-[#FF5555]/15 rounded-full blur-3xl animate-float gpu-accelerated" />
+          <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#FF3131]/10 rounded-full blur-3xl animate-float gpu-accelerated" style={{ animationDelay: '2s' }} />
         </div>
       </div>
 
@@ -25,25 +32,30 @@ const HeroSection = () => {
         <div className="max-w-5xl mx-auto text-center">
           
           {/* Animated Badge */}
-          <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 animate-bounce-in">
+          <div className="inline-flex items-center gap-2 mb-8 px-5 py-2.5 bg-white/15 backdrop-blur-md rounded-full border border-white/30 animate-bounce-in gpu-accelerated">
             <Sparkles className="h-5 w-5 text-yellow-300 animate-pulse" />
             <span className="text-white text-sm font-bold uppercase tracking-wider">Ofertas Relâmpago - Até 50% OFF</span>
           </div>
           
           {/* Main Title with Neon Effect */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
-            <span className="block neon-text animate-pulse-scale">TECNOLOGIA</span>
-            <span className="block text-yellow-300 drop-shadow-lg">DE PONTA</span>
+            {titleParts.length > 1 ? (
+              <>
+                <span className="block neon-text animate-pulse-scale gpu-accelerated">{titleParts[0]}</span>
+                <span className="block text-yellow-300 drop-shadow-lg">{titleParts.slice(1).join(" ")}</span>
+              </>
+            ) : (
+              <span className="block neon-text animate-pulse-scale gpu-accelerated">{heroTitle}</span>
+            )}
           </h1>
           
           {/* Subtitle */}
           <p className="text-lg md:text-2xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed animate-slide-up">
-            Monte seu PC gamer, encontre os melhores smartphones e componentes com 
-            <span className="text-yellow-300 font-semibold"> entrega rápida</span> em Moçambique
+            {heroSubtitle}
           </p>
 
           {/* Dual CTAs with Animated Effects */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 animate-slide-up gpu-accelerated" style={{ animationDelay: '0.2s' }}>
             <Button
               size="lg"
               onClick={() => navigate('/monte-seu-pc')}
@@ -75,7 +87,7 @@ const HeroSection = () => {
             ].map((stat, index) => (
               <div 
                 key={stat.label} 
-                className="glass p-4 md:p-6 rounded-xl backdrop-blur-md border border-white/20 hover:border-white/40 hover:scale-105 transition-all duration-300 animate-slide-up"
+                className="glass p-4 md:p-6 rounded-xl backdrop-blur-md border border-white/20 hover:border-white/40 hover:scale-105 transition-all duration-300 animate-slide-up gpu-accelerated"
                 style={{ animationDelay: `${0.1 * (index + 1)}s` }}
               >
                 <stat.icon className={`h-6 w-6 ${stat.color} mx-auto mb-2`} />

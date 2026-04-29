@@ -4,12 +4,13 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "next-themes";
 import { CartProvider } from "@/contexts/CartContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 import { Loader2 } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { CaptchaProvider } from "@/providers/CaptchaProvider";
 import WhatsAppBanner from "@/components/WhatsAppBanner";
+import AdminRoute from "@/components/AdminRoute";
 
 const Index = lazy(() => import("./pages/Index"));
 const Product = lazy(() => import("./pages/Product"));
@@ -62,7 +63,7 @@ const LoadingFallback = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+    <SettingsProvider>
       <TooltipProvider>
         <CartProvider>
           <CaptchaProvider>
@@ -97,7 +98,7 @@ const App = () => (
                   <Route path="/forgot-password" element={<ForgotPassword />} />
                   <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/manutencao" element={<Maintenance />} />
-                  <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
                   <Route path="/automacao-ia" element={<AutomationIA />} />
                   <Route path="/switches" element={<Switches />} />
                   <Route path="/perifericos" element={<Perifericos />} />
@@ -119,7 +120,7 @@ const App = () => (
           </CaptchaProvider>
         </CartProvider>
       </TooltipProvider>
-    </ThemeProvider>
+    </SettingsProvider>
   </QueryClientProvider>
 );
 

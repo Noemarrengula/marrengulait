@@ -101,15 +101,15 @@ const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge
         isFavorite={isFavorite}
       />
       
-      {/* Stock Badge */}
-      {stock !== undefined && (
-        <div className="absolute bottom-3 left-3 z-10">
-          <StockBadge stock={stock} />
-        </div>
-      )}
-      
       {/* Informações do produto */}
-      <div className="p-4 relative z-10">
+      <div className="p-4">
+        {/* Stock Badge — in flow, not absolute, to avoid button overlap */}
+        {stock !== undefined && (
+          <div className="mb-2">
+            <StockBadge stock={stock} />
+          </div>
+        )}
+
         {storeName && (
           <p className={STORE_NAME_CLASSES}>
             <Store className="h-3 w-3" />

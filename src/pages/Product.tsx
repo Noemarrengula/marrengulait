@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import Footer from "@/components/Footer";
-import RelatedProducts from "@/components/RelatedProducts";
-import ProductReviews from "@/components/ProductReviews";
 import DynamicSEO from "@/components/DynamicSEO";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import StockBadge from "@/components/StockBadge";
@@ -18,12 +15,12 @@ import { useProduct } from "@/hooks/useProducts";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/context/SettingsContext";
 import { toast } from "sonner";
-import { 
-  ShoppingCart, 
-  Heart, 
-  Star, 
-  Truck, 
-  Shield, 
+import {
+  ShoppingCart,
+  Heart,
+  Star,
+  Truck,
+  Shield,
   RotateCcw,
   Store,
   MessageCircle,
@@ -39,11 +36,13 @@ import {
   Zap
 } from "lucide-react";
 
+const RelatedProducts = lazy(() => import("@/components/RelatedProducts"));
+const ProductReviews = lazy(() => import("@/components/ProductReviews"));
+
 const Product = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const queryClient = useQueryClient();
   const { data: product, isLoading, error, refetch } = useProduct(id || '');
   const { addItem } = useCart();
   const { locale, currency, convertPrice } = useSettings();
@@ -58,7 +57,6 @@ const Product = () => {
   const priceSavings = product?.old_price ? convertPrice(product.old_price - product.price) : 0;
 
   useEffect(() => {
-    queryClient.invalidateQueries({ queryKey: ['product', id] });
     refetch();
     setImageKey(prev => prev + 1);
   }, [location.pathname]);
@@ -327,7 +325,7 @@ const Product = () => {
                   size="lg"
                   variant="outline"
                   onClick={handleToggleFavorite}
-                  className={isFavorite ? 'bg-red-50 border-red-200 text-red-500' : ''}
+                  className={`w-14 shrink-0 ${isFavorite ? 'bg-red-50 border-red-200 text-red-500' : ''}`}
                 >
                   <Heart className={`h-5 w-5 ${isFavorite ? 'fill-current' : ''}`} />
                 </Button>
@@ -430,17 +428,21 @@ const Product = () => {
             </TabsContent>
 
             <TabsContent value="reviews" className="mt-6">
-              <ProductReviews productId={product.id} />
+              <Suspense fallback={<div className="flex justify-center py-8"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>}>
+                <ProductReviews productId={product.id} />
+              </Suspense>
             </TabsContent>
           </Tabs>
         </div>
       </div>
 
-      <RelatedProducts 
-        productId={product.id} 
-        category={product.category} 
-        title="Produtos Relacionados"
-      />
+      <Suspense fallback={null}>
+        <RelatedProducts
+          productId={product.id}
+          category={product.category}
+          title="Produtos Relacionados"
+        />
+      </Suspense>
 
       <Footer />
     </div>

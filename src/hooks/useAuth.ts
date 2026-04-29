@@ -1,31 +1,27 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session, AuthError } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 
 type UserRole = 'admin' | 'vendor' | 'user';
 
 const QUERY_TIMEOUT = 10000;
 
 interface RoleResult {
-  data: { role: string }[];
-  error: AuthError | null;
+  data: { role: string }[] | null;
+  error: PostgrestError | null;
 }
 
 interface ProfileResult {
-  data: { user_id: string }[];
-  error: AuthError | null;
+  data: { user_id: string }[] | null;
+  error: PostgrestError | null;
 }
 
-const withTimeout = <T,>(
-  promise: Promise<T>,
-  timeoutMs: number
-): Promise<T> => {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error('Query timeout')), timeoutMs)
-    ),
-  ]);
+const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error('Query timeout')), timeoutMs)
+  );
+  return Promise.race([promise, timeout]);
 };
 
 export const useAuth = () => {
@@ -37,26 +33,24 @@ export const useAuth = () => {
 
   const fetchUserData = useCallback(async (userId: string) => {
     try {
-      const [rolesResult, profileResult] = await Promise.all([
-        withTimeout(
-          supabase.from('user_roles').select('role').eq('user_id', userId),
-          QUERY_TIMEOUT
-        ),
-        withTimeout(
-          supabase.from('profiles').select('user_id').eq('user_id', userId),
-          QUERY_TIMEOUT
-        ),
-      ]);
+      const rolesResult = await withTimeout<RoleResult>(
+        supabase.from('user_roles').select('role').eq('user_id', userId),
+        QUERY_TIMEOUT
+      );
+      const profileResult = await withTimeout<ProfileResult>(
+        supabase.from('profiles').select('user_id').eq('user_id', userId),
+        QUERY_TIMEOUT
+      );
 
-      const rolesData = (rolesResult as RoleResult)?.data;
-      const profileData = (profileResult as ProfileResult)?.data;
+      const rolesData = rolesResult?.data;
+      const profileData = profileResult?.data;
 
       let userRoles: UserRole[] = ['user'];
       if (rolesData && rolesData.length > 0) {
         userRoles = rolesData.map((r: { role: string }) => r.role as UserRole);
       }
 
-      if (!profileData) {
+      if (!profileData || profileData.length === 0) {
         const sessionResult = await supabase.auth.getSession();
         const currentUser = sessionResult.data.session?.user;
         const fullName =
@@ -86,7 +80,9 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const sessionResult = await withTimeout(
+      const sessionResult = await withTimeout<
+        { data: { session: Session | null }; error: AuthError | null }
+      >(
         supabase.auth.getSession(),
         QUERY_TIMEOUT
       );
@@ -167,7 +163,9 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const result = await withTimeout(
+      const result = await withTimeout<
+        { data: { session: Session | null; user: User | null } | null; error: AuthError | null }
+      >(
         supabase.auth.signInWithPassword({ email, password }),
         QUERY_TIMEOUT
       );
@@ -197,7 +195,9 @@ export const useAuth = () => {
     setError(null);
 
     try {
-      const result = await withTimeout(
+      const result = await withTimeout<
+        { data: { session: Session | null; user: User | null } | null; error: AuthError | null }
+      >(
         supabase.auth.signUp({
           email,
           password,
@@ -230,7 +230,7 @@ export const useAuth = () => {
     setLoading(true);
 
     try {
-      const result = await withTimeout(
+      const result = await withTimeout<{ error: AuthError | null }>(
         supabase.auth.signOut(),
         QUERY_TIMEOUT
       );

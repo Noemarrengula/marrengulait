@@ -374,3 +374,12 @@ img {
   content-visibility: auto;
   contain-intrinsic-size: 0 500px;
 }
+
+/* Hide scrollbar for carousel */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
