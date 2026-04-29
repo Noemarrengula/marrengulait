@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import logoImage from "@/assets/marrengula-logo.png";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface LogoProps {
   className?: string;
@@ -9,19 +8,10 @@ interface LogoProps {
   showText?: boolean;
   variant?: "default" | "white" | "dark";
   animated?: boolean;
-  asLink?: boolean;
 }
 
-const Logo = ({ className, imageClassName, showText = true, variant = "default", animated = true, asLink = false }: LogoProps) => {
-  const navigate = useNavigate();
+const Logo = ({ className, imageClassName, showText = true, variant = "default", animated = true }: LogoProps) => {
   const [imageError, setImageError] = useState(false);
-
-  const handleClick = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (asLink) {
-      navigate('/');
-    }
-  };
   
   const getColors = () => {
     switch (variant) {
@@ -30,7 +20,7 @@ const Logo = ({ className, imageClassName, showText = true, variant = "default",
       case "dark":
         return { primary: "#000000", secondary: "#333333", text: "#000000" };
       default:
-        return { primary: "#FF3131", secondary: "#FF5555", text: "currentColor" };
+        return { primary: "hsl(var(--primary))", secondary: "hsl(var(--accent))", text: "currentColor" };
     }
   };
 
@@ -38,7 +28,7 @@ const Logo = ({ className, imageClassName, showText = true, variant = "default",
   const sizeClass = imageClassName ?? "h-10 w-10";
 
   return (
-    <div className={cn("flex items-center gap-2", className)} onClick={handleClick} role={asLink ? "link" : undefined} style={{ cursor: 'pointer' }}>
+    <div className={cn("flex items-center gap-2", className)}>
       {!imageError ? (
         <img
           src={logoImage}
@@ -67,14 +57,14 @@ const Logo = ({ className, imageClassName, showText = true, variant = "default",
           {/* Fundo branco com cantos arredondados e borda preta */}
           <rect x="20" y="20" width="160" height="160" rx="30" ry="30" fill="#ffffff" stroke="#313241" strokeWidth="15"/>
           
-          {/* M em vermelho (#FF3131) - canto inferior esquerdo */}
+          {/* M em rosa (#FF5577) - canto inferior esquerdo */}
           <g>
-            <path d="M 50 160 L 50 80 L 70 110 L 90 80 L 90 160" fill="none" stroke="#FF3131" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M 50 160 L 50 80 L 70 110 L 90 80 L 90 160" fill="none" stroke="#FF5577" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
           </g>
           
-          {/* T em preto (#000000) - canto superior direito */}
+          {/* T em preto (#313241) - canto superior direito */}
           <g>
-            <path d="M 110 60 L 150 60 M 130 60 L 130 140" fill="none" stroke="#000000" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M 110 60 L 150 60 M 130 60 L 130 140" fill="none" stroke="#313241" strokeWidth="20" strokeLinecap="round" strokeLinejoin="round"/>
           </g>
         </svg>
       )}
@@ -82,8 +72,8 @@ const Logo = ({ className, imageClassName, showText = true, variant = "default",
       {/* Text Logo */}
       {showText && (
         <div className={cn("flex flex-col leading-none", animated && "animate-in slide-in-from-left duration-700")}>
-          <span className="text-xl font-bold tracking-tight text-[#FF3131] drop-shadow-[0_2px_4px_rgba(255,49,49,0.3)]">
-            Marrengula<span className="font-black">IT</span>
+          <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent animate-gradient">
+            MarrengulaIT
           </span>
           <span className={cn("text-[10px] text-muted-foreground font-medium tracking-wider uppercase", animated && "animate-in fade-in duration-1000 delay-300")}>
             Tech & Innovation
