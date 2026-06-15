@@ -1,4 +1,4 @@
-import { Sparkles, Gift, Star, Smile, Candy, Balloon, ArrowRight } from "lucide-react";
+import { Sparkles, Gift, Star, Smile, Candy, PartyPopper, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAdminSettings } from "@/hooks/useAdminSettings";
@@ -27,7 +27,7 @@ const JuneBanner = () => {
 
       {/* Floating decorations */}
       <div className="absolute top-4 left-8 animate-bounce opacity-70" style={{ animationDuration: '2s' }}>
-        <Balloon className="w-8 h-8 text-[#EF476F]" />
+        <PartyPopper className="w-8 h-8 text-[#EF476F]" />
       </div>
       <div className="absolute top-20 right-20 animate-bounce opacity-60" style={{ animationDuration: '2.5s', animationDelay: '0.3s' }}>
         <Star className="w-10 h-10 text-[#FFD166] fill-[#FFD166]" />
