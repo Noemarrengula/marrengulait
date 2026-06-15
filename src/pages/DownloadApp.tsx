@@ -6,20 +6,30 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Download, Smartphone, Monitor, Shield, Bell, Camera, MapPin, CheckCircle2, Loader2, ExternalLink } from 'lucide-react';
+import { Download, Smartphone, Monitor, Shield, Bell, Camera, MapPin, CheckCircle2, Loader2, ExternalLink, Github, Construction } from 'lucide-react';
 import { useCapacitorNative } from '@/hooks/useCapacitorNative';
 
 const DownloadApp = () => {
   const { isCapacitor, requestNotificationPermission, isLoading } = useCapacitorNative();
   const [isAndroid, setIsAndroid] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
+  const [apkExists, setApkExists] = useState<boolean | null>(null);
   const [appVersion] = useState('1.0.0');
-  const [appSize] = useState('45 MB');
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
     setIsAndroid(userAgent.includes('android'));
+    checkApkExists();
   }, []);
+
+  const checkApkExists = async () => {
+    try {
+      const res = await fetch('/downloads/MarrengulaIT-v1.0.0.apk', { method: 'HEAD' });
+      setApkExists(res.ok);
+    } catch {
+      setApkExists(false);
+    }
+  };
 
   const handleDownload = () => {
     setDownloadStarted(true);
@@ -82,8 +92,8 @@ const DownloadApp = () => {
   ] : [
     {
       step: 1,
-      title: 'Escolha seu dispositivo',
-      description: 'Disponible para Android. Visite num dispositivo Android para baixar.',
+      title: 'Aceda num Android',
+      description: 'Visite esta página num dispositivo Android para baixar o APK.',
     },
   ];
 
@@ -112,47 +122,143 @@ const DownloadApp = () => {
             <Badge variant="outline" className="text-sm px-4 py-1">
               v{appVersion}
             </Badge>
-            <Badge variant="outline" className="text-sm px-4 py-1">
-              {appSize}
-            </Badge>
             <Badge variant="outline" className="text-sm px-4 py-1 bg-green-100 text-green-700 border-green-200">
               <CheckCircle2 className="w-3 h-3 mr-1" />
               100% Gratuito
             </Badge>
           </div>
+
+          {/* GitHub Actions Status */}
+          <a
+            href="https://github.com/Noemarrengula/marrengulait/actions/workflows/build-apk.yml"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Github className="w-4 h-4" />
+            <span>Build Status: </span>
+            <img
+              src="https://github.com/Noemarrengula/marrengulait/actions/workflows/build-apk.yml/badge.svg"
+              alt="Build APK Status"
+              className="inline-block h-5"
+            />
+          </a>
         </div>
 
         {/* Download Card */}
         <Card className="mb-12 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#FF3131] to-[#FF5555] p-8 text-center text-white">
-            <Download className="w-16 h-16 mx-auto mb-4 opacity-90" />
-            <h2 className="text-3xl font-bold mb-2">Download Rápido</h2>
-            <p className="opacity-90 mb-6">
-              Instale o app em poucos passos
-            </p>
-            <Button
-              onClick={handleDownload}
-              disabled={downloadStarted}
-              size="lg"
-              className="bg-white text-[#FF3131] hover:bg-white/90 shadow-xl text-lg px-8"
-            >
-              {downloadStarted ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  A descarregar...
-                </>
-              ) : (
-                <>
-                  <Download className="w-5 h-5 mr-2" />
-                  Descarregar APK
-                </>
-              )}
-            </Button>
-            <p className="text-sm mt-4 opacity-75">
-              Compatível com Android 6.0+
-            </p>
-          </div>
+          {apkExists === true ? (
+            <div className="bg-gradient-to-r from-[#FF3131] to-[#FF5555] p-8 text-center text-white">
+              <Download className="w-16 h-16 mx-auto mb-4 opacity-90" />
+              <h2 className="text-3xl font-bold mb-2">Download Rápido</h2>
+              <p className="opacity-90 mb-6">
+                Instale o app em poucos passos
+              </p>
+              <Button
+                onClick={handleDownload}
+                disabled={downloadStarted}
+                size="lg"
+                className="bg-white text-[#FF3131] hover:bg-white/90 shadow-xl text-lg px-8"
+              >
+                {downloadStarted ? (
+                  <>
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                    A descarregar...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-5 h-5 mr-2" />
+                    Descarregar APK
+                  </>
+                )}
+              </Button>
+              <p className="text-sm mt-4 opacity-75">
+                Compatível com Android 6.0+
+              </p>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-r from-amber-500 to-orange-500 p-8 text-center text-white">
+              <Construction className="w-16 h-16 mx-auto mb-4 opacity-90" />
+              <h2 className="text-3xl font-bold mb-2">APK em Preparação</h2>
+              <p className="opacity-90 mb-4 max-w-lg mx-auto">
+                O ficheiro APK está a ser gerado automaticamente. Siga os passos abaixo para obter o download.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button asChild variant="secondary" size="lg" className="font-semibold shadow-xl">
+                  <a
+                    href="https://github.com/Noemarrengula/marrengulait/actions/workflows/build-apk.yml"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="w-5 h-5 mr-2" />
+                    Ir para GitHub Actions
+                  </a>
+                </Button>
+                <Button
+                  onClick={checkApkExists}
+                  variant="outline"
+                  size="lg"
+                  className="border-white/40 bg-white/10 text-white hover:bg-white/20 font-semibold"
+                >
+                  <Loader2 className="w-5 h-5 mr-2" />
+                  Verificar novamente
+                </Button>
+              </div>
+            </div>
+          )}
         </Card>
+
+        {/* Build Instructions (shown when APK not available) */}
+        {apkExists === false && (
+          <Card className="mb-12 border-amber-200 bg-amber-50/50">
+            <CardHeader>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Github className="w-6 h-6" />
+                Como gerar o APK
+              </CardTitle>
+              <CardDescription>
+                O APK é construído automaticamente pelo GitHub Actions
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF3131] text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                  <div>
+                    <h3 className="font-semibold">Adicionar Secrets no GitHub</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vá a <strong>Settings → Secrets and variables → Actions</strong> e adicione:
+                    </p>
+                    <div className="mt-2 bg-white rounded-lg p-3 text-sm font-mono border space-y-1">
+                      <div><span className="text-amber-600">VITE_SUPABASE_URL</span> = URL do Supabase</div>
+                      <div><span className="text-amber-600">VITE_SUPABASE_PUBLISHABLE_KEY</span> = Chave pública</div>
+                      <div><span className="text-amber-600">VITE_STRIPE_PUBLISHABLE_KEY</span> = Chave Stripe</div>
+                      <div><span className="text-amber-600">VITE_RECAPTCHA_SITE_KEY</span> = Chave reCAPTCHA</div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF3131] text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                  <div>
+                    <h3 className="font-semibold">Executar o Workflow</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Vá a <strong>Actions → Build Android APK → Run workflow</strong> e aguarde a conclusão (5-10 min).
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF3131] text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                  <div>
+                    <h3 className="font-semibold">Descarregar o APK</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Após o build, o APK estará disponível em <strong>Artifacts</strong> no workflow. Descarregue e coloque em <code className="bg-muted px-1 rounded">public/downloads/</code> do projeto.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
