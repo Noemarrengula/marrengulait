@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-MZ">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Marrengula-IT | E-commerce de Tecnologia & Serviços de TI</title>
+    <meta name="description" content="Marketplace de tecnologia em Moçambique. Hardware, computadores, acessórios e serviços profissionais de TI. Compre das melhores lojas especializadas." />
+    <meta name="keywords" content="tecnologia, e-commerce, marketplace, Moçambique, hardware, computadores, laptops, serviços TI, Maputo" />
+    <meta name="author" content="Marrengula-IT" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://marrengula-it.co.mz" />
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-534365491"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-534365491');
+    </script>
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#FF3131" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Marrengula-IT" />
+    <meta name="application-name" content="Marrengula-IT" />
+    <meta name="msapplication-TileColor" content="#FF3131" />
+    <meta name="msapplication-tap-highlight" content="no" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Marrengula-IT | Tecnologia & Inovação" />
+    <meta property="og:description" content="E-commerce e marketplace de tecnologia com serviços profissionais de TI em Moçambique" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://marrengula-it.co.mz/og-image.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@MarrengulaIT" />
+    <meta name="twitter:image" content="https://marrengula-it.co.mz/og-image.png" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg.scope))
+            .catch(err => console.log('SW registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>

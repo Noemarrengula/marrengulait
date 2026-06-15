@@ -1,0 +1,138 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║                                                                      ║
+║              🆕 CRIAR NOVO ADMIN - CARTÃO RÁPIDO                    ║
+║                                                                      ║
+║                        3 Minutos (Máx)                               ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  1️⃣  ABRIR TERMINAL                                                ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   Ctrl + Shift + ~  (terminal no VS Code)                           ┃
+┃                                                                      ┃
+┃   Ou qualquer terminal PowerShell                                   ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  2️⃣  COLAR E EXECUTAR                                              ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   cd "c:\Users\HP Workstation\Documents\Projecto Actia\            ┃
+┃   marrengulait" && node create-new-admin-user.js                   ┃
+┃                                                                      ┃
+┃   Ou se já está na pasta:                                           ┃
+┃                                                                      ┃
+┃   node create-new-admin-user.js                                     ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  3️⃣  SEGUIR AS INSTRUÇÕES DO SCRIPT                                 ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   Script diz:                                                        ┃
+┃   →  Abrir: http://localhost:5173/auth                              ┃
+┃   →  Clique: "Sign Up" / "Registar"                                 ┃
+┃   →  Preencha: Email + Password                                     ┃
+┃   →  Clique: "Sign Up"                                              ┃
+┃   →  Volte ao terminal                                              ┃
+┃   →  Pressione ENTER                                                ┃
+┃                                                                      ┃
+┃   Script pergunta:                                                   ┃
+┃   →  "Email registado:"                                             ┃
+┃   →  Digite o email que acabou de registar                          ┃
+┃   →  Pressione ENTER                                                ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  4️⃣  ESPERAR CONCLUSÃO                                             ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   Script faz automaticamente:                                        ┃
+┃   ✅  Encontra o novo usuário                                       ┃
+┃   ✅  Obtém o UUID                                                  ┃
+┃   ✅  Adiciona role 'admin'                                         ┃
+┃   ✅  Verifica se funcionou                                         ┃
+┃                                                                      ┃
+┃   Output esperado:                                                   ┃
+┃   ✅ VERIFICAÇÃO OK - Usuário é ADMIN                               ┃
+┃   ✅ PRONTO                                                          ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  5️⃣  FAZER LOGIN NOVAMENTE NO APP                                  ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   1. Sign Out (clique em menu)                                      ┃
+┃   2. Ir para: http://localhost:5173/auth                            ┃
+┃   3. Email: [seu-email-novo]                                        ┃
+┃   4. Password: [sua-senha]                                          ┃
+┃   5. Clique: "Sign In"                                              ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  6️⃣  ACESSAR /ADMIN                                                ┃
+┣━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┫
+┃                                                                      ┃
+┃   Ir para: http://localhost:5173/admin                              ┃
+┃                                                                      ┃
+┃   Resultado esperado:                                                ┃
+┃   ✅ Painel admin aparece completo                                  ┃
+┃   ✅ Pode ver: Produtos, Usuários, Lojas, Pedidos                   ┃
+┃   ✅ Não mostra "Acesso Negado"                                     ┃
+┃                                                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+                           ✅ PRONTO!
+
+              Conta criada como admin e funcionando 🚀
+
+═══════════════════════════════════════════════════════════════════════════
+
+
+⚠️  SE ALGO NÃO FUNCIONAR:
+
+   ❌ "Acesso Negado" em /admin:
+   → localStorage.clear(); location.reload();
+   → Depois: Hard refresh (Ctrl+Shift+R)
+
+   ❌ "Email inválido":
+   → Certifique que digitou um email válido
+   → Exemplo: usuario@gmail.com
+
+   ❌ "Usuário não encontrado":
+   → Pode não ter guardado no banco
+   → Solução: Fazer sign in primeiro, depois rodar script
+
+   ❌ "Role já existe":
+   → Significa que funcionou! ✅
+   → Usuário já é admin
+
+
+═══════════════════════════════════════════════════════════════════════════
+
+                    📚 DOCUMENTOS RELACIONADOS
+
+   Mais detalhes?     → Leia: NEW_ADMIN_GUIDE.md
+   Upload rápido?     → Use: COPY_PASTE_COMMANDS.md
+   Precisa de ajuda?  → Veja: README_ADMIN_SETUP_INDEX.md
+
+═══════════════════════════════════════════════════════════════════════════
+
+                 Criado: 2026-02-19
+                 Script: create-new-admin-user.js
+                 Status: ✅ TESTADO E PRONTO
