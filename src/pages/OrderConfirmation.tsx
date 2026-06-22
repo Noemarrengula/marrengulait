@@ -205,7 +205,7 @@ const OrderConfirmation = () => {
             
             <div className="space-y-3">
               {order.items?.map((item, index) => (
-                <div key={index} className="flex justify-between items-center py-2 border-b last:border-0">
+                <div key={item.product_name} className="flex justify-between items-center py-2 border-b last:border-0">
                   <div>
                     <div className="font-medium">{item.product_name}</div>
                     <div className="text-sm text-muted-foreground">

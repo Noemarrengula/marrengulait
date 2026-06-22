@@ -219,6 +219,7 @@ const PCBuilder = () => {
                         <Button
                           variant="ghost"
                           size="sm"
+                          aria-label="Limpar seleção"
                           onClick={() => handleClearSelection(category)}
                           className="text-muted-foreground hover:text-destructive"
                         >

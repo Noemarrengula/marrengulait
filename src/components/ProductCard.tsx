@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -169,4 +170,4 @@ const ProductCard = ({ id, title, price, oldPrice, image, rating, reviews, badge
   );
 };
 
-export default ProductCard;
+export default memo(ProductCard);

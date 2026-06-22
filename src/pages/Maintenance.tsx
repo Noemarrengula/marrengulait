@@ -121,8 +121,8 @@ const Maintenance = ({
                 { value: countdown.hours, label: "Horas" },
                 { value: countdown.minutes, label: "Min" },
                 { value: countdown.seconds, label: "Seg" },
-              ].map((item, i) => (
-                <div key={i} className="text-center">
+              ].map((item) => (
+                <div key={item.label} className="text-center">
                   <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl bg-gradient-to-br from-[#FF3131]/20 to-[#FF3131]/5 border border-[#FF3131]/30 flex items-center justify-center">
                     <span className="text-2xl md:text-3xl font-bold text-white">{item.value}</span>
                   </div>

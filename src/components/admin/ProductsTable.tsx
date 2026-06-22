@@ -64,10 +64,10 @@ const ProductsTable = ({ products, onEdit, onDelete }: ProductsTableProps) => {
             </TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => onEdit(product)}>
+                <Button size="sm" variant="ghost" aria-label="Editar produto" onClick={() => onEdit(product)}>
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="ghost" onClick={() => onDelete(product.id)}>
+                <Button size="sm" variant="ghost" aria-label="Eliminar produto" onClick={() => onDelete(product.id)}>
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>

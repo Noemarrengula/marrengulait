@@ -13,7 +13,7 @@ const CartButton = () => {
 
   return (
     <Link to="/carrinho" onClick={handleClick}>
-      <Button variant="ghost" size="icon" className="relative hover:bg-accent/10 transition-all">
+      <Button variant="ghost" size="icon" aria-label="Carrinho" className="relative hover:bg-accent/10 transition-all">
         <ShoppingCart className="h-5 w-5 transition-transform hover:scale-110" />
         {totalItems > 0 && (
           <Badge 

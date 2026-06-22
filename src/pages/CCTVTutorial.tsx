@@ -185,8 +185,8 @@ const CCTVTutorial = () => {
             </div>
 
             <div className="grid md:grid-cols-4 gap-6">
-              {benefits.map((benefit, i) => (
-                <Card key={i} className="text-center hover:shadow-lg transition-shadow">
+              {benefits.map((benefit) => (
+                <Card key={benefit.title} className="text-center hover:shadow-lg transition-shadow">
                   <CardContent className="pt-6">
                     <div className="w-12 h-12 bg-[#FF3131]/10 rounded-full flex items-center justify-center mx-auto mb-4 text-[#FF3131]">
                       {benefit.icon}
@@ -230,8 +230,8 @@ const CCTVTutorial = () => {
           <div className="space-y-8">
             <h2 className="text-3xl font-bold text-center">Tipos de Câmaras</h2>
             <div className="grid md:grid-cols-2 gap-6">
-              {cameraTypes.map((camera, i) => (
-                <Card key={i} className="overflow-hidden">
+              {cameraTypes.map((camera) => (
+                <Card key={camera.name} className="overflow-hidden">
                   <div className="aspect-video bg-muted">
                     <img
                       src={camera.image}
@@ -252,8 +252,8 @@ const CCTVTutorial = () => {
                       <div>
                         <h4 className="font-semibold text-green-600 mb-2">Vantagens:</h4>
                         <ul className="space-y-1">
-                          {camera.pros.map((pro, j) => (
-                            <li key={j} className="flex items-center gap-2 text-sm">
+                          {camera.pros.map((pro) => (
+                            <li key={pro} className="flex items-center gap-2 text-sm">
                               <Check className="h-4 w-4 text-green-500" />
                               {pro}
                             </li>
@@ -263,8 +263,8 @@ const CCTVTutorial = () => {
                       <div>
                         <h4 className="font-semibold text-red-600 mb-2">Desvantagens:</h4>
                         <ul className="space-y-1">
-                          {camera.cons.map((con, j) => (
-                            <li key={j} className="flex items-center gap-2 text-sm">
+                          {camera.cons.map((con) => (
+                            <li key={con} className="flex items-center gap-2 text-sm">
                               <span className="text-red-500">×</span>
                               {con}
                             </li>
@@ -340,8 +340,8 @@ const CCTVTutorial = () => {
               {/* Tips */}
               <div className="space-y-4">
                 <h3 className="text-xl font-bold">Dicas de Posicionamento</h3>
-                {placementTips.map((tip, i) => (
-                  <Card key={i}>
+                {placementTips.map((tip) => (
+                  <Card key={tip.title}>
                     <CardContent className="flex gap-4 pt-6">
                       <div className="w-10 h-10 bg-[#FF3131]/10 rounded-full flex items-center justify-center text-[#FF3131]">
                         {tip.icon}

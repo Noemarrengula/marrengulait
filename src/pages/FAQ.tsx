@@ -236,7 +236,7 @@ export default function FAQ() {
                     const globalIndex = catIndex * 100 + qIndex;
                     const isOpen = openItems.has(globalIndex);
                     return (
-                      <Card key={qIndex} className={isOpen ? 'border-primary/50' : ''}>
+                      <Card key={globalIndex} className={isOpen ? 'border-primary/50' : ''}>
                         <CardContent className="p-0">
                           <button
                             onClick={() => toggleItem(globalIndex)}

@@ -10,7 +10,8 @@ import NotificationBell from "@/components/NotificationBell";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { memo, useState } from "react";
+import { useLockedBody } from "@/hooks/useLockedBody";
 
 const Header = () => {
   const { user, isAdmin, signOut, loading } = useAuth();
@@ -18,6 +19,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  useLockedBody(mobileMenuOpen);
 
   const scrollAndNavigate = (path: string) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -162,7 +164,7 @@ const Header = () => {
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="hover:bg-accent/10">
+                  <Button variant="ghost" size="icon" aria-label="Menu do utilizador" className="hover:bg-accent/10">
                     <User className="h-5 w-5" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -203,6 +205,7 @@ const Header = () => {
             <Button 
               variant="ghost" 
               size="icon"
+              aria-label="Abrir menu"
               className="md:hidden hover:bg-[#FF3131]/10"
               onClick={() => setMobileMenuOpen(true)}
             >
@@ -223,7 +226,7 @@ const Header = () => {
           <div className="absolute right-0 top-0 h-full w-[85vw] max-w-[320px] bg-background shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <Logo showText={true} />
-              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+              <Button variant="ghost" size="icon" aria-label="Fechar menu" onClick={() => setMobileMenuOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
             </div>
@@ -266,4 +269,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default memo(Header);

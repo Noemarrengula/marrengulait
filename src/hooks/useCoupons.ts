@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Coupon {
   id: string;
@@ -50,8 +51,6 @@ export function useCoupons(subtotal: number): UseCouponReturn {
     setError(null);
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { data, error: rpcError } = await supabase.rpc('validate_coupon', {
         p_code: code.trim(),
         p_subtotal: subtotalAmount,
@@ -96,8 +95,6 @@ export function useCoupons(subtotal: number): UseCouponReturn {
 
   const applyCoupon = useCallback(async (code: string): Promise<boolean> => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { data, error } = await supabase.rpc('apply_coupon', {
         p_code: code.trim(),
       });
@@ -141,8 +138,6 @@ export function useCouponValidation() {
     setError(null);
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { data, error: rpcError } = await supabase.rpc('validate_coupon', {
         p_code: code.trim().toUpperCase(),
         p_subtotal: subtotal,
@@ -184,8 +179,6 @@ export function useCouponValidation() {
 
 export function useAdminCoupons() {
   const fetchCoupons = useCallback(async (): Promise<Coupon[]> => {
-    const { supabase } = await import('@/integrations/supabase/client');
-
     const { data, error } = await supabase
       .from('coupons')
       .select('*')
@@ -197,8 +190,6 @@ export function useAdminCoupons() {
 
   const createCoupon = useMutation({
     mutationFn: async (coupon: Omit<Coupon, 'id' | 'current_uses' | 'created_at' | 'updated_at'>) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { error } = await supabase.from('coupons').insert([{
         code: coupon.code.toUpperCase(),
         discount_type: coupon.discount_type,
@@ -222,8 +213,6 @@ export function useAdminCoupons() {
 
   const updateCoupon = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Coupon> }) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { error } = await supabase
         .from('coupons')
         .update(updates)
@@ -242,8 +231,6 @@ export function useAdminCoupons() {
 
   const deleteCoupon = useMutation({
     mutationFn: async (id: string) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { error } = await supabase
         .from('coupons')
         .delete()

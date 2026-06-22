@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -42,8 +43,6 @@ export function ReviewForm({ productId, onSubmit }: ReviewFormProps) {
     setIsSubmitting(true);
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase.from('reviews').insert({
         product_id: productId,
         user_id: user.id,

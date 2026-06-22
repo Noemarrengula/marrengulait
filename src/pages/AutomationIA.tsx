@@ -130,8 +130,8 @@ const AutomationIA = () => {
       <div className="bg-purple-900/10 border-b border-purple-200/20">
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center gap-3">
+            {benefits.map((benefit) => (
+              <div key={benefit.title} className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
                   <benefit.icon className="h-6 w-6 text-purple-600" />
                 </div>
@@ -155,9 +155,9 @@ const AutomationIA = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, index) => (
+          {services.map((service) => (
             <Card 
-              key={index} 
+              key={service.title} 
               className={`relative overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${
                 service.popular ? 'border-purple-500 shadow-purple-500/20' : ''
               }`}
@@ -178,8 +178,8 @@ const AutomationIA = () => {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 mb-4">
-                  {service.features.map((feature, i) => (
-                    <li key={i} className="flex items-center text-sm">
+                  {service.features.map((feature) => (
+                    <li key={feature} className="flex items-center text-sm">
                       <CheckCircle2 className="h-4 w-4 text-purple-600 mr-2 flex-shrink-0" />
                       {feature}
                     </li>
@@ -281,8 +281,8 @@ const AutomationIA = () => {
               { step: "2", title: "Proposta", desc: "Criamos solução personalizada" },
               { step: "3", title: "Implementação", desc: "Desenvolvemos e testamos" },
               { step: "4", title: "Suporte", desc: "Acompanhamento contínuo" },
-            ].map((item, i) => (
-              <div key={i} className="text-center">
+            ].map((item) => (
+              <div key={item.title} className="text-center">
                 <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 text-white text-2xl font-bold flex items-center justify-center mx-auto mb-4">
                   {item.step}
                 </div>

@@ -56,7 +56,7 @@ export default function TestimonialsSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {testimonials.map((testimonial, index) => (
             <Card 
-              key={index} 
+              key={testimonial.name} 
               className="hover:shadow-lg transition-shadow bg-white"
             >
               <CardContent className="p-6">
@@ -65,7 +65,7 @@ export default function TestimonialsSection() {
                 <div className="flex gap-1 mb-3">
                   {[...Array(5)].map((_, i) => (
                     <Star
-                      key={i}
+                      key={`star-${i}`}
                       className={`h-4 w-4 ${
                         i < testimonial.rating
                           ? "fill-yellow-400 text-yellow-400"

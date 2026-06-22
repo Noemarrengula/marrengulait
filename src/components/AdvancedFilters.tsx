@@ -18,7 +18,7 @@ const AdvancedFilters = ({ onClose }: { onClose?: () => void }) => {
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-bold">Filtros</h3>
         {onClose && (
-          <Button variant="ghost" size="sm" onClick={onClose}>
+          <Button variant="ghost" size="sm" aria-label="Fechar filtros" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
         )}

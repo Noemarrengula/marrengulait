@@ -300,8 +300,6 @@ const AdminPanel = () => {
         is_active: true,
       });
       
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
-      await queryClient.invalidateQueries({ queryKey: ['product'] });
       await loadAllData();
       
       setTimeout(() => window.location.href = '/', 1500);
@@ -359,8 +357,6 @@ const AdminPanel = () => {
       });
       setEditingProduct(null);
       
-      await queryClient.invalidateQueries({ queryKey: ['products'] });
-      await queryClient.invalidateQueries({ queryKey: ['product'] });
       await loadAllData();
       
       setTimeout(() => window.location.href = '/', 1500);
@@ -381,7 +377,6 @@ const AdminPanel = () => {
         const { error } = await supabase.from('products').delete().eq('id', confirmDelete.id);
         if (error) throw error;
         toast({ title: '✅ Produto eliminado!' });
-        await queryClient.invalidateQueries({ queryKey: ['products'] });
       } else if (confirmDelete.type === 'question') {
         const { error } = await supabase.from('product_questions').delete().eq('id', confirmDelete.id);
         if (error) throw error;
@@ -494,8 +489,8 @@ const AdminPanel = () => {
             {label:'Perguntas', value: questions.length},
             {label:'Alertas de Preço', value: alerts.length},
             {label:'Badges', value: badges.length},
-          ].map((stat, idx) => (
-            <Card key={idx}>
+          ].map((stat) => (
+            <Card key={stat.label}>
               <CardContent className="pt-6">
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
                 {loadingData ? (
@@ -534,9 +529,9 @@ const AdminPanel = () => {
               <CardHeader className="justify-between flex-row items-center gap-2">
                 <CardTitle>{editingProduct ? 'Editar Produto' : 'Adicionar Novo Produto'}</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => exportProductsPDF(productFilter?
+                  <Button size="sm" variant="outline" onClick={async () => { await exportProductsPDF(productFilter?
                       products.filter(p=>(p.name||p.title||'').toLowerCase().includes(productFilter.toLowerCase()))
-                      : products)}
+                      : products); }}
                   >
                     <FileText className="h-4 w-4 mr-1" />
                     PDF
@@ -914,12 +909,12 @@ const AdminPanel = () => {
               <CardHeader className="justify-between flex-row items-center gap-2">
                 <CardTitle>Pedidos ({orders.length})</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => exportOrdersPDF(orderFilter?
+                  <Button size="sm" variant="outline" onClick={async () => { await exportOrdersPDF(orderFilter?
                       orders.filter(o=>
                           o.customer_name.toLowerCase().includes(orderFilter.toLowerCase()) ||
                           o.customer_email.toLowerCase().includes(orderFilter.toLowerCase())
                         )
-                      : orders)}
+                      : orders); }}
                   >
                     <FileText className="h-4 w-4 mr-1" />
                     PDF
@@ -991,9 +986,9 @@ const AdminPanel = () => {
               <CardHeader className="justify-between flex-row items-center gap-2">
                 <CardTitle>Utilizadores ({users.length})</CardTitle>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => exportUsersPDF(userFilter?
+                  <Button size="sm" variant="outline" onClick={async () => { await exportUsersPDF(userFilter?
                       users.filter(u=>u.email.toLowerCase().includes(userFilter.toLowerCase()))
-                      : users)}
+                      : users); }}
                   >
                     <FileText className="h-4 w-4 mr-1" />
                     PDF
@@ -1265,27 +1260,27 @@ const AdminPanel = () => {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <Button onClick={() => exportSalesSummaryPDF(orders, products, users)} className="bg-[#FF3131] hover:bg-[#FF5555] h-auto py-4 flex-col gap-2">
+                  <Button onClick={async () => { await exportSalesSummaryPDF(orders, products, users); }} className="bg-[#FF3131] hover:bg-[#FF5555] h-auto py-4 flex-col gap-2">
                     <FileText className="h-6 w-6" />
                     <span>Resumo de Vendas</span>
                     <span className="text-xs opacity-80">Relatório completo com estatísticas</span>
                   </Button>
-                  <Button onClick={() => exportProductsPDF(products)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                  <Button onClick={async () => { await exportProductsPDF(products); }} variant="outline" className="h-auto py-4 flex-col gap-2">
                     <FileText className="h-6 w-6" />
                     <span>Lista de Produtos</span>
                     <span className="text-xs text-muted-foreground">Catálogo completo em PDF</span>
                   </Button>
-                  <Button onClick={() => exportOrdersPDF(orders)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                  <Button onClick={async () => { await exportOrdersPDF(orders); }} variant="outline" className="h-auto py-4 flex-col gap-2">
                     <FileText className="h-6 w-6" />
                     <span>Relatório de Pedidos</span>
                     <span className="text-xs text-muted-foreground">Todas as vendas em PDF</span>
                   </Button>
-                  <Button onClick={() => exportUsersPDF(users)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                  <Button onClick={async () => { await exportUsersPDF(users); }} variant="outline" className="h-auto py-4 flex-col gap-2">
                     <FileText className="h-6 w-6" />
                     <span>Lista de Utilizadores</span>
                     <span className="text-xs text-muted-foreground">Base de clientes em PDF</span>
                   </Button>
-                  <Button onClick={() => exportAlertsPDF(alerts, questions)} variant="outline" className="h-auto py-4 flex-col gap-2">
+                  <Button onClick={async () => { await exportAlertsPDF(alerts, questions); }} variant="outline" className="h-auto py-4 flex-col gap-2">
                     <FileText className="h-6 w-6" />
                     <span>Alertas e Perguntas</span>
                     <span className="text-xs text-muted-foreground">Interações de clientes</span>

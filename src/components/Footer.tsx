@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Logo from "@/components/Logo";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { toast } from "sonner";
 
 const Footer = () => {
@@ -212,4 +212,4 @@ const Footer = () => {
   );
 };
 
-export default Footer;
+export default memo(Footer);

@@ -69,6 +69,7 @@ const Favorites = () => {
                 <button
                   onClick={() => handleRemoveFavorite(item.product_id)}
                   className="absolute top-3 right-3 z-10 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-md hover:bg-red-50 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                  aria-label="Remover dos favoritos"
                   title="Remover dos favoritos"
                   disabled={removeFromWishlist.isPending}
                 >

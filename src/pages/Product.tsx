@@ -172,15 +172,15 @@ const Product = () => {
             {/* Thumbnails */}
             {product.images && product.images.length > 1 && (
               <div className="flex gap-2 overflow-x-auto">
-                {product.images.map((img, idx) => (
+                {product.images.map((img) => (
                   <button
-                    key={idx}
+                    key={img}
                     onClick={() => setSelectedImage(idx)}
                     className={`w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
                       selectedImage === idx ? 'border-[#FF3131]' : 'border-transparent'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" width="80" height="80" className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -395,8 +395,8 @@ const Product = () => {
                   <div className="mt-6">
                     <h3 className="font-bold mb-3">Características:</h3>
                     <ul className="space-y-2">
-                      {features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-2">
+                      {features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-2">
                           <Check className="h-4 w-4 text-green-500" />
                           <span>{feature}</span>
                         </li>

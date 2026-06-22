@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 
 export type SettingsContextType = {
   locale: string;
@@ -142,22 +142,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [isDarkMode]);
 
+  const value = useMemo(() => ({
+    locale: settings.locale,
+    currency: settings.currency,
+    theme: settings.theme,
+    setLocale,
+    setCurrency,
+    setTheme,
+    isDarkMode,
+    isSystemPreference,
+    resetToSystem,
+    convertPrice,
+    exchangeRates: EXCHANGE_RATES,
+  }), [settings.locale, settings.currency, settings.theme, setLocale, setCurrency, setTheme, isDarkMode, isSystemPreference, resetToSystem, convertPrice]);
+
   return (
-    <SettingsContext.Provider
-      value={{
-        locale: settings.locale,
-        currency: settings.currency,
-        theme: settings.theme,
-        setLocale,
-        setCurrency,
-        setTheme,
-        isDarkMode,
-        isSystemPreference,
-        resetToSystem,
-        convertPrice,
-        exchangeRates: EXCHANGE_RATES,
-      }}
-    >
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

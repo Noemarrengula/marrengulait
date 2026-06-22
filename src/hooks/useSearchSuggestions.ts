@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export type SearchSuggestion = {
   id: string;
@@ -40,8 +41,6 @@ export const useSearchSuggestions = (query: string, debounceMs = 300) => {
       if (!debouncedQuery || debouncedQuery.length < 2) {
         return [];
       }
-
-      const { supabase } = await import('@/integrations/supabase/client');
 
       const { data, error } = await supabase
         .from('products')

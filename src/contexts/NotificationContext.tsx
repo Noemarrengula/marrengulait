@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import { toast } from 'sonner';
 
 export type NotificationType = 'success' | 'error' | 'info' | 'warning';
@@ -74,23 +74,23 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     addNotification({ type: 'warning', title, message });
   }, [addNotification]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = useMemo(() => notifications.filter(n => !n.read).length, [notifications]);
+
+  const value = useMemo(() => ({
+    notifications,
+    unreadCount,
+    addNotification,
+    markAsRead,
+    markAllAsRead,
+    clearNotifications,
+    success,
+    error,
+    info,
+    warning,
+  }), [notifications, unreadCount, addNotification, markAsRead, markAllAsRead, clearNotifications, success, error, info, warning]);
 
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        addNotification,
-        markAsRead,
-        markAllAsRead,
-        clearNotifications,
-        success,
-        error,
-        info,
-        warning,
-      }}
-    >
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );

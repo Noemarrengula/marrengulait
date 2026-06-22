@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export type RelatedProduct = {
   id: string;
@@ -21,8 +22,6 @@ export const useRelatedProducts = (
     queryKey: ['related-products', productId, category, limit],
     queryFn: async (): Promise<RelatedProduct[]> => {
       if (!productId) return [];
-
-      const { supabase } = await import('@/integrations/supabase/client');
 
       let query = supabase
         .from('products')

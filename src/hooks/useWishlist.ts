@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export type WishlistItem = {
   id: string;
@@ -29,8 +30,6 @@ export const useWishlist = (userId?: string) => {
     queryFn: async (): Promise<WishlistItem[]> => {
       if (!userId) return [];
       
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { data, error } = await supabase
         .from('wishlists')
         .select(`
@@ -58,7 +57,7 @@ export const useWishlist = (userId?: string) => {
       return (data || []) as WishlistItem[];
     },
     enabled: !!userId,
-    staleTime: 0,
+    staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
   });
 
@@ -80,8 +79,6 @@ export const useAddToWishlist = () => {
 
   return useMutation({
     mutationFn: async ({ userId, productId }: { userId: string; productId: string }) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase.from('wishlists').insert({
         user_id: userId,
         product_id: productId,
@@ -109,8 +106,6 @@ export const useRemoveFromWishlist = () => {
 
   return useMutation({
     mutationFn: async ({ userId, productId }: { userId: string; productId: string }) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase
         .from('wishlists')
         .delete()
@@ -143,8 +138,6 @@ export const useToggleWishlist = () => {
       productId: string; 
       isCurrentlyInWishlist: boolean;
     }) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       if (isCurrentlyInWishlist) {
         const { error } = await supabase
           .from('wishlists')

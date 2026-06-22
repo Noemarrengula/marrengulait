@@ -504,7 +504,7 @@ export default function ServicosTI() {
           <h2 className="text-2xl font-bold text-center mb-8">Por que escolher a Marrengula IT?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {whyChooseUs.map((item, index) => (
-              <Card key={index} className="border-2 hover:border-[#93291E]/30 transition-all">
+              <Card key={item.title} className="border-2 hover:border-[#93291E]/30 transition-all">
                 <CardContent className="p-6 text-center">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-[#93291E]/10 mb-4">
                     <item.icon className="w-6 h-6 text-[#93291E]" />

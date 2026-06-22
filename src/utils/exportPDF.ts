@@ -1,7 +1,21 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+let jsPDFInstance: Promise<any> | null = null;
+let autoTableInstance: Promise<any> | null = null;
 
-export const formatCurrency = (value: number, currency = 'MZN'): string => {
+async function getJsPDF() {
+  if (!jsPDFInstance) {
+    jsPDFInstance = import('jspdf').then(m => m.default);
+  }
+  return jsPDFInstance;
+}
+
+async function getAutoTable() {
+  if (!autoTableInstance) {
+    autoTableInstance = import('jspdf-autotable').then(m => m.default);
+  }
+  return autoTableInstance;
+}
+
+const formatCurrency = (value: number, currency = 'MZN'): string => {
   return new Intl.NumberFormat('pt-MZ', {
     style: 'currency',
     currency,
@@ -9,7 +23,7 @@ export const formatCurrency = (value: number, currency = 'MZN'): string => {
   }).format(value);
 };
 
-export const formatDate = (date: string | Date): string => {
+const formatDate = (date: string | Date): string => {
   return new Date(date).toLocaleDateString('pt-MZ', {
     day: '2-digit',
     month: '2-digit',
@@ -54,22 +68,24 @@ interface QuestionRow {
   created_at?: string;
 }
 
-export const exportProductsPDF = (products: ProductRow[], companyName = 'Marrengula-IT') => {
+export const exportProductsPDF = async (products: ProductRow[], companyName = 'Marrengula-IT') => {
+  const jsPDF = await getJsPDF();
+  const autoTable = await getAutoTable();
   const doc = new jsPDF();
-  
+
   doc.setFontSize(20);
   doc.setTextColor(255, 49, 49);
   doc.text(companyName, 14, 20);
-  
+
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Relatório de Produtos', 14, 30);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
   doc.text(`Total de Produtos: ${products.length}`, 14, 44);
-  
+
   const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
   doc.text(`Valor Total em Stock: ${formatCurrency(totalValue)}`, 14, 50);
 
@@ -104,17 +120,19 @@ export const exportProductsPDF = (products: ProductRow[], companyName = 'Marreng
   doc.save(`produtos-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportOrdersPDF = (orders: OrderRow[], companyName = 'Marrengula-IT') => {
+export const exportOrdersPDF = async (orders: OrderRow[], companyName = 'Marrengula-IT') => {
+  const jsPDF = await getJsPDF();
+  const autoTable = await getAutoTable();
   const doc = new jsPDF();
-  
+
   doc.setFontSize(20);
   doc.setTextColor(255, 49, 49);
   doc.text(companyName, 14, 20);
-  
+
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Relatório de Pedidos', 14, 30);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
@@ -166,17 +184,19 @@ export const exportOrdersPDF = (orders: OrderRow[], companyName = 'Marrengula-IT
   doc.save(`pedidos-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportUsersPDF = (users: UserRow[], companyName = 'Marrengula-IT') => {
+export const exportUsersPDF = async (users: UserRow[], companyName = 'Marrengula-IT') => {
+  const jsPDF = await getJsPDF();
+  const autoTable = await getAutoTable();
   const doc = new jsPDF();
-  
+
   doc.setFontSize(20);
   doc.setTextColor(255, 49, 49);
   doc.text(companyName, 14, 20);
-  
+
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Relatório de Utilizadores', 14, 30);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
@@ -210,22 +230,24 @@ export const exportUsersPDF = (users: UserRow[], companyName = 'Marrengula-IT') 
   doc.save(`utilizadores-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportSalesSummaryPDF = (
+export const exportSalesSummaryPDF = async (
   orders: OrderRow[],
   products: ProductRow[],
   users: UserRow[],
   companyName = 'Marrengula-IT'
 ) => {
+  const jsPDF = await getJsPDF();
+  const autoTable = await getAutoTable();
   const doc = new jsPDF();
-  
+
   doc.setFontSize(22);
   doc.setTextColor(255, 49, 49);
   doc.text(companyName, 14, 20);
-  
+
   doc.setFontSize(16);
   doc.setTextColor(0, 0, 0);
   doc.text('Resumo de Vendas', 14, 30);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
@@ -274,9 +296,9 @@ export const exportSalesSummaryPDF = (
     },
   });
 
-  const jsPDFInstance = doc as jsPDF & { lastAutoTable?: { finalY: number } };
+  const jsPDFInstance = doc;
   const finalY = jsPDFInstance.lastAutoTable?.finalY + 15 || 80;
-  
+
   if (finalY > 250) {
     doc.addPage();
   }
@@ -314,18 +336,19 @@ export const exportSalesSummaryPDF = (
   doc.save(`resumo-vendas-${new Date().toISOString().split('T')[0]}.pdf`);
 };
 
-export const exportAlertsPDF = (alerts: AlertRow[], questions: QuestionRow[], companyName = 'Marrengula-IT') => {
+export const exportAlertsPDF = async (alerts: AlertRow[], questions: QuestionRow[], companyName = 'Marrengula-IT') => {
+  const jsPDF = await getJsPDF();
+  const autoTable = await getAutoTable();
   const doc = new jsPDF();
-  const jsPDFInstance = doc as jsPDF & { lastAutoTable?: { finalY: number } };
-  
+
   doc.setFontSize(20);
   doc.setTextColor(255, 49, 49);
   doc.text(companyName, 14, 20);
-  
+
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text('Relatório de Alertas e Perguntas', 14, 30);
-  
+
   doc.setFontSize(10);
   doc.setTextColor(100, 100, 100);
   doc.text(`Gerado em: ${new Date().toLocaleString('pt-MZ')}`, 14, 38);
@@ -362,7 +385,7 @@ export const exportAlertsPDF = (alerts: AlertRow[], questions: QuestionRow[], co
       styles: { fontSize: 8, cellPadding: 2 },
     });
 
-    yPos = jsPDFInstance.lastAutoTable?.finalY + 15 || yPos + 15;
+    yPos = doc.lastAutoTable?.finalY + 15 || yPos + 15;
   }
 
   if (questions.length > 0 && yPos < 200) {

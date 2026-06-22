@@ -169,8 +169,8 @@ const Services = () => {
       <div className="bg-secondary/30 border-b border-border">
         <div className="container mx-auto px-4 py-8">
           <div ref={benefitsRef} className={`grid grid-cols-2 md:grid-cols-4 gap-4 scroll-reveal ${benefitsVisible ? 'is-visible' : ''}`}>
-            {benefits.map((benefit, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm">
+            {benefits.map((benefit) => (
+              <div key={benefit.text} className="flex items-center gap-2 text-sm">
                 <benefit.icon className="h-5 w-5 text-primary flex-shrink-0" />
                 <span className="text-foreground">{benefit.text}</span>
               </div>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLockedBody } from "@/hooks/useLockedBody";
 import { useNavigate } from "react-router-dom";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ const WHATSAPP_NUMBER = "845807880";
 const ChatBot = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  useLockedBody(isOpen, "chatbot");
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -260,7 +262,7 @@ const ChatBot = () => {
                 <Input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
                   placeholder="Digite sua mensagem..."
                   className="flex-1"
                 />

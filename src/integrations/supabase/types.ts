@@ -735,6 +735,61 @@ export type Database = {
           updated_at?: string
         }
       }
+      activity_log: {
+        Row: { id: string; action: string; entity: string; entity_id: string | null; details: string | null; user_email: string | null; created_at: string }
+        Insert: { id?: string; action: string; entity: string; entity_id?: string | null; details?: string | null; user_email?: string | null; created_at?: string }
+        Update: { id?: string; action?: string; entity?: string; entity_id?: string | null; details?: string | null; user_email?: string | null; created_at?: string }
+      }
+      content_banners: {
+        Row: { id: string; title: string; subtitle: string | null; image_url: string | null; link_url: string | null; active: boolean; sort_order: number; created_at: string; updated_at: string }
+        Insert: { id?: string; title: string; subtitle?: string | null; image_url?: string | null; link_url?: string | null; active?: boolean; sort_order?: number; created_at?: string; updated_at?: string }
+        Update: { id?: string; title?: string; subtitle?: string | null; image_url?: string | null; link_url?: string | null; active?: boolean; sort_order?: number; created_at?: string; updated_at?: string }
+      }
+      clients: {
+        Row: { id: string; user_id: string; company_name: string | null; nuit: string | null; address: string | null; city: string; province: string; country: string; contact_person: string | null; contact_email: string | null; contact_phone: string | null; preferencial_payment: string | null; notes: string | null; is_vip: boolean; is_active: boolean; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; company_name?: string | null; nuit?: string | null; address?: string | null; city?: string; province?: string; country?: string; contact_person?: string | null; contact_email?: string | null; contact_phone?: string | null; preferencial_payment?: string | null; notes?: string | null; is_vip?: boolean; is_active?: boolean; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; company_name?: string | null; nuit?: string | null; address?: string | null; city?: string; province?: string; country?: string; contact_person?: string | null; contact_email?: string | null; contact_phone?: string | null; preferencial_payment?: string | null; notes?: string | null; is_vip?: boolean; is_active?: boolean; created_at?: string; updated_at?: string }
+      }
+      product_questions: {
+        Row: { id: string; product_id: string; user_id: string | null; question: string; answer: string | null; answered_by: string | null; answered_at: string | null; is_visible: boolean; created_at: string }
+        Insert: { id?: string; product_id: string; user_id?: string | null; question: string; answer?: string | null; answered_by?: string | null; answered_at?: string | null; is_visible?: boolean; created_at?: string }
+        Update: { id?: string; product_id?: string; user_id?: string | null; question?: string; answer?: string | null; answered_by?: string | null; answered_at?: string | null; is_visible?: boolean; created_at?: string }
+      }
+      price_alerts: {
+        Row: { id: string; user_id: string; product_id: string; target_price: number; current_price_at_creation: number | null; is_active: boolean; is_triggered: boolean; triggered_at: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; product_id: string; target_price: number; current_price_at_creation?: number | null; is_active?: boolean; is_triggered?: boolean; triggered_at?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; product_id?: string; target_price?: number; current_price_at_creation?: number | null; is_active?: boolean; is_triggered?: boolean; triggered_at?: string | null; created_at?: string; updated_at?: string }
+      }
+      payment_methods: {
+        Row: { id: string; type: string; details: Json; is_default: boolean; created_at: string }
+        Insert: { id?: string; type: string; details: Json; is_default?: boolean; created_at?: string }
+        Update: { id?: string; type?: string; details?: Json; is_default?: boolean; created_at?: string }
+      }
+      whatsapp_alerts: {
+        Row: { id: string; user_id: string | null; phone: string; product_id: string | null; alert_type: string; message: string | null; is_active: boolean; created_at: string }
+        Insert: { id?: string; user_id?: string | null; phone: string; product_id?: string | null; alert_type: string; message?: string | null; is_active?: boolean; created_at?: string }
+        Update: { id?: string; user_id?: string | null; phone?: string; product_id?: string | null; alert_type?: string; message?: string | null; is_active?: boolean; created_at?: string }
+      }
+      wishlists: {
+        Row: { id: string; user_id: string; product_id: string; is_public: boolean; name: string | null; created_at: string }
+        Insert: { id?: string; user_id: string; product_id: string; is_public?: boolean; name?: string | null; created_at?: string }
+        Update: { id?: string; user_id?: string; product_id?: string; is_public?: boolean; name?: string | null; created_at?: string }
+      }
+      saved_for_later: {
+        Row: { id: string; user_id: string; product_id: string; quantity: number; created_at: string; updated_at: string }
+        Insert: { id?: string; user_id: string; product_id: string; quantity?: number; created_at?: string; updated_at?: string }
+        Update: { id?: string; user_id?: string; product_id?: string; quantity?: number; created_at?: string; updated_at?: string }
+      }
+      product_reviews: {
+        Row: { id: string; product_id: string; user_id: string; user_name: string; rating: number; title: string; comment: string; is_approved: boolean; created_at: string; updated_at: string }
+        Insert: { id?: string; product_id: string; user_id: string; user_name: string; rating: number; title: string; comment: string; is_approved?: boolean; created_at?: string; updated_at?: string }
+        Update: { id?: string; product_id?: string; user_id?: string; user_name?: string; rating?: number; title?: string; comment?: string; is_approved?: boolean; created_at?: string; updated_at?: string }
+      }
+      admin_settings: {
+        Row: { id: string; key: string; value: Json; updated_at: string | null; updated_by: string | null }
+        Insert: { id?: string; key: string; value: Json; updated_at?: string | null; updated_by?: string | null }
+        Update: { id?: string; key?: string; value?: Json; updated_at?: string | null; updated_by?: string | null }
+      }
     }
     Views: {
       [_ in never]: never
@@ -742,7 +797,7 @@ export type Database = {
     Functions: {
       has_role: {
         Args: {
-          _role: Database['public']['Enums']['app_role']
+          _role: 'admin' | 'vendor' | 'user'
           _user_id: string
         }
         Returns: boolean

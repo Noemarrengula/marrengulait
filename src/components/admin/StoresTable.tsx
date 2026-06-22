@@ -46,16 +46,16 @@ const StoresTable = ({ stores, onViewStore, onApprove, onSuspend }: StoresTableP
             </TableCell>
             <TableCell>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => onViewStore(store)}>
+                <Button size="sm" variant="ghost" aria-label="Ver loja" onClick={() => onViewStore(store)}>
                   <Eye className="h-4 w-4" />
                 </Button>
                 {store.status === 'pending' && (
-                  <Button size="sm" variant="ghost" onClick={() => onApprove(store.name)}>
+                  <Button size="sm" variant="ghost" aria-label="Aprovar loja" onClick={() => onApprove(store.name)}>
                     <CheckCircle className="h-4 w-4 text-green-600" />
                   </Button>
                 )}
                 {store.status === 'active' && (
-                  <Button size="sm" variant="ghost" onClick={() => onSuspend(store.name)}>
+                  <Button size="sm" variant="ghost" aria-label="Suspender loja" onClick={() => onSuspend(store.name)}>
                     <XCircle className="h-4 w-4 text-red-600" />
                   </Button>
                 )}

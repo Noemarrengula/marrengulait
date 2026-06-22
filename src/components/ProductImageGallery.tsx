@@ -23,6 +23,8 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
           <img
             src={images[currentIndex]}
             alt={`${productName} - ${currentIndex + 1}`}
+            width="400"
+            height="400"
             className="w-full h-full object-contain p-8"
           />
         </div>
@@ -33,6 +35,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Imagem anterior"
               onClick={prev}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black opacity-0 group-hover:opacity-100 transition-opacity"
             >
@@ -41,6 +44,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
             <Button
               variant="ghost"
               size="icon"
+              aria-label="Próxima imagem"
               onClick={next}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black opacity-0 group-hover:opacity-100 transition-opacity"
             >
@@ -54,6 +58,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
           <Button
             variant="secondary"
             size="icon"
+            aria-label="Vista 360°"
             className="bg-white/90 hover:bg-white dark:bg-black/90 dark:hover:bg-black"
           >
             <Play className="w-4 h-4" />
@@ -61,6 +66,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
           <Button
             variant="secondary"
             size="icon"
+            aria-label="Tela cheia"
             onClick={() => setIsFullscreen(!isFullscreen)}
             className="bg-white/90 hover:bg-white dark:bg-black/90 dark:hover:bg-black"
           >
@@ -79,7 +85,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
         <div className="grid grid-cols-5 gap-2">
           {images.map((img, i) => (
             <button
-              key={i}
+              key={img}
               onClick={() => setCurrentIndex(i)}
               className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
                 i === currentIndex
@@ -87,7 +93,7 @@ const ProductImageGallery = ({ images, productName }: ProductImageGalleryProps) 
                   : "border-border hover:border-primary/50"
               }`}
             >
-              <img src={img} alt={`Thumb ${i + 1}`} className="w-full h-full object-cover" />
+              <img src={img} alt={`Thumb ${i + 1}`} width="80" height="80" className="w-full h-full object-cover" />
             </button>
           ))}
         </div>

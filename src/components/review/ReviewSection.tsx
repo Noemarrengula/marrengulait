@@ -5,6 +5,7 @@ import { ReviewForm } from './ReviewForm';
 import { Button } from '@/components/ui/button';
 import { Loader2, MessageSquare } from 'lucide-react';
 import type { Database } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type Review = Database['public']['Tables']['reviews']['Row'] & {
   profiles?: {
@@ -36,8 +37,6 @@ export function ReviewSection({
   const fetchReviews = async () => {
     setLoading(true);
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -62,8 +61,6 @@ export function ReviewSection({
 
   const handleHelpful = async (reviewId: string) => {
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const review = reviews.find((r) => r.id === reviewId);
       if (!review) return;
 

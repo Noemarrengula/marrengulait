@@ -268,9 +268,9 @@ const CCTVKitBuilder = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {kitOptions.options.map((option, index) => (
+                  {kitOptions.options.map((option) => (
                     <div
-                      key={index}
+                      key={option.name}
                       className={`border rounded-lg p-4 cursor-pointer transition-colors ${
                         kitOptions.selected === index
                           ? "border-[#FF3131] bg-red-50"

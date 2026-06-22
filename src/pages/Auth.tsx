@@ -294,6 +294,7 @@ const Auth = () => {
                         type="button"
                         variant="ghost"
                         size="sm"
+                        aria-label={showLoginPassword ? "Ocultar senha" : "Mostrar senha"}
                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-[#FF3131]"
                         onClick={() => setShowLoginPassword(!showLoginPassword)}
                       >
@@ -411,6 +412,7 @@ const Auth = () => {
                       type="button"
                       variant="ghost"
                       size="sm"
+                      aria-label={showSignupPassword ? "Ocultar senha" : "Mostrar senha"}
                       className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-[#FF3131]"
                       onClick={() => setShowSignupPassword(!showSignupPassword)}
                     >
@@ -479,6 +481,7 @@ const Auth = () => {
                       type="button"
                       variant="ghost"
                       size="sm"
+                      aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                       className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-[#FF3131]"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     >

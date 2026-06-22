@@ -61,7 +61,7 @@ const ServicesTable = ({ services, onStatusChange, onView }: ServicesTableProps)
               {new Date(service.created_at).toLocaleDateString(locale)}
             </TableCell>
             <TableCell>
-              <Button size="sm" variant="ghost" onClick={() => onView(service)}>
+              <Button size="sm" variant="ghost" aria-label="Ver detalhes" onClick={() => onView(service)}>
                 <Eye className="h-4 w-4" />
               </Button>
             </TableCell>

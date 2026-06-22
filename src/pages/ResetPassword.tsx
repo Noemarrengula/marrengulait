@@ -249,6 +249,7 @@ const ResetPassword = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
+                    aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-[#FF3131]"
                     onClick={() => setShowPassword(!showPassword)}
                   >
@@ -309,6 +310,7 @@ const ResetPassword = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
+                    aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent hover:text-[#FF3131]"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >

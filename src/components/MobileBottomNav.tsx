@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Home, Search, Heart, ShoppingCart, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -103,4 +104,4 @@ export function MobileBottomNav() {
   );
 }
 
-export default MobileBottomNav;
+export default memo(MobileBottomNav);

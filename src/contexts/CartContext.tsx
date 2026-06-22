@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
 import { CartItem } from '@/types/cart';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AppliedCoupon {
   id: string;
@@ -134,8 +135,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     try {
-      const { supabase } = await import('@/integrations/supabase/client');
-
       const { data, error } = await supabase.rpc('validate_coupon', {
         p_code: code.trim().toUpperCase(),
         p_subtotal: subtotal,
@@ -189,30 +188,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     toast.success('Cupão removido');
   }, []);
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const totalItems = useMemo(() => items.reduce((sum, item) => sum + item.quantity, 0), [items]);
+  const subtotal = useMemo(() => items.reduce((sum, item) => sum + item.price * item.quantity, 0), [items]);
   const discount = coupon?.discount_amount || 0;
   const total = Math.max(0, subtotal - discount);
   const totalPrice = total;
 
+  const value = useMemo(() => ({
+    items,
+    addItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    totalItems,
+    totalPrice,
+    subtotal,
+    discount,
+    total,
+    coupon,
+    applyCoupon,
+    removeCoupon,
+  }), [items, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, subtotal, discount, total, coupon, applyCoupon, removeCoupon]);
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQuantity,
-        clearCart,
-        totalItems,
-        totalPrice,
-        subtotal,
-        discount,
-        total,
-        coupon,
-        applyCoupon,
-        removeCoupon,
-      }}
-    >
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );

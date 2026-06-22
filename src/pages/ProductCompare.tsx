@@ -65,12 +65,13 @@ const ProductCompare = () => {
                     <Button
                       variant="ghost"
                       size="icon"
+                      aria-label="Remover produto"
                       className="absolute top-2 right-2"
                       onClick={() => removeProduct(product.id)}
                     >
                       <X className="w-4 h-4" />
                     </Button>
-                    <img src={product.image_url} alt={product.title} className="w-32 h-32 object-cover mx-auto mb-2" />
+                    <img src={product.image_url} alt={product.title} width="128" height="128" className="w-32 h-32 object-cover mx-auto mb-2" />
                     <p className="font-semibold text-sm">{product.title}</p>
                   </th>
                 ))}

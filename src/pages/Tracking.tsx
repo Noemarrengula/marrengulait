@@ -317,7 +317,7 @@ const Tracking = () => {
                     <div key={item.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center overflow-hidden">
                         {item.image ? (
-                          <img src={item.image} alt={item.product_name} className="w-full h-full object-cover" />
+                          <img src={item.image} alt={item.product_name} width="64" height="64" className="w-full h-full object-cover" />
                         ) : (
                           <Package className="h-8 w-8 text-muted-foreground" />
                         )}

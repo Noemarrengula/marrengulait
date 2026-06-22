@@ -28,10 +28,10 @@ const PriceHistoryChart = ({ productId, currentPrice }: { productId: string; cur
       {/* Simple Chart */}
       <div className="relative h-32 mb-4">
         <div className="absolute inset-0 flex items-end justify-between gap-2">
-          {priceHistory.map((item, i) => {
+          {priceHistory.map((item) => {
             const height = ((item.price - lowestPrice) / (highestPrice - lowestPrice)) * 100;
             return (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
+              <div key={item.date} className="flex-1 flex flex-col items-center gap-1">
                 <div className="text-xs font-semibold text-primary">
                   {(item.price / 1000).toFixed(0)}K
                 </div>

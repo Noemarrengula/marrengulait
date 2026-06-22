@@ -155,9 +155,9 @@ const PromoBanners = () => {
 
       {/* Dots Indicator */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
-        {banners.map((_, index) => (
+          {banners.map((banner, index) => (
           <button
-            key={index}
+            key={banner.id}
             onClick={() => setCurrentSlide(index)}
             className={cn(
               "w-3 h-3 rounded-full transition-all",

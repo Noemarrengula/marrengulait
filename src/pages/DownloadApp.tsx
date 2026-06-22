@@ -263,7 +263,7 @@ const DownloadApp = () => {
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {features.map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
+            <Card key={feature.title} className="hover:shadow-lg transition-shadow">
               <CardHeader className="text-center pb-2">
                 <div className="w-12 h-12 bg-[#FF3131]/10 rounded-xl flex items-center justify-center mx-auto mb-3">
                   <feature.icon className="w-6 h-6 text-[#FF3131]" />

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import { useSystemPreferences, SystemPreferences } from '@/hooks/useSystemPreferences';
 
 interface LocaleContextType {
@@ -188,68 +188,68 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(preferences.locale);
   }, [preferences.locale]);
 
-  const setLocale = (newLocale: string) => {
+  const setLocale = useCallback((newLocale: string) => {
     setLocaleState(newLocale);
     const lang = newLocale.split('-')[0];
     setPreference('locale', newLocale, false);
     setPreference('language', lang, false);
     setPreference('currency', lang === 'pt' ? 'MZN' : 'USD', false);
-  };
+  }, [setPreference]);
 
-  const setSystemLocale = () => {
+  const setSystemLocale = useCallback(() => {
     const { locale, language, currency } = preferences;
     setLocaleState(locale);
     setPreference('locale', locale, true);
     setPreference('language', language, true);
     setPreference('currency', currency, true);
-  };
+  }, [preferences, setPreference]);
 
-  const t = (key: string): string => {
+  const t = useCallback((key: string): string => {
     const lang = preferences.language;
     return translations[lang]?.[key] || translations['en']?.[key] || key;
-  };
+  }, [preferences.language]);
 
-  const formatCurrency = (amount: number): string => {
+  const formatCurrency = useCallback((amount: number): string => {
     return new Intl.NumberFormat(preferences.locale, {
       style: 'currency',
       currency: preferences.currency,
       minimumFractionDigits: 2,
     }).format(amount);
-  };
+  }, [preferences.locale, preferences.currency]);
 
-  const formatDate = (date: Date | string): string => {
+  const formatDate = useCallback((date: Date | string): string => {
     const d = typeof date === 'string' ? new Date(date) : date;
     return new Intl.DateTimeFormat(preferences.locale, {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
     }).format(d);
-  };
+  }, [preferences.locale]);
 
-  const formatNumber = (num: number): string => {
+  const formatNumber = useCallback((num: number): string => {
     return new Intl.NumberFormat(preferences.locale).format(num);
-  };
+  }, [preferences.locale]);
 
-  const availableLocales = [
+  const availableLocales = useMemo(() => [
     { code: 'pt-MZ', name: 'Português', flag: '🇲🇿' },
     { code: 'en-US', name: 'English', flag: '🇬🇧' },
     { code: 'es-MZ', name: 'Español', flag: '🇪🇸' },
-  ];
+  ], []);
+
+  const value = useMemo(() => ({
+    locale,
+    setLocale,
+    t,
+    formatCurrency,
+    formatDate,
+    formatNumber,
+    isSystemLocale: isSystem.locale,
+    setSystemLocale,
+    availableLocales,
+  }), [locale, setLocale, t, formatCurrency, formatDate, formatNumber, isSystem.locale, setSystemLocale, availableLocales]);
 
   return (
-    <LocaleContext.Provider
-      value={{
-        locale,
-        setLocale,
-        t,
-        formatCurrency,
-        formatDate,
-        formatNumber,
-        isSystemLocale: isSystem.locale,
-        setSystemLocale,
-        availableLocales,
-      }}
-    >
+    <LocaleContext.Provider value={value}>
       {children}
     </LocaleContext.Provider>
   );

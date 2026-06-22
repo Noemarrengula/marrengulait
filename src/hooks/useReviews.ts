@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 type Review = {
   id: string;
@@ -27,8 +28,6 @@ export const useReviews = (productId?: string) => {
     queryKey: ['reviews', productId],
     queryFn: async () => {
       if (!productId) return [];
-      
-      const { supabase } = await import('@/integrations/supabase/client');
       
       const { data, error } = await supabase
         .from('reviews')
@@ -64,8 +63,6 @@ export const usePendingReviews = () => {
   return useQuery({
     queryKey: ['pending-reviews'],
     queryFn: async () => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { data, error } = await supabase
         .from('reviews')
         .select(`
@@ -92,8 +89,6 @@ export const useApproveReview = () => {
 
   return useMutation({
     mutationFn: async (reviewId: string) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase
         .from('reviews')
         .update({ is_approved: true })
@@ -118,8 +113,6 @@ export const useRejectReview = () => {
 
   return useMutation({
     mutationFn: async (reviewId: string) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase
         .from('reviews')
         .delete()
@@ -156,8 +149,6 @@ export const useCreateReview = () => {
       title?: string;
       comment: string;
     }) => {
-      const { supabase } = await import('@/integrations/supabase/client');
-      
       const { error } = await supabase.from('reviews').insert({
         product_id: productId,
         user_id: userId,

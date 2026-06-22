@@ -22,7 +22,7 @@ export default function Breadcrumbs({ items, className = "" }: BreadcrumbsProps)
       </Link>
       
       {items.map((item, index) => (
-        <div key={index} className="flex items-center space-x-2">
+        <div key={item.label + (item.href || '')} className="flex items-center space-x-2">
           <ChevronRight className="h-4 w-4 text-muted-foreground" />
           {item.href ? (
             <Link

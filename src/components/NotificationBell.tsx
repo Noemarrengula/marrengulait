@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLockedBody } from '@/hooks/useLockedBody';
 import { Bell, Check, CheckCheck, Trash2, X, Info, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,6 +30,7 @@ const NotificationIcon = ({ type }: { type: NotificationType }) => {
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  useLockedBody(isOpen, "notifications");
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
 
   const formatTime = (date: Date) => {
@@ -94,9 +96,9 @@ export default function NotificationBell() {
                     <Button
                       variant="ghost"
                       size="sm"
+                      aria-label="Limpar notificações"
                       onClick={clearNotifications}
                       className="h-8 px-2"
-                      title="Limpar notificações"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -104,6 +106,7 @@ export default function NotificationBell() {
                   <Button
                     variant="ghost"
                     size="sm"
+                    aria-label="Fechar notificações"
                     onClick={() => setIsOpen(false)}
                     className="h-8 px-2"
                   >
