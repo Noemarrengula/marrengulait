@@ -1,8 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Configuração
-const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://jmefqzhoumdcgcxtdssu.supabase.co';
-const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_6EUZKv42fC6vzueNMoo9aw_umL2MWqX';
+// Uso: node --env-file=.env test-integration.js
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://seu-projeto.supabase.co';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_sua_chave';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

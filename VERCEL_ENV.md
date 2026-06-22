@@ -19,8 +19,8 @@ VITE_SUPABASE_PROJECT_ID=igphzzzxjahwocfmgkyo
 # ============================================
 # Found in: Stripe Dashboard > Developers > API keys
 
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_51SAbf4DL3fuiXBUaIvVfvMSt0HcqbN3HzpwW1P2nYHW0OWooUH84aOM0OerhCMLC5int6PuyxIQNXQlCoQxAVkh500XeIJRdQq
-STRIPE_SECRET_KEY=sk_test_51SAbf4DL3fuiXBUaiVc6EfVjhr86H1xtTvJNsAbyFlLE93KOuz7rekhgONEbDs4GYSwdfHrJwPMaiMcxZQigiiOU00F1uO84sy
+VITE_STRIPE_PUBLISHABLE_KEY=pk_test_sua_chave_publicavel
+# STRIPE_SECRET_KEY (colocar nas Environment Variables do Vercel, nunca no .env ou docs!)
 
 # ============================================
 # PAYPAL (OPCIONAL - descomentar quando tiveres)

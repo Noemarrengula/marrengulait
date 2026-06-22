@@ -25,13 +25,37 @@ const Auth = () => {
 
   const handleRecaptcha = async (action: string) => {
     if (!executeRecaptcha) {
-      return null;
+      return true;
     }
     try {
       const token = await executeRecaptcha(action);
-      return token;
+      if (!token) return true;
+
+      const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+      const verifyUrl = `${SUPABASE_URL}/functions/v1/verify-recaptcha`;
+
+      const res = await fetch(verifyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, action }),
+      });
+
+      if (!res.ok) return true;
+
+      const data = await res.json();
+
+      if (!data.valid) {
+        toast({
+          title: 'Verificação de segurança falhou',
+          description: data.error || 'Tente novamente',
+          variant: 'destructive',
+        });
+        return false;
+      }
+
+      return true;
     } catch {
-      return null;
+      return true;
     }
   };
 
@@ -92,7 +116,8 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      await handleRecaptcha('login');
+      const recaptchaOk = await handleRecaptcha('login');
+      if (!recaptchaOk) { setIsLoading(false); return; }
       const { error } = await signIn(loginEmail, loginPassword);
       
       if (!error) {
@@ -121,7 +146,8 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      await handleRecaptcha('magic_link');
+      const recaptchaOk = await handleRecaptcha('magic_link');
+      if (!recaptchaOk) { setIsLoading(false); return; }
       const { error } = await signIn(loginEmail);
       
       if (error) {
@@ -155,7 +181,8 @@ const Auth = () => {
     setIsLoading(true);
     
     try {
-      await handleRecaptcha('signup');
+      const recaptchaOk = await handleRecaptcha('signup');
+      if (!recaptchaOk) { setIsLoading(false); return; }
       const { error } = await signUp(signupEmail, signupPassword, signupFullName);
       
       if (!error) {

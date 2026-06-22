@@ -1,8 +1,9 @@
 // Script para popular base de dados com produtos de exemplo
+// Uso: node --env-file=.env seed-database.js
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://ynfnegxufykueofehvzm.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InluZm5lZ3h1ZnlrdWVvZmVodnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM1NTA5MzgsImV4cCI6MjA3OTEyNjkzOH0.BmLSptmvf9Q4XLzWG7ZiO3I40Ay5luJgHMNE0dCtUKg';
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL || 'https://seu-projeto.supabase.co';
+const SUPABASE_KEY = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_sua_chave';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 

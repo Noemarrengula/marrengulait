@@ -61,7 +61,7 @@ git push -u origin main
 VITE_SUPABASE_URL=https://seu-projeto.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sua-chave-pUBLICA
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_sua-chave
-STRIPE_SECRET_KEY=sk_test_sua-chave-secreta
+STRIPE_SECRET_KEY=sk_test_*** (substituir pela chave real)
 ```
 
 6. Clique "Deploy"
@@ -187,7 +187,7 @@ VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 # Stripe
 VITE_STRIPE_PUBLISHABLE_KEY=pk_test_...
-STRIPE_SECRET_KEY=sk_test_...
+STRIPE_SECRET_KEY=sk_test_*** (usar chave real do Stripe Dashboard)
 
 # Site URL (para confirmação de email)
 VITE_SITE_URL=https://marrengulait.com
