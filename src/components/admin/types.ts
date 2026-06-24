@@ -120,6 +120,36 @@ export interface ContentBanner {
   order: number;
 }
 
+export interface ProductForm {
+  title: string;
+  price: number;
+  compare_at_price: number;
+  stock: number;
+  category: string;
+  brand: string;
+  image_url: string;
+  description: string;
+  is_featured: boolean;
+  is_on_sale: boolean;
+  is_active: boolean;
+}
+
+export interface CouponForm {
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  minOrder: number;
+  maxUses: number;
+  expiryDate: string;
+}
+
+export interface BannerForm {
+  title: string;
+  subtitle: string;
+  imageUrl: string;
+  linkUrl: string;
+}
+
 export interface DashboardStats {
   totalProducts: number;
   totalOrders: number;

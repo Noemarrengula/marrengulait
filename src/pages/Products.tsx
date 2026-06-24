@@ -34,9 +34,10 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(8);
 
-  const { data: products, isLoading, error, refetch } = useProducts(filters);
+  const { data: result, isLoading, error, refetch } = useProducts(filters, currentPage, itemsPerPage);
   
-  const totalItems = products?.length || 0;
+  const products = result?.data || [];
+  const totalItems = result?.count ?? 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   useEffect(() => {

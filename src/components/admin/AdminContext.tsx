@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type {
   Product, Order, User, Question, PriceAlert,
-  Coupon, ActivityLog, SiteSettings, ContentBanner, DashboardStats
+  Coupon, ActivityLog, SiteSettings, ContentBanner, DashboardStats,
+  ProductForm, CouponForm, BannerForm
 } from "./types";
 
 interface AdminContextType {
@@ -30,18 +31,18 @@ interface AdminContextType {
   ITEMS_PER_PAGE: number;
   editingProduct: Product | null;
   isProductModalOpen: boolean; setIsProductModalOpen: (v: boolean) => void;
-  productForm: Record<string, any>; setProductForm: (v: any) => void;
+  productForm: ProductForm; setProductForm: (v: ProductForm) => void;
   inlineEdit: { productId: string; field: "stock" | "price"; value: string } | null;
-  setInlineEdit: (v: any) => void;
+  setInlineEdit: (v: { productId: string; field: "stock" | "price"; value: string } | null) => void;
   selectedProducts: Set<string>; setSelectedProducts: (v: Set<string>) => void;
   bulkAction: string; setBulkAction: (v: string) => void;
-  couponForm: any; setCouponForm: (v: any) => void;
+  couponForm: CouponForm; setCouponForm: (v: CouponForm) => void;
   editingCoupon: Coupon | null; setEditingCoupon: (v: Coupon | null) => void;
-  bannerForm: any; setBannerForm: (v: any) => void;
+  bannerForm: BannerForm; setBannerForm: (v: BannerForm) => void;
   editingBanner: ContentBanner | null; setEditingBanner: (v: ContentBanner | null) => void;
   answerForm: Record<string, string>; setAnswerForm: (v: Record<string, string>) => void;
   deleteConfirm: { type: string; id: string } | null;
-  setDeleteConfirm: (v: any) => void;
+  setDeleteConfirm: (v: { type: string; id: string } | null) => void;
   stats: DashboardStats;
   filteredProducts: Product[]; paginatedProducts: Product[];
   filteredOrders: Order[]; paginatedOrders: Order[];

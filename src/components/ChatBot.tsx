@@ -243,7 +243,7 @@ const ChatBot = () => {
                 <div className="flex flex-wrap gap-2">
                   {quickReplies.map((reply, index) => (
                     <Button
-                      key={index}
+                      key={reply.text}
                       variant="outline"
                       size="sm"
                       onClick={() => handleQuickReply(reply)}

@@ -182,11 +182,12 @@ export function ProductsTab() {
                   <tr key={product.id} className="border-t dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 dark:bg-gray-950/50">
                     <td className="py-2.5 px-3"><input type="checkbox" checked={selectedProducts.has(product.id)} onChange={e => { setSelectedProducts(prev => { const next = new Set(prev); if (e.target.checked) next.add(product.id); else next.delete(product.id); return next; }); }} className="rounded" /></td>
                     <td className="py-2.5 px-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0 overflow-hidden">
                           {product.image_url ? <img src={product.image_url} alt="" width="40" height="40" className="w-full h-full object-cover" /> : <Package className="h-5 w-5 text-gray-300" />}
                         </div>
                         <div className="min-w-0"><p className="font-medium truncate">{product.title || product.name}</p><div className="flex gap-1 mt-0.5">{product.is_featured && <Badge variant="default" className="text-[10px] h-4 px-1">Destaque</Badge>}{product.is_on_sale && <Badge variant="destructive" className="text-[10px] h-4 px-1">Promo</Badge>}</div></div>
+                          </div>
                     </td>
                     <td className="py-2.5 px-3">
                       {inlineEdit?.productId === product.id && inlineEdit.field === "price" ? (

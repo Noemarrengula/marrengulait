@@ -6,6 +6,7 @@ import MegaMenu from "@/components/MegaMenu";
 import Footer from "@/components/Footer";
 import ProductFilters from "@/components/ProductFilters";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import { EmptyState } from "@/components/EmptyState";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Grid3x3, LayoutGrid, Loader2 } from "lucide-react";
@@ -38,14 +39,10 @@ const CategoryPage = ({
     ratings: []
   });
 
-  const { data: products, isLoading, error, refetch } = useProducts(filters);
+  const { data: result, isLoading, error, refetch } = useProducts(filters);
   
-  const filteredProducts = products?.filter(p => 
-    p.category?.toLowerCase() === categoryId.toLowerCase() ||
-    p.category?.toLowerCase().includes(categoryId.toLowerCase())
-  ) || [];
-
-  const totalItems = filteredProducts.length;
+  const products = result?.data || [];
+  const totalItems = result?.count ?? products.length;
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['products'] });
@@ -66,7 +63,7 @@ const CategoryPage = ({
     (filters.ratings?.length || 0) + 
     (filters.priceRange && (filters.priceRange[0] > 0 || filters.priceRange[1] < 200000) ? 1 : 0);
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  const sortedProducts = [...products].sort((a, b) => {
     switch (sortBy) {
       case 'price-asc':
         return (a.price || 0) - (b.price || 0);
@@ -158,17 +155,8 @@ const CategoryPage = ({
           <div className="flex items-center justify-center py-24">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
           </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-16">
-            <Icon className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Nenhum produto encontrado</h2>
-            <p className="text-muted-foreground mb-4">
-              Ainda não temos produtos nesta categoria, mas em breve teremos!
-            </p>
-            <Button onClick={() => navigate('/produtos')}>
-              Ver Todos os Produtos
-            </Button>
-          </div>
+        ) : products.length === 0 ? (
+          <EmptyState icon={Icon as never} title="Nenhum produto encontrado" description="Ainda não temos produtos nesta categoria, mas em breve teremos!" actionLabel="Ver Todos os Produtos" onAction={() => navigate('/produtos')} />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {sortedProducts.map((product) => (

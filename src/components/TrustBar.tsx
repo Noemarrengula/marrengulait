@@ -46,7 +46,7 @@ export default function TrustBar() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {trustItems.map((item, index) => (
             <div
-              key={index}
+              key={item.title}
               className="flex items-center gap-3 group cursor-default animate-slide-up"
               style={{ animationDelay: `${index * 0.05}s` }}
             >

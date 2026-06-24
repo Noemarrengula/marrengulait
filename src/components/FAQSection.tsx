@@ -90,7 +90,7 @@ export default function FAQSection() {
           ) : (
             filtered.slice(0, 6).map((faq, index) => (
               <Card
-                key={index}
+                key={faq.question}
                 className={`transition-all ${
                   openIndex === index ? "border-primary/50" : "border-border"
                 }`}

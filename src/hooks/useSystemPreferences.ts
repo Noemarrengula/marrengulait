@@ -25,10 +25,12 @@ const languageToCurrency: Record<string, string> = {
 
 export function useSystemPreferences() {
   const [preferences, setPreferences] = useState<SystemPreferences>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      return JSON.parse(stored);
-    }
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        return JSON.parse(stored);
+      }
+    } catch (_) {}
     return getDefaultPreferences();
   });
 
@@ -71,7 +73,7 @@ export function useSystemPreferences() {
   ) => {
     setPreferences((prev) => {
       const updated = { ...prev, [key]: value };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch (_) {}
       return updated;
     });
     setIsSystem((prev) => ({ ...prev, [key]: isSystemValue }));
@@ -107,7 +109,7 @@ export function useSystemPreferences() {
       const defaults = getDefaultPreferences();
       setPreferences(defaults);
       setIsSystem({ theme: true, locale: true, currency: true });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults)); } catch (_) {}
     },
   };
 }

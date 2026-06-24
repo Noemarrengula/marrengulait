@@ -110,7 +110,7 @@ export const useRecentSearches = () => {
   }, []);
 
   const clearRecent = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEY);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
   }, []);
 
   return { getRecent, addRecent, clearRecent };

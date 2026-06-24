@@ -75,7 +75,6 @@ export const useAuth = () => {
   }, []);
 
   const initializeAuth = useCallback(async () => {
-    console.log('[Auth] Initializing...');
     setLoading(true);
     setError(null);
 
@@ -100,7 +99,6 @@ export const useAuth = () => {
       const session = sessionResult.data?.session;
 
       if (!session?.user) {
-        console.log('[Auth] No session');
         setUser(null);
         setRoles([]);
         setLoading(false);
@@ -108,7 +106,6 @@ export const useAuth = () => {
         return;
       }
 
-      console.log('[Auth] User found:', session.user.email);
       setUser(session.user);
 
       await fetchUserData(session.user.id);
@@ -126,12 +123,10 @@ export const useAuth = () => {
   }, [fetchUserData]);
 
   useEffect(() => {
-    console.log('[Auth] Setting up listener');
     initializeAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[Auth] State changed:', event);
 
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
@@ -148,7 +143,6 @@ export const useAuth = () => {
     );
 
     return () => {
-      console.log('[Auth] Cleanup');
       subscription.unsubscribe();
     };
   }, [initializeAuth, fetchUserData]);
@@ -158,7 +152,6 @@ export const useAuth = () => {
       return { data: null, error: new Error('Password required') };
     }
 
-    console.log('[Auth] Signing in:', email);
     setLoading(true);
     setError(null);
 
@@ -177,7 +170,6 @@ export const useAuth = () => {
         return { data: result.data, error: result.error };
       }
 
-      console.log('[Auth] Sign in success');
       setLoading(false);
       return { data: result.data, error: null };
     } catch (err) {
@@ -190,7 +182,6 @@ export const useAuth = () => {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, fullName: string) => {
-    console.log('[Auth] Signing up:', email);
     setLoading(true);
     setError(null);
 
@@ -213,7 +204,6 @@ export const useAuth = () => {
         return { data: result.data, error: result.error };
       }
 
-      console.log('[Auth] Sign up success');
       setLoading(false);
       return { data: result.data, error: null };
     } catch (err) {
@@ -226,7 +216,6 @@ export const useAuth = () => {
   }, []);
 
   const signOut = useCallback(async () => {
-    console.log('[Auth] Signing out...');
     setLoading(true);
 
     try {
@@ -247,7 +236,6 @@ export const useAuth = () => {
   }, []);
 
   const forceSync = useCallback(async () => {
-    console.log('[Auth] Force sync...');
     await initializeAuth();
   }, [initializeAuth]);
 

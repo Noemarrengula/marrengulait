@@ -51,9 +51,7 @@ export const useAbandonedCart = () => {
             onConflict: 'user_id'
           });
 
-        if (!error) {
-          console.log('Abandoned cart notification saved');
-        }
+        if (!error) {}
 
         cartData.notified = true;
         localStorage.setItem(`cart_${user.id}`, JSON.stringify(cartData));

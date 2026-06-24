@@ -212,7 +212,6 @@ export const useCapacitorNative = (): UseCapacitorNativeReturn => {
       await PushNotifications.register();
 
       PushNotifications.addListener('registration', (token: Token) => {
-        console.log('Push token:', token.value);
         localStorage.setItem('push_token', token.value);
       });
 
@@ -222,13 +221,10 @@ export const useCapacitorNative = (): UseCapacitorNativeReturn => {
       });
 
       PushNotifications.addListener('pushNotificationReceived', (notification) => {
-        console.log('Push received:', notification);
         toast.info(notification.title || 'Nova notificação');
       });
 
-      PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-        console.log('Push action:', notification);
-      });
+      PushNotifications.addListener('pushNotificationActionPerformed', () => {});
     } catch (error) {
       console.error('Push notification error:', error);
       toast.error('Erro ao configurar notificações');

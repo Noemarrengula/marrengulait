@@ -34,8 +34,10 @@ const LoadingFallback = () => (
 
 const Index = () => {
   const location = useLocation();
-  const { data: featuredProducts, isLoading: loadingFeatured, refetch: refetchFeatured } = useProducts({ featured: true });
-  const { data: latestProducts, isLoading: loadingLatest, refetch: refetchLatest } = useProducts();
+  const { data: featuredResult, isLoading: loadingFeatured, refetch: refetchFeatured } = useProducts({ featured: true });
+  const { data: latestResult, isLoading: loadingLatest, refetch: refetchLatest } = useProducts();
+  const featuredProducts = featuredResult?.data || [];
+  const latestProducts = latestResult?.data || [];
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -66,7 +68,7 @@ const Index = () => {
         title="Mais Vendidos" 
         subtitle="Os produtos mais populares entre os nossos clientes"
         loading={loadingFeatured}
-        products={featuredProducts || []}
+        products={featuredProducts}
         showViewAll
         viewAllLink="/produtos"
       />
@@ -81,7 +83,7 @@ const Index = () => {
         title="Novidades" 
         subtitle="Acabaram de chegar ao nosso marketplace"
         loading={loadingLatest}
-        products={latestProducts?.slice(0, 8) || []}
+        products={latestProducts.slice(0, 8)}
         showViewAll
         viewAllLink="/produtos"
       />

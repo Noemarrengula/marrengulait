@@ -24,36 +24,52 @@ export interface ProductFilters {
 }
 
 export const productService = {
-  async getAllProducts(filters?: ProductFilters) {
+  async getAllProducts(filters?: ProductFilters, page?: number, pageSize?: number) {
+    let countQuery = supabase.from('products').select('*', { count: 'exact', head: true });
     let query = supabase.from('products').select('*');
 
-    if (filters?.categories && filters.categories.length > 0) {
-      query = query.in('category', filters.categories);
-    }
-    if (filters?.brands && filters.brands.length > 0) {
-      query = query.in('brand', filters.brands);
-    }
-    if (filters?.priceRange) {
-      query = query.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
-    }
-    if (filters?.search) {
-      const searchLower = filters.search.toLowerCase();
-      query = query.or(
-        `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,category.ilike.%${searchLower}%,brand.ilike.%${searchLower}%,tags.cs.{"${searchLower}"}`
-      );
-    }
-    if (filters?.featured !== undefined) {
-      query = query.eq('featured', filters.featured);
-    }
-    if (filters?.onSale !== undefined) {
-      query = query.eq('on_sale', filters.onSale);
-    }
+    const applyFilters = <T extends ReturnType<typeof supabase.from>>(q: T): T => {
+      if (filters?.categories && filters.categories.length > 0) {
+        q = q.in('category', filters.categories);
+      }
+      if (filters?.brands && filters.brands.length > 0) {
+        q = q.in('brand', filters.brands);
+      }
+      if (filters?.priceRange) {
+        q = q.gte('price', filters.priceRange[0]).lte('price', filters.priceRange[1]);
+      }
+      if (filters?.search) {
+        const searchLower = filters.search.toLowerCase();
+        q = q.or(
+          `name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,category.ilike.%${searchLower}%,brand.ilike.%${searchLower}%,tags.cs.{"${searchLower}"}`
+        );
+      }
+      if (filters?.featured !== undefined) {
+        q = q.eq('featured', filters.featured);
+      }
+      if (filters?.onSale !== undefined) {
+        q = q.eq('on_sale', filters.onSale);
+      }
+      return q;
+    };
 
+    countQuery = applyFilters(countQuery);
+    query = applyFilters(query);
     query = query.order('created_at', { ascending: false });
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return data || [];
+    if (page !== undefined && pageSize !== undefined) {
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      query = query.range(from, to);
+    }
+
+    const [countResult, dataResult] = await Promise.all([countQuery, query]);
+    if (dataResult.error) throw dataResult.error;
+
+    return {
+      data: dataResult.data || [],
+      count: countResult.count ?? 0,
+    };
   },
 
   async getProductById(id: string) {

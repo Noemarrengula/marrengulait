@@ -420,8 +420,6 @@ export default function ServicosTI() {
         const categoriesData = await serviceCatalog.getCategories();
         setCategories(categoriesData);
         
-        console.log("✅ Serviços carregados:", servicesData.length);
-        console.log("✅ Categorias:", categoriesData);
       } catch (err) {
         console.error("❌ Erro ao carregar serviços:", err);
         const message = err instanceof Error ? err.message : "Erro ao carregar serviços";

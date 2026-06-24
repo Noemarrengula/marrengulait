@@ -10,8 +10,8 @@ export interface AnalyticsEvent {
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (command: string, ...args: unknown[]) => void;
+    dataLayer: unknown[];
   }
 }
 
@@ -45,8 +45,6 @@ class AnalyticsService {
       session_id: this.sessionId,
       source: window.location.pathname
     };
-
-    console.log('[Analytics]', eventName, eventData);
 
     if (typeof window.gtag !== 'undefined') {
       window.gtag('event', eventName, eventData);

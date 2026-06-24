@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { useSettings } from "@/contexts/SettingsContext";
-import { useProducts } from "@/hooks/useProducts";
 
 interface PCComponent {
   id: string;
@@ -36,8 +35,6 @@ const PCBuilder = () => {
     cooling: null,
   });
 
-  const { data: allProducts } = useProducts();
-  
   const components = {
     processor: [
       { id: "proc-1", name: "Intel Core i5-13400F", price: 25000, image: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=100", icon: Cpu },

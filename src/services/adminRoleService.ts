@@ -81,7 +81,6 @@ export const adminRoleService = {
         return { success: false, error: `Erro ao promover: ${insertError.message}` };
       }
 
-      console.log('✅ Usuário promovido a admin:', userId);
       return { success: true };
     } catch (error) {
       return { success: false, error: `Erro desconhecido: ${error}` };
@@ -112,7 +111,6 @@ export const adminRoleService = {
         return { success: false, error: `Erro ao atualizar role: ${insertError.message}` };
       }
 
-      console.log(`✅ Role do usuário ${userId} alterado para ${newRole}`);
       return { success: true };
     } catch (error) {
       return { success: false, error: `Erro desconhecido: ${error}` };

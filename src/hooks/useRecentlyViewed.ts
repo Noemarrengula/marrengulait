@@ -67,7 +67,7 @@ export function useRecentlyViewed() {
 
   const clearRecentlyViewed = useCallback(() => {
     setRecentlyViewed([]);
-    localStorage.removeItem(STORAGE_KEY);
+    try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
   }, []);
 
   return {

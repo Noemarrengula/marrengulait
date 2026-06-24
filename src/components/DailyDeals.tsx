@@ -229,9 +229,9 @@ export default function DailyDeals() {
 
         {/* Dots indicator */}
         <div className="flex justify-center gap-2 mt-8">
-          {deals.map((_, index) => (
+          {deals.map((deal, index) => (
             <button
-              key={index}
+              key={deal.id}
               onClick={() => setActiveDeal(index)}
               className={`rounded-full transition-all ${
                 index === activeDeal ? "w-8 h-3 bg-[#FF3131]" : "w-3 h-3 bg-muted hover:bg-muted-foreground/50"

@@ -32,10 +32,12 @@ interface StoredSettings {
 }
 
 function getStoredSettings(): StoredSettings {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored) {
-    return JSON.parse(stored);
-  }
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (_) {}
   return {
     locale: 'pt-MZ',
     currency: 'MZN',
@@ -89,7 +91,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch (_) {}
   }, [settings]);
 
   const setLocale = useCallback((loc: string) => {

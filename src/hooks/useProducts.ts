@@ -2,16 +2,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productService, ProductFilters, ProductFormData } from '@/services/productService';
 import { toast } from 'sonner';
 
-export const useProducts = (filters?: ProductFilters) => {
+export const useProducts = (filters?: ProductFilters, page?: number, pageSize?: number) => {
   const queryClient = useQueryClient();
   
   const queryKey = filters 
-    ? ['products', JSON.stringify(filters)]
-    : ['products'];
+    ? ['products', JSON.stringify({ filters, page, pageSize })]
+    : ['products', { page, pageSize }];
   
   return useQuery({
     queryKey,
-    queryFn: () => productService.getAllProducts(filters),
+    queryFn: () => productService.getAllProducts(filters, page, pageSize),
     staleTime: 1000 * 60 * 1,
     gcTime: 1000 * 60 * 1,
   });

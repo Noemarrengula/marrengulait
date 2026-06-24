@@ -2,10 +2,8 @@ import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
-import { SettingsProvider } from "@/contexts/SettingsContext";
 import { Loader2 } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { CaptchaProvider } from "@/providers/CaptchaProvider";
@@ -53,8 +51,6 @@ const ServicosTI = lazy(() => import("./pages/ServicosTI"));
 
 const ChatBot = lazy(() => import("@/components/ChatBot"));
 
-const queryClient = new QueryClient();
-
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
     <Loader2 className="h-12 w-12 animate-spin text-[#FF3131]" />
@@ -62,12 +58,10 @@ const LoadingFallback = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <SettingsProvider>
-      <TooltipProvider>
-        <CartProvider>
-          <CaptchaProvider>
-            <BrowserRouter>
+  <TooltipProvider>
+    <CartProvider>
+      <CaptchaProvider>
+        <BrowserRouter>
               <Toaster />
               <Sonner />
               <Suspense fallback={<LoadingFallback />}>
@@ -120,8 +114,6 @@ const App = () => (
           </CaptchaProvider>
         </CartProvider>
       </TooltipProvider>
-    </SettingsProvider>
-  </QueryClientProvider>
-);
+    );
 
 export default App;

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import PaymentProofUpload from '@/components/checkout/PaymentProofUpload';
-import { Loader2, CreditCard, Smartphone, Banknote, Truck, CheckCircle2, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Loader2, CreditCard, Smartphone, Banknote, Truck, CheckCircle2, ShieldCheck, ArrowLeft, ShoppingBag } from 'lucide-react';
 
 type PaymentMethod = 'mpesa' | 'emola' | 'transfer' | 'cod';
 
@@ -248,14 +249,8 @@ const Checkout = () => {
     return (
       <div className="min-h-screen bg-background">
         <Header />
-        <div className="container mx-auto px-4 py-24 text-center">
-          <h1 className="text-2xl font-bold mb-4">O seu carrinho está vazio</h1>
-          <p className="text-muted-foreground mb-6">
-            Adicione produtos para continuar com a compra.
-          </p>
-          <Button onClick={() => navigate('/produtos')} className="bg-[#FF3131]">
-            Explorar Produtos
-          </Button>
+        <div className="container mx-auto px-4 py-24">
+          <EmptyState icon={ShoppingBag} title="O seu carrinho está vazio" description="Adicione produtos para continuar com a compra." actionLabel="Explorar Produtos" onAction={() => navigate('/produtos')} />
         </div>
         <Footer />
       </div>

@@ -9,6 +9,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:integration": "node test-integration.js",
     "supabase:types": "supabase gen types typescript --local > src/integrations/supabase/types.ts",
     "db:reset": "supabase db reset",
@@ -57,6 +59,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
+    "dompurify": "^3.2.4",
     "dotenv": "^17.3.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
@@ -81,6 +84,9 @@
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^16.2.0",
+    "@types/dompurify": "^3.2.0",
     "@types/node": "^22.16.5",
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
@@ -89,7 +95,10 @@
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
+    "fdir": "^6.4.3",
     "globals": "^15.15.0",
+    "jsdom": "^26.0.0",
+    "lodash": "^4.17.21",
     "lovable-tagger": "^1.1.11",
     "postcss": "^8.4.31",
     "sharp": "^0.34.5",
@@ -97,7 +106,8 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vite": "^7.2.2"
+    "vite": "^7.2.2",
+    "vitest": "^3.0.0"
   },
   "overrides": {
     "glob": "^12.0.0"

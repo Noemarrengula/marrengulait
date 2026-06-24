@@ -74,7 +74,7 @@ export function AdminDashboard() {
       toast.success('Review aprovado!');
       queryClient.invalidateQueries({ queryKey: ['pendingReviews'] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(`Erro: ${error.message}`);
     }
   });

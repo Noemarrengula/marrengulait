@@ -58,7 +58,7 @@ export function getRecentlyViewed(): RecentlyViewedItem[] {
 }
 
 export function clearRecentlyViewed() {
-  localStorage.removeItem(STORAGE_KEY);
+  try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
 }
 
 interface RecentlyViewedProps {

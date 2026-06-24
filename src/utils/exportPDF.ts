@@ -1,5 +1,15 @@
-let jsPDFInstance: Promise<any> | null = null;
-let autoTableInstance: Promise<any> | null = null;
+type JsPDFModule = new (orientation?: string, unit?: string, format?: string) => {
+  setFontSize: (size: number) => void;
+  setTextColor: (...args: number[]) => void;
+  text: (text: string, x: number, y: number) => void;
+  save: (filename: string) => void;
+  addPage: () => void;
+  lastAutoTable?: { finalY: number };
+  internal: { pageSize: { width: number; height: number } };
+};
+
+let jsPDFInstance: Promise<JsPDFModule> | null = null;
+let autoTableInstance: Promise<(doc: unknown, config: Record<string, unknown>) => void> | null = null;
 
 async function getJsPDF() {
   if (!jsPDFInstance) {

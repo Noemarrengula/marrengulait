@@ -57,15 +57,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    try { localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items)); } catch (_) {}
   }, [items]);
 
   useEffect(() => {
-    if (coupon) {
-      localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(coupon));
-    } else {
-      localStorage.removeItem(COUPON_STORAGE_KEY);
-    }
+    try {
+      if (coupon) {
+        localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify(coupon));
+      } else {
+        localStorage.removeItem(COUPON_STORAGE_KEY);
+      }
+    } catch (_) {}
   }, [coupon]);
 
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
