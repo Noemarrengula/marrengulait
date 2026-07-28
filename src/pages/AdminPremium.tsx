@@ -212,9 +212,9 @@ function AdminPanelInner() {
                 <div className="col-span-2"><Label>URL da Imagem</Label><Input value={productForm.image_url} onChange={e => setProductForm({ ...productForm, image_url: e.target.value })} placeholder="https://..." /></div>
                 <div className="col-span-2"><Label>Descrição</Label><Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} placeholder="Descrição do produto..." className="min-h-[80px]" /></div>
                 <div className="col-span-2 flex items-center gap-6">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" checked={productForm.is_featured} onChange={e => setProductForm({ ...productForm, is_featured: e.target.checked })} /> Destaque</label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" checked={productForm.is_on_sale} onChange={e => setProductForm({ ...productForm, is_on_sale: e.target.checked })} /> Promoção</label>
-                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" checked={productForm.is_active} onChange={e => setProductForm({ ...productForm, is_active: e.target.checked })} /> Ativo</label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input id="featured-checkbox" type="checkbox" checked={productForm.is_featured} onChange={e => setProductForm({ ...productForm, is_featured: e.target.checked })} /> Destaque</label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input id="sale-checkbox" type="checkbox" checked={productForm.is_on_sale} onChange={e => setProductForm({ ...productForm, is_on_sale: e.target.checked })} /> Promoção</label>
+                  <label className="flex items-center gap-2 cursor-pointer text-sm"><input id="active-checkbox" type="checkbox" checked={productForm.is_active} onChange={e => setProductForm({ ...productForm, is_active: e.target.checked })} /> Ativo</label>
                 </div>
               </div>
               <div className="flex gap-2 pt-2 border-t dark:border-gray-800">

@@ -2,7 +2,7 @@ import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, X
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const COLORS = ['#FF3131', '#FF5555', '#FF7777', '#FF9999', '#FFBABB', '#FFDDD', '#12CBC4', '#A3CB38'];
+const COLORS = ['#FF3131', '#FF5555', '#FF7777', '#FF9999', '#FFBABB', '#FFDDDD', '#12CBC4', '#A3CB38'];
 
 interface ChartCardProps {
   title: string;

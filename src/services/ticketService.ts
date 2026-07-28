@@ -150,29 +150,19 @@ export const ticketService = {
   },
 
   async getTicketStats(): Promise<TicketStats> {
-    const { data, error } = await supabase
-      .from('tickets')
-      .select('status');
+    const statuses = ['open', 'in_progress', 'resolved', 'closed'] as const;
+    const counts = await Promise.all(
+      statuses.map(status =>
+        supabase
+          .from('tickets')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', status)
+      )
+    );
 
-    if (error) throw new Error(`Erro ao buscar estatísticas: ${error.message}`);
-
-    const stats: TicketStats = {
-      total: 0,
-      open: 0,
-      in_progress: 0,
-      resolved: 0,
-      closed: 0
-    };
-
-    (data || []).forEach((t: Ticket) => {
-      stats.total++;
-      if (t.status === 'open') stats.open++;
-      else if (t.status === 'in_progress') stats.in_progress++;
-      else if (t.status === 'resolved') stats.resolved++;
-      else if (t.status === 'closed') stats.closed++;
-    });
-
-    return stats;
+    const [open, inProgress, resolved, closed] = counts.map(c => c.count || 0);
+    const total = open + inProgress + resolved + closed;
+    return { total, open, in_progress: inProgress, resolved, closed };
   },
 
   async getOpenTickets(): Promise<Ticket[]> {

@@ -46,7 +46,6 @@ export const adminRoleService = {
    */
   async promoteToAdmin(userId: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // Primeiro, verifica se já é admin
       const { data: existingAdmin, error: checkError } = await supabase
         .from('user_roles')
         .select('role')
@@ -59,26 +58,30 @@ export const adminRoleService = {
       }
 
       if (existingAdmin) {
-        return { success: true }; // Já é admin
+        return { success: true };
       }
 
-      // Remove role anterior (asumindo que é 'user')
-      const { error: deleteError } = await supabase
+      const oldRoles = await supabase
         .from('user_roles')
-        .delete()
+        .select('role')
         .eq('user_id', userId);
 
-      if (deleteError) {
-        console.warn('Aviso ao remover role anterior:', deleteError);
-      }
-
-      // Insere role de admin
       const { error: insertError } = await supabase
         .from('user_roles')
         .insert([{ user_id: userId, role: 'admin' }]);
 
       if (insertError) {
         return { success: false, error: `Erro ao promover: ${insertError.message}` };
+      }
+
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .neq('role', 'admin');
+
+      if (deleteError) {
+        console.warn('Aviso ao remover role anterior:', deleteError);
       }
 
       return { success: true };
@@ -92,23 +95,22 @@ export const adminRoleService = {
    */
   async changeUserRole(userId: string, newRole: 'admin' | 'vendor' | 'user'): Promise<{ success: boolean; error?: string }> {
     try {
-      // Remove roles anteriores
-      const { error: deleteError } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
-      if (deleteError && deleteError.code !== 'PGRST116') {
-        console.warn('Aviso ao remover roles anteriores:', deleteError);
-      }
-
-      // Insere novo role
       const { error: insertError } = await supabase
         .from('user_roles')
         .insert([{ user_id: userId, role: newRole }]);
 
       if (insertError) {
         return { success: false, error: `Erro ao atualizar role: ${insertError.message}` };
+      }
+
+      const { error: deleteError } = await supabase
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .neq('role', newRole);
+
+      if (deleteError && deleteError.code !== 'PGRST116') {
+        console.warn('Aviso ao remover roles anteriores:', deleteError);
       }
 
       return { success: true };

@@ -83,7 +83,7 @@ export function AdminDashboard() {
     mutationFn: async (reviewId: string) => {
       const { error } = await supabase
         .from('reviews')
-        .delete()
+        .update({ is_approved: false, rejected_at: new Date().toISOString() })
         .eq('id', reviewId);
       if (error) throw error;
     },
@@ -149,7 +149,8 @@ export function AdminDashboard() {
             const isActive = activeTab === tab.id;
             const hasBadge = tab.badge && (
               (tab.id === 'orders' && stats?.pending_orders) ||
-              (tab.id === 'alerts' && lowStock?.length)
+              (tab.id === 'alerts' && lowStock?.length) ||
+              (tab.id === 'reviews' && pendingReviews?.length)
             );
             
             return (
@@ -169,7 +170,7 @@ export function AdminDashboard() {
                 )}
                 {hasBadge && !collapsed && (
                   <Badge variant="destructive" className="h-5 min-w-5 flex items-center justify-center">
-                    {tab.id === 'orders' ? stats?.pending_orders : lowStock?.length}
+                    {tab.id === 'orders' ? stats?.pending_orders : tab.id === 'alerts' ? lowStock?.length : pendingReviews?.length}
                   </Badge>
                 )}
                 {hasBadge && collapsed && (

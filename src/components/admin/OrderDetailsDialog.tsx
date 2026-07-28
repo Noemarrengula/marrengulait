@@ -58,7 +58,7 @@ const OrderDetailsDialog = ({ order, open, onClose }: OrderDetailsDialogProps) =
             <h3 className="font-semibold mb-2">Itens</h3>
             <div className="space-y-2">
               {order.items?.map((item) => (
-                <div key={item.product_name} className="flex justify-between text-sm border-b pb-2">
+                <div key={item.product_name + '_' + item.quantity + '_' + (item.id || Math.random())} className="flex justify-between text-sm border-b pb-2">
                   <div>
                     <div className="font-medium">{item.product_name}</div>
                     <div className="text-muted-foreground">Qtd: {item.quantity}</div>

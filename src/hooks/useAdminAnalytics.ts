@@ -78,9 +78,17 @@ export function useTopProducts(limit: number = 10) {
         `)
         .order('sales_count', { ascending: false })
         .limit(limit);
-      
+
       if (error) throw error;
-      return data as TopProduct[];
+
+      return (data || []).map((item: Record<string, unknown>) => ({
+        id: item.id as string,
+        name: item.name as string,
+        total_sold: Number(item.sales_count) || 0,
+        total_revenue: Array.isArray(item.total_amount)
+          ? (item.total_amount as Array<{ subtotal: number }>).reduce((sum, oi) => sum + (oi.subtotal || 0), 0)
+          : 0,
+      })) as TopProduct[];
     },
   });
 }

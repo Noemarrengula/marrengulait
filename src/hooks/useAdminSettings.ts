@@ -65,7 +65,7 @@ export function useAdminSettings() {
     const fetchAll = async () => {
       try {
         const [{ data: settingsData }, { data: bannersData }, { data: couponsData }] = await Promise.all([
-          supabase.from("admin_settings").select("key, value").eq("key", "site_settings").single(),
+          supabase.from("admin_settings").select("key, value").eq("key", "site_settings").maybeSingle(),
           supabase.from("content_banners").select("*").eq("active", true).order("sort_order", { ascending: true }),
           supabase.from("coupons").select("*").eq("active", true),
         ]);

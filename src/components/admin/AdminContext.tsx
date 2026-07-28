@@ -247,7 +247,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       if (settingsRes.data) {
         for (const row of settingsRes.data) {
           if (row.key === "site_settings" && row.value) {
-            setSiteSettings(prev => ({ ...prev, ...(row.value as Partial<SiteSettings>) }));
+            const merged = { ...siteSettings, ...(row.value as Partial<SiteSettings>) };
+            setSiteSettings(merged);
+            setEditingSettings(merged);
           }
         }
       }
@@ -346,8 +348,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     setInlineEdit(null);
   };
 
+  const ALLOWED_TABLES = ["products", "coupons", "content_banners", "price_alerts", "product_questions"];
+
   const handleDelete = async () => {
     if (!deleteConfirm) return;
+    if (!ALLOWED_TABLES.includes(deleteConfirm.type)) {
+      toast({ title: "Tipo de item inválido", variant: "destructive" });
+      return;
+    }
     try {
       const { error } = await supabase.from(deleteConfirm.type).delete().eq("id", deleteConfirm.id);
       if (error) throw error;

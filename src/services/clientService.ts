@@ -59,32 +59,17 @@ export const clientService = {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) throw new Error('Utilizador não autenticado');
 
-    const { data: existing } = await supabase
+    const { data, error } = await supabase
       .from('clients')
-      .select('id')
-      .eq('user_id', user.user.id)
+      .upsert(
+        { user_id: user.user.id, ...params, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id', ignoreDuplicates: false }
+      )
+      .select()
       .single();
 
-    if (existing) {
-      const { data, error } = await supabase
-        .from('clients')
-        .update({ ...params, updated_at: new Date().toISOString() })
-        .eq('id', existing.id)
-        .select()
-        .single();
-
-      if (error) throw new Error(`Erro ao atualizar cliente: ${error.message}`);
-      return data;
-    } else {
-      const { data, error } = await supabase
-        .from('clients')
-        .insert({ user_id: user.user.id, ...params })
-        .select()
-        .single();
-
-      if (error) throw new Error(`Erro ao criar cliente: ${error.message}`);
-      return data;
-    }
+    if (error) throw new Error(`Erro ao criar/atualizar cliente: ${error.message}`);
+    return data;
   },
 
   async getClientById(id: string): Promise<Client | null> {

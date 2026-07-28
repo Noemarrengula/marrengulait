@@ -38,6 +38,10 @@ export interface Order {
   payment_status?: string;
   payment_method?: string;
   created_at: string;
+  delivery_address?: string;
+  delivery_city?: string;
+  delivery_province?: string;
+  delivery_postal_code?: string;
   shipping_address?: Record<string, unknown>;
   items?: Record<string, unknown>[];
   payment_proof_url?: string;
