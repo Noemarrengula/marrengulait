@@ -5,6 +5,7 @@ import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Message {
   id: string;
@@ -104,7 +105,28 @@ const ChatBot = () => {
     return "🤔 Posso ajudá-lo com:\n\n• Produtos e preços\n• Promoções\n• Entregas\n• Pagamentos\n• Suporte técnico\n\nO que precisa?";
   };
 
-  const handleSend = () => {
+  const getAIResponse = async (userMessage: string): Promise<string> => {
+    try {
+      const history = messages
+        .filter((m) => m.id !== "1" && m.sender !== "bot_ai")
+        .slice(-10)
+        .map((m) => ({
+          role: m.sender === "user" ? "user" : "assistant",
+          text: m.text,
+        }));
+
+      const { data, error } = await supabase.functions.invoke("chat-ai", {
+        body: { message: userMessage, history },
+      });
+
+      if (error) throw error;
+      return data.reply || getBotResponse(userMessage);
+    } catch {
+      return getBotResponse(userMessage);
+    }
+  };
+
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -118,10 +140,10 @@ const ChatBot = () => {
     setInput("");
     setIsTyping(true);
 
-    setTimeout(() => {
-      sendBotMessage(getBotResponse(input));
-      setIsTyping(false);
-    }, 1000);
+    const reply = await getAIResponse(input);
+
+    sendBotMessage(reply);
+    setIsTyping(false);
   };
 
   const handleQuickReply = (reply: { text: string; action: () => void }) => {
