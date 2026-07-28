@@ -42,3 +42,5 @@ coverage
 .turbo
 .vercel
 .netlify
+tk.txt
+supabase/.temp/

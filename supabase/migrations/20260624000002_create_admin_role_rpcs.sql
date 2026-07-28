@@ -5,7 +5,7 @@ CREATE OR REPLACE FUNCTION get_all_user_roles()
 RETURNS TABLE(
   id UUID,
   user_id UUID,
-  role app_role,
+  role TEXT,
   created_at TIMESTAMPTZ
 )
 LANGUAGE sql
@@ -13,14 +13,14 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT ur.id, ur.user_id, ur.role, ur.created_at
+  SELECT ur.id, ur.user_id, ur.role::TEXT, ur.created_at
   FROM user_roles ur
   ORDER BY ur.created_at DESC;
 $$;
 
 CREATE OR REPLACE FUNCTION add_user_role(
   p_user_id UUID,
-  p_role app_role
+  p_role TEXT
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -53,7 +53,7 @@ $$;
 
 CREATE OR REPLACE FUNCTION remove_user_role_by_user_and_role(
   p_user_id UUID,
-  p_role app_role
+  p_role TEXT
 )
 RETURNS VOID
 LANGUAGE plpgsql

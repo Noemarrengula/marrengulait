@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import type { PostgrestError } from '@supabase/supabase-js';
 
 type UserRole = 'admin' | 'vendor' | 'user';
 
-const QUERY_TIMEOUT = 10000;
+const QUERY_TIMEOUT = 15000;
 
 interface RoleResult {
   data: { role: string }[] | null;
@@ -30,8 +30,12 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true);
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const userDataFetched = useRef(false);
+  const fetchAttempts = useRef(0);
 
   const fetchUserData = useCallback(async (userId: string) => {
+    fetchAttempts.current += 1;
+
     try {
       const rolesResult = await withTimeout<RoleResult>(
         supabase.from('user_roles').select('role').eq('user_id', userId),
@@ -59,13 +63,21 @@ export const useAuth = () => {
           currentUser?.email?.split('@')[0] ||
           'User';
 
-        await supabase.from('profiles').insert({
-          user_id: userId,
-          full_name: fullName,
-        }).select().single();
+        try {
+          await withTimeout(
+            supabase.from('profiles').insert({
+              user_id: userId,
+              full_name: fullName,
+            }).select().single(),
+            QUERY_TIMEOUT
+          );
+        } catch {
+          console.warn('[Auth] Failed to create profile, continuing with defaults');
+        }
       }
 
       setRoles(userRoles);
+      userDataFetched.current = true;
       return userRoles;
     } catch (err) {
       console.error('[Auth] Error fetching user data:', err);

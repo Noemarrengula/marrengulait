@@ -84,27 +84,34 @@ ALTER TABLE content_banners ENABLE ROW LEVEL SECURITY;
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
 -- admin_settings: admin full access, authenticated read
+DROP POLICY IF EXISTS "admin_settings_admin_all" ON admin_settings;
 CREATE POLICY "admin_settings_admin_all" ON admin_settings
   FOR ALL USING (public._is_admin()) WITH CHECK (public._is_admin());
 
+DROP POLICY IF EXISTS "admin_settings_auth_read" ON admin_settings;
 CREATE POLICY "admin_settings_auth_read" ON admin_settings
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- content_banners: admin full access, everyone read active
+DROP POLICY IF EXISTS "content_banners_admin_all" ON content_banners;
 CREATE POLICY "content_banners_admin_all" ON content_banners
   FOR ALL USING (public._is_admin()) WITH CHECK (public._is_admin());
 
+DROP POLICY IF EXISTS "content_banners_public_read" ON content_banners;
 CREATE POLICY "content_banners_public_read" ON content_banners
   FOR SELECT USING (active = true);
 
 -- activity_log: admin only
+DROP POLICY IF EXISTS "activity_log_admin_all" ON activity_log;
 CREATE POLICY "activity_log_admin_all" ON activity_log
   FOR ALL USING (public._is_admin()) WITH CHECK (public._is_admin());
 
 -- coupons: admin full access, authenticated read active
+DROP POLICY IF EXISTS "coupons_admin_all" ON coupons;
 CREATE POLICY "coupons_admin_all" ON coupons
   FOR ALL USING (public._is_admin()) WITH CHECK (public._is_admin());
 
+DROP POLICY IF EXISTS "coupons_auth_read" ON coupons;
 CREATE POLICY "coupons_auth_read" ON coupons
   FOR SELECT USING (auth.role() = 'authenticated' AND active = true);
 

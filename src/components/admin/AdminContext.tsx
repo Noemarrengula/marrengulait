@@ -96,7 +96,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     mpesaEnabled: true, emolaEnabled: true, cashEnabled: true,
     heroTitle: "TECNOLOGIA DE PONTA",
     heroSubtitle: "Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique",
-    showJuneBanner: true,
+    showAugustBanner: true,
   });
   const [contentBanners, setContentBanners] = useState<ContentBanner[]>([
     { id: "1", title: "Ofertas Relâmpago", subtitle: "Até 50% OFF", imageUrl: "", linkUrl: "/produtos?promo=true", active: true, order: 1 },

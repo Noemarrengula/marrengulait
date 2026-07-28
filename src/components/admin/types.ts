@@ -107,7 +107,7 @@ export interface SiteSettings {
   cashEnabled: boolean;
   heroTitle: string;
   heroSubtitle: string;
-  showJuneBanner: boolean;
+  showAugustBanner: boolean;
 }
 
 export interface ContentBanner {

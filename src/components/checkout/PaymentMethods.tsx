@@ -9,6 +9,7 @@ export type PaymentMethod = 'stripe' | 'paypal' | 'mpesa';
 interface PaymentMethodsProps {
   amount: number;
   currency?: string;
+  orderNumber?: string;
   onStripeSuccess: (paymentIntent: Record<string, unknown>) => void;
   onStripeError: (error: string) => void;
   onPayPalSuccess: (order: Record<string, unknown>) => void;
@@ -22,6 +23,7 @@ interface PaymentMethodsProps {
 export function PaymentMethods({
   amount,
   currency = 'MZN',
+  orderNumber,
   onStripeSuccess,
   onStripeError,
   onPayPalSuccess,
@@ -125,6 +127,7 @@ export function PaymentMethods({
           <StripeCardWrapper
             amount={amount}
             currency={currency}
+            orderNumber={orderNumber}
             onSuccess={onStripeSuccess}
             onError={onStripeError}
           />

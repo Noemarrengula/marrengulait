@@ -14,7 +14,7 @@ export interface AdminSiteSettings {
   cashEnabled: boolean;
   heroTitle: string;
   heroSubtitle: string;
-  showJuneBanner: boolean;
+  showAugustBanner: boolean;
 }
 
 export interface AdminContentBanner {
@@ -53,7 +53,7 @@ const DEFAULT_SETTINGS: AdminSiteSettings = {
   cashEnabled: true,
   heroTitle: "TECNOLOGIA DE PONTA",
   heroSubtitle: "Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique",
-  showJuneBanner: true,
+  showAugustBanner: true,
 };
 
 export function useAdminSettings() {

@@ -434,7 +434,7 @@ export function ContentTab() {
         <CardContent className="space-y-4">
           <div><Label>Título Principal</Label><Input value={editingSettings.heroTitle} onChange={e => setEditingSettings({ ...editingSettings, heroTitle: e.target.value })} /></div>
           <div><Label>Subtítulo</Label><Textarea value={editingSettings.heroSubtitle} onChange={e => setEditingSettings({ ...editingSettings, heroSubtitle: e.target.value })} /></div>
-          <div className="flex items-center gap-3"><Switch checked={editingSettings.showJuneBanner} onCheckedChange={v => setEditingSettings({ ...editingSettings, showJuneBanner: v })} /><Label className="cursor-pointer">Mostrar June Banner (Mês das Crianças)</Label></div>
+          <div className="flex items-center gap-3"><Switch checked={editingSettings.showAugustBanner} onCheckedChange={v => setEditingSettings({ ...editingSettings, showAugustBanner: v })} /><Label className="cursor-pointer">Mostrar Banner de Férias de Inverno (Agosto)</Label></div>
         </CardContent>
       </Card>
       <Card>

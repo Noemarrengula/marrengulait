@@ -56,6 +56,8 @@ CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DES
 CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
 
 -- Função para gerar número de pedido único
+DROP TRIGGER IF EXISTS set_order_number ON public.orders;
+DROP FUNCTION IF EXISTS generate_order_number();
 CREATE OR REPLACE FUNCTION generate_order_number()
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -177,6 +179,7 @@ BEGIN
 END;
 $$;
 
+DROP TRIGGER IF EXISTS update_orders_updated_at ON public.orders;
 CREATE TRIGGER update_orders_updated_at
   BEFORE UPDATE ON public.orders
   FOR EACH ROW

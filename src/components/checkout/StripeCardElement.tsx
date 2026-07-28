@@ -9,11 +9,12 @@ import { supabase } from '@/integrations/supabase/client';
 interface StripeCardFormProps {
   amount: number;
   currency?: string;
+  orderNumber?: string;
   onSuccess: (paymentIntent: Record<string, unknown>) => void;
   onError: (error: string) => void;
 }
 
-function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFormProps) {
+function CardForm({ amount, currency = 'MZN', orderNumber, onSuccess, onError }: StripeCardFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -44,6 +45,7 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
           body: JSON.stringify({
             amount: Math.round(amount * 100),
             currency: currency.toLowerCase(),
+            order_number: orderNumber,
           }),
         }
       ).then(res => res.json());
@@ -145,11 +147,12 @@ function CardForm({ amount, currency = 'MZN', onSuccess, onError }: StripeCardFo
 interface StripeCardWrapperProps {
   amount: number;
   currency?: string;
+  orderNumber?: string;
   onSuccess: (paymentIntent: Record<string, unknown>) => void;
   onError: (error: string) => void;
 }
 
-export function StripeCardWrapper(props: StripeCardWrapperProps) {
+export function StripeCardWrapper({ amount, currency, orderNumber, onSuccess, onError }: StripeCardWrapperProps) {
   if (!IS_STRIPE_CONFIGURED) {
     return (
       <div className="p-6 border rounded-lg bg-muted/50 text-center">
@@ -164,7 +167,7 @@ export function StripeCardWrapper(props: StripeCardWrapperProps) {
 
   return (
     <Elements stripe={getStripe()} options={{ appearance: STRIPE_APPEARANCE }}>
-      <CardForm {...props} />
+      <CardForm amount={amount} currency={currency} orderNumber={orderNumber} onSuccess={onSuccess} onError={onError} />
     </Elements>
   );
 }

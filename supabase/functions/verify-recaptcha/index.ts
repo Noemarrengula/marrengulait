@@ -2,11 +2,25 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const RECAPTCHA_SECRET_KEY = Deno.env.get('RECAPTCHA_SECRET_KEY') || ''
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey',
+  'Access-Control-Max-Age': '86400',
+};
+
 serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: CORS_HEADERS,
+    });
+  }
+
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     })
   }
 
@@ -16,7 +30,7 @@ serve(async (req) => {
     if (!token) {
       return new Response(JSON.stringify({ valid: false, error: 'Token ausente' }), {
         status: 400,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       })
     }
 
@@ -40,7 +54,7 @@ serve(async (req) => {
         'error-codes': data['error-codes'] || [],
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       })
     }
 
@@ -51,7 +65,7 @@ serve(async (req) => {
         score: data.score,
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       })
     }
 
@@ -61,7 +75,7 @@ serve(async (req) => {
         error: `Ação inválida: esperado "${action}", recebido "${data.action}"`,
       }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       })
     }
 
@@ -71,12 +85,12 @@ serve(async (req) => {
       action: data.action,
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     })
   } catch (err) {
     return new Response(JSON.stringify({ valid: false, error: err instanceof Error ? err.message : 'Erro interno' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     })
   }
 })
