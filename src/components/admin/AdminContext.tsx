@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { uploadProductImage } from "@/lib/storage";
 import type {
   Product, Order, User, Question, PriceAlert,
   Coupon, ActivityLog, SiteSettings, ContentBanner, DashboardStats,
@@ -49,6 +50,7 @@ interface AdminContextType {
   filteredUsers: User[]; unansweredQuestions: Question[];
   categories: string[];
   totalProductPages: number; totalOrderPages: number;
+  productImageFile: File | null; setProductImageFile: (v: File | null) => void;
   loadData: (showRefresh?: boolean) => Promise<void>;
   logActivity: (action: string, entity: string, entityId: string, details: string) => Promise<void>;
   openProductModal: (product?: Product) => void;
@@ -118,6 +120,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     category: "", brand: "", image_url: "", description: "",
     is_featured: false, is_on_sale: false, is_active: true
   });
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
   const [inlineEdit, setInlineEdit] = useState<{ productId: string; field: "stock" | "price"; value: string } | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState("");
@@ -292,6 +295,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       setEditingProduct(null);
       setProductForm({ title: "", price: 0, compare_at_price: 0, stock: 0, category: "", brand: "", image_url: "", description: "", is_featured: false, is_on_sale: false, is_active: true });
     }
+    setProductImageFile(null);
     setIsProductModalOpen(true);
   };
 
@@ -300,13 +304,18 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       toast({ title: "Preencha o título e preço", variant: "destructive" }); return;
     }
     try {
+      let imageUrl = productForm.image_url || null;
+      if (productImageFile) {
+        const tempId = editingProduct?.id || `temp_${Date.now()}`;
+        imageUrl = await uploadProductImage(productImageFile, tempId);
+      }
       const productData: Record<string, unknown> = {
         title: productForm.title, name: productForm.title,
         slug: productForm.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
         price: productForm.price, compare_at_price: productForm.compare_at_price || null,
         old_price: productForm.is_on_sale ? productForm.compare_at_price : null,
         stock: productForm.stock, category: productForm.category,
-        brand: productForm.brand || null, image_url: productForm.image_url || null,
+        brand: productForm.brand || null, image_url: imageUrl,
         description: productForm.description || null,
         is_featured: productForm.is_featured, is_on_sale: productForm.is_on_sale,
         is_active: productForm.is_active, store_name: "MarrengulaIT",
@@ -555,6 +564,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     stats, filteredProducts, paginatedProducts,
     filteredOrders, paginatedOrders, filteredUsers, unansweredQuestions,
     categories, totalProductPages, totalOrderPages,
+    productImageFile, setProductImageFile,
     loadData, logActivity, openProductModal, handleProductSubmit,
     handleInlineEditSave, handleDelete, handleBulkAction, updateOrderStatus,
     handleAddCoupon, toggleCoupon, deleteCoupon,

@@ -22,7 +22,7 @@ import {
   Loader2, RefreshCw, Menu, X, ChevronsLeft, ChevronsRight, Moon, Sun,
   LayoutDashboard, ShoppingCart, Package, ClipboardList, Users,
   Tag, Globe, CreditCard, BarChart3, HelpCircle, Settings,
-  FileText as FileTextIcon
+  FileText as FileTextIcon, Upload
 } from "lucide-react";
 
 const navSections = [
@@ -59,6 +59,7 @@ function AdminPanelInner() {
     handleNavClick, stats, unansweredQuestions, loadData,
     isProductModalOpen, setIsProductModalOpen,
     editingProduct, productForm, setProductForm,
+    productImageFile, setProductImageFile,
     handleProductSubmit,
     deleteConfirm, setDeleteConfirm, handleDelete,
   } = useAdmin();
@@ -209,7 +210,23 @@ function AdminPanelInner() {
                 <div><Label>Stock</Label><Input type="number" value={productForm.stock} onChange={e => setProductForm({ ...productForm, stock: Number(e.target.value) })} /></div>
                 <div><Label>Categoria</Label><Input value={productForm.category} onChange={e => setProductForm({ ...productForm, category: e.target.value })} placeholder="Ex: Hardware" /></div>
                 <div><Label>Marca</Label><Input value={productForm.brand} onChange={e => setProductForm({ ...productForm, brand: e.target.value })} placeholder="Ex: Hikvision" /></div>
-                <div className="col-span-2"><Label>URL da Imagem</Label><Input value={productForm.image_url} onChange={e => setProductForm({ ...productForm, image_url: e.target.value })} placeholder="https://..." /></div>
+                <div className="col-span-2 space-y-2">
+                  <Label>Imagem do Produto</Label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary text-sm text-gray-500 dark:text-gray-400">
+                      <Upload className="h-4 w-4" />
+                      {productImageFile ? productImageFile.name : "Upload do dispositivo"}
+                      <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setProductImageFile(f); setProductForm({ ...productForm, image_url: '' }); } }} />
+                    </label>
+                    <span className="text-xs text-gray-400">ou</span>
+                    <Input value={productForm.image_url} onChange={e => { setProductForm({ ...productForm, image_url: e.target.value }); setProductImageFile(null); }} placeholder="https://..." className="flex-1" />
+                  </div>
+                  {(productImageFile || productForm.image_url) && (
+                    <div className="relative w-20 h-20 rounded overflow-hidden border">
+                      <img src={productImageFile ? URL.createObjectURL(productImageFile) : productForm.image_url} alt="Preview" className="w-full h-full object-cover" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                    </div>
+                  )}
+                </div>
                 <div className="col-span-2"><Label>Descrição</Label><Textarea value={productForm.description} onChange={e => setProductForm({ ...productForm, description: e.target.value })} placeholder="Descrição do produto..." className="min-h-[80px]" /></div>
                 <div className="col-span-2 flex items-center gap-6">
                   <label className="flex items-center gap-2 cursor-pointer text-sm"><input id="featured-checkbox" type="checkbox" checked={productForm.is_featured} onChange={e => setProductForm({ ...productForm, is_featured: e.target.checked })} /> Destaque</label>
