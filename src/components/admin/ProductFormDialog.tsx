@@ -196,7 +196,7 @@ const ProductFormDialog = ({ open, onClose, onSubmit, product }: ProductFormDial
                 id="stock"
                 type="number"
                 value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, stock: parseInt(e.target.value, 10) })}
                 required
               />
             </div>

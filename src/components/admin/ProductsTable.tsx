@@ -45,6 +45,7 @@ const ProductsTable = ({ products, onEdit, onDelete }: ProductsTableProps) => {
                 src={product.image_url || '/placeholder.png'} 
                 alt={product.title}
                 className="w-12 h-12 object-cover rounded"
+                onError={(e) => { e.currentTarget.src = '/placeholder.png'; }}
               />
             </TableCell>
             <TableCell className="font-medium max-w-xs truncate">

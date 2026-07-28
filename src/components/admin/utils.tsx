@@ -27,7 +27,8 @@ export function downloadCSV(data: Record<string, unknown>[], columns: string[], 
   const headers = columns.join(",");
   const rows = data.map(row => columns.map(col => {
     const val = row[col] ?? "";
-    return `"${String(val).replace(/"/g, '""')}"`;
+    const sanitized = String(val).replace(/^[=\-+@\t]/g, '').replace(/"/g, '""');
+    return `"${sanitized}"`;
   }).join(",")).join("\n");
   const blob = new Blob([`${headers}\n${rows}`], { type: "text/csv" });
   const url = URL.createObjectURL(blob);
