@@ -1,8 +1,8 @@
-const CACHE_NAME = 'marrengula-it-v2';
-const STATIC_CACHE = 'marrengula-static-v2';
-const DYNAMIC_CACHE = 'marrengula-dynamic-v2';
-const IMAGE_CACHE = 'marrengula-images-v2';
-const API_CACHE = 'marrengula-api-v2';
+const CACHE_NAME = 'marrengula-it-v3';
+const STATIC_CACHE = 'marrengula-static-v3';
+const DYNAMIC_CACHE = 'marrengula-dynamic-v3';
+const IMAGE_CACHE = 'marrengula-images-v3';
+const API_CACHE = 'marrengula-api-v3';
 
 const STATIC_ASSETS = [
   '/',
