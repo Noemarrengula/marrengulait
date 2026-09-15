@@ -1,0 +1,12 @@
+export { DashboardTab } from "./DashboardTab";
+export { ProductsTab } from "./ProductsTab";
+export { OrdersTab } from "./OrdersTab";
+export { InventoryTab } from "./InventoryTab";
+export { UsersTab } from "./UsersTab";
+export { CouponsTab } from "./CouponsTab";
+export { ContentTab } from "./ContentTab";
+export { PaymentsTab } from "./PaymentsTab";
+export { ReportsTab } from "./ReportsTab";
+export { SupportTab } from "./SupportTab";
+export { ActivityTab } from "./ActivityTab";
+export { SettingsTab } from "./SettingsTab";

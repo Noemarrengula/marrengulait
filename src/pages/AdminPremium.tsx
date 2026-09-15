@@ -5,7 +5,7 @@ import {
   DashboardTab, ProductsTab, OrdersTab, InventoryTab, UsersTab,
   CouponsTab, ContentTab, PaymentsTab, ReportsTab, SupportTab,
   ActivityTab, SettingsTab
-} from "@/components/admin/AdminTabContent";
+} from "@/components/admin/tabs";
 import { formatDate } from "@/components/admin/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
