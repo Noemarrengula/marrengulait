@@ -1,10 +1,31 @@
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, useRef, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { uploadProductImage } from "@/lib/storage";
+import {
+  fetchAllAdminData,
+  deleteRows,
+  saveProductRecord,
+  updateProductFieldRecord,
+  bulkDeleteProducts,
+  bulkUpdateProducts,
+  updateOrderStatusRecord,
+  updatePaymentStatusRecord,
+  insertCouponRecord,
+  toggleCouponActive,
+  removeCoupon,
+  insertBannerRecord,
+  toggleBannerActive,
+  removeBanner,
+  answerQuestionRecord,
+  saveSiteSettingsRecord,
+  insertActivityLogEntry,
+} from "@/services/adminDataService";
+import {
+  computeCategories, computeStats, filterProducts,
+  filterOrders, filterUsers, filterUnanswered, paginate
+} from "./adminSelectors";
 import type {
   Product, Order, User, Question, PriceAlert,
   Coupon, ActivityLog, SiteSettings, ContentBanner, DashboardStats,
@@ -74,8 +95,7 @@ const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
-  const { isDarkMode, setTheme, theme } = useSettings();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -135,77 +155,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [answerForm, setAnswerForm] = useState<Record<string, string>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: string } | null>(null);
 
-  const categories = useMemo(() => {
-    const cats = new Set(products.map(p => p.category).filter(Boolean));
-    return Array.from(cats) as string[];
-  }, [products]);
-
-  const stats: DashboardStats = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, o) => sum + (o.total_amount || 0), 0);
-    const pendingOrders = orders.filter(o => o.status === "pending" || o.status === "confirmed").length;
-    const lowStockProducts = products.filter(p => p.stock <= 10).length;
-    const now = new Date();
-    const salesByDay = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date(now);
-      date.setDate(date.getDate() - (6 - i));
-      const dateStr = date.toISOString().split("T")[0];
-      const dayOrders = orders.filter(o =>
-        o.created_at?.startsWith(dateStr) &&
-        (o.payment_status === "paid" || o.status === "delivered")
-      );
-      return { date: dateStr, total: dayOrders.reduce((s, o) => s + (o.total_amount || 0), 0) };
-    });
-    return {
-      totalProducts: products.length, totalOrders: orders.length,
-      totalUsers: users.length, totalRevenue, lowStockProducts,
-      pendingOrders, recentOrders: orders.slice(0, 5),
-      topProducts: [...products].sort((a, b) => (b.sale_count || 0) - (a.sale_count || 0)).slice(0, 5),
-      salesByDay
-    };
-  }, [products, orders, users]);
-
-  const filteredProducts = useMemo(() => {
-    return products.filter(p => {
-      const name = p.title || p.name || "";
-      const matchesSearch = name.toLowerCase().includes(productSearch.toLowerCase());
-      const matchesCategory = productCategory === "all" || p.category === productCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [products, productSearch, productCategory]);
-
-  const paginatedProducts = useMemo(() => {
-    const start = (productPage - 1) * ITEMS_PER_PAGE;
-    return filteredProducts.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredProducts, productPage]);
-
-  const filteredOrders = useMemo(() => {
-    return orders.filter(o => {
-      const matchesSearch =
-        o.customer_name.toLowerCase().includes(orderSearch.toLowerCase()) ||
-        o.customer_email.toLowerCase().includes(orderSearch.toLowerCase()) ||
-        o.order_number?.toLowerCase().includes(orderSearch.toLowerCase());
-      const matchesStatus = orderStatus === "all" || o.status === orderStatus;
-      return matchesSearch && matchesStatus;
-    });
-  }, [orders, orderSearch, orderStatus]);
-
-  const paginatedOrders = useMemo(() => {
-    const start = (orderPage - 1) * ITEMS_PER_PAGE;
-    return filteredOrders.slice(start, start + ITEMS_PER_PAGE);
-  }, [filteredOrders, orderPage]);
-
-  const filteredUsers = useMemo(() => {
-    const searchLower = userSearch.toLowerCase();
-    return users.filter(u =>
-      u.email?.toLowerCase().includes(searchLower) ||
-      u.full_name?.toLowerCase().includes(searchLower)
-    );
-  }, [users, userSearch]);
-
-  const unansweredQuestions = useMemo(() =>
-    questions.filter(q => !q.answer || q.answer.trim() === ""),
-    [questions]
-  );
+  const categories = useMemo(() => computeCategories(products), [products]);
+  const stats: DashboardStats = useMemo(() => computeStats(products, orders, users), [products, orders, users]);
+  const filteredProducts = useMemo(() => filterProducts(products, productSearch, productCategory), [products, productSearch, productCategory]);
+  const paginatedProducts = useMemo(() => paginate(filteredProducts, productPage, ITEMS_PER_PAGE), [filteredProducts, productPage]);
+  const filteredOrders = useMemo(() => filterOrders(orders, orderSearch, orderStatus), [orders, orderSearch, orderStatus]);
+  const paginatedOrders = useMemo(() => paginate(filteredOrders, orderPage, ITEMS_PER_PAGE), [filteredOrders, orderPage]);
+  const filteredUsers = useMemo(() => filterUsers(users, userSearch), [users, userSearch]);
+  const unansweredQuestions = useMemo(() => filterUnanswered(questions), [questions]);
 
   useEffect(() => { loadData(); }, []);
 
@@ -213,50 +170,22 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (showRefresh) setRefreshing(true);
     else setLoadingData(true);
     try {
-      const [productsRes, ordersRes, profilesRes, questionsRes, alertsRes, couponsRes, bannersRes, settingsRes, activityRes] = await Promise.all([
-        supabase.from("products").select("*").order("created_at", { ascending: false }),
-        supabase.from("orders").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("*").order("created_at", { ascending: false }),
-        supabase.from("product_questions").select("*").order("created_at", { ascending: false }),
-        supabase.from("price_alerts").select("*").order("created_at", { ascending: false }),
-        supabase.from("coupons").select("*").order("created_at", { ascending: false }),
-        supabase.from("content_banners").select("*").order("sort_order", { ascending: true }),
-        supabase.from("admin_settings").select("key, value"),
-        supabase.from("activity_log").select("*").order("created_at", { ascending: false }).limit(500),
-      ]);
-      if (productsRes.data) setProducts(productsRes.data);
-      if (ordersRes.data) setOrders(ordersRes.data);
-      if (profilesRes.data) {
-        setUsers(profilesRes.data.map((p: Record<string, unknown>) => ({
-          id: p.id as string, email: (p.email as string) || (p.full_name as string) || "User",
-          full_name: p.full_name as string, phone: p.phone as string,
-          created_at: p.created_at as string, last_login_at: p.last_login_at as string
-        })));
-      }
-      if (questionsRes.data) setQuestions(questionsRes.data);
-      if (alertsRes.data) setAlerts(alertsRes.data);
-      if (couponsRes.data) setCoupons(couponsRes.data.map((c: Record<string, unknown>) => ({
-        id: c.id as string, code: c.code as string, type: (c.type as "percent" | "fixed") || "percent",
-        value: Number(c.value) || 0, min_order: Number(c.min_order) || 0,
-        max_uses: Number(c.max_uses) || 100, used_count: Number(c.used_count) || 0,
-        expiry_date: c.expiry_date as string | null, active: c.active !== false,
-        created_at: c.created_at as string
-      })));
-      if (bannersRes.data) setContentBanners(bannersRes.data.map((b: Record<string, unknown>, i: number) => ({
-        id: b.id as string, title: b.title as string, subtitle: (b.subtitle as string) || "",
-        imageUrl: (b.image_url as string) || "", linkUrl: (b.link_url as string) || "",
-        active: b.active !== false, order: (b.sort_order as number) ?? (i + 1)
-      })));
-      if (settingsRes.data) {
-        for (const row of settingsRes.data) {
-          if (row.key === "site_settings" && row.value) {
-            const merged = { ...siteSettings, ...(row.value as Partial<SiteSettings>) };
-            setSiteSettings(merged);
-            setEditingSettings(merged);
-          }
+      const data = await fetchAllAdminData();
+      setProducts(data.products);
+      setOrders(data.orders);
+      setUsers(data.users);
+      setQuestions(data.questions);
+      setAlerts(data.alerts);
+      setCoupons(data.coupons);
+      setContentBanners(data.banners);
+      setActivityLog(data.activityLog);
+      for (const row of data.settingsRows) {
+        if (row.key === "site_settings" && row.value) {
+          const merged = { ...siteSettings, ...(row.value as Partial<SiteSettings>) };
+          setSiteSettings(merged);
+          setEditingSettings(merged);
         }
       }
-      if (activityRes.data) setActivityLog(activityRes.data);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "Erro desconhecido";
       toast({ title: "Erro ao carregar dados", description: message, variant: "destructive" });
@@ -272,11 +201,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       details, user_email: user?.email || "admin", created_at: new Date().toISOString()
     };
     setActivityLog(prev => [entry, ...prev].slice(0, 500));
-    try {
-      await supabase.from("activity_log").insert({
-        action, entity, entity_id: entityId, details, user_email: user?.email || "admin"
-      });
-    } catch (e) { console.error("[Admin] Failed to log activity:", e); }
+    await insertActivityLogEntry({
+      action, entity, entity_id: entityId, details, user_email: user?.email || "admin"
+    });
   }, [user]);
 
   const openProductModal = (product?: Product) => {
@@ -304,35 +231,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       toast({ title: "Preencha o título e preço", variant: "destructive" }); return;
     }
     try {
-      let imageUrl = productForm.image_url || null;
-      if (productImageFile) {
-        const tempId = editingProduct?.id || `temp_${Date.now()}`;
-        imageUrl = await uploadProductImage(productImageFile, tempId);
-      }
-      const productData: Record<string, unknown> = {
-        title: productForm.title, name: productForm.title,
-        slug: productForm.title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""),
-        price: productForm.price, compare_at_price: productForm.compare_at_price || null,
-        old_price: productForm.is_on_sale ? productForm.compare_at_price : null,
-        stock: productForm.stock, category: productForm.category,
-        brand: productForm.brand || null, image_url: imageUrl,
-        description: productForm.description || null,
-        is_featured: productForm.is_featured, is_on_sale: productForm.is_on_sale,
-        is_active: productForm.is_active, store_name: "MarrengulaIT",
-        updated_at: new Date().toISOString()
-      };
-      if (editingProduct) {
-        const { error } = await supabase.from("products").update(productData).eq("id", editingProduct.id);
-        if (error) throw error;
-        logActivity("update", "product", editingProduct.id, `Produto "${productForm.title}" atualizado`);
-        toast({ title: "✅ Produto atualizado!" });
-      } else {
-        productData.created_at = new Date().toISOString();
-        const { error } = await supabase.from("products").insert([productData]);
-        if (error) throw error;
-        logActivity("create", "product", "new", `Produto "${productForm.title}" criado`);
-        toast({ title: "✅ Produto criado!" });
-      }
+      const result = await saveProductRecord({
+        editingId: editingProduct?.id ?? null,
+        form: productForm,
+        imageFile: productImageFile,
+      });
+      const verb = result.created ? "criado" : "atualizado";
+      logActivity(result.created ? "create" : "update", "product", result.id, `Produto "${productForm.title}" ${verb}`);
+      toast({ title: `✅ Produto ${verb}!` });
       setIsProductModalOpen(false);
       loadData(true);
     } catch (error: unknown) {
@@ -345,8 +251,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const num = parseFloat(value);
     if (isNaN(num) || num < 0) { setInlineEdit(null); return; }
     try {
-      const { error } = await supabase.from("products").update({ [field]: num, updated_at: new Date().toISOString() }).eq("id", productId);
-      if (error) throw error;
+      await updateProductFieldRecord(productId, field, num);
       setProducts(prev => prev.map(p => p.id === productId ? { ...p, [field]: num } : p));
       logActivity("inline_edit", "product", productId, `${field} alterado para ${num}`);
       toast({ title: `✅ ${field === "stock" ? "Stock" : "Preço"} atualizado!` });
@@ -366,8 +271,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       return;
     }
     try {
-      const { error } = await supabase.from(deleteConfirm.type).delete().eq("id", deleteConfirm.id);
-      if (error) throw error;
+      await deleteRows(deleteConfirm.type as "products" | "coupons" | "content_banners" | "price_alerts" | "product_questions", deleteConfirm.id);
       logActivity("delete", deleteConfirm.type, deleteConfirm.id, "Item eliminado");
       toast({ title: "✅ Item eliminado!" });
       setDeleteConfirm(null);
@@ -383,22 +287,17 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const ids = Array.from(selectedProducts);
     try {
       if (bulkAction === "delete") {
-        const { error } = await supabase.from("products").delete().in("id", ids);
-        if (error) throw error;
+        await bulkDeleteProducts(ids);
         logActivity("bulk_delete", "products", ids.join(","), `${ids.length} produtos eliminados`);
       } else if (bulkAction === "featured") {
-        const { error } = await supabase.from("products").update({ is_featured: true }).in("id", ids);
-        if (error) throw error;
+        await bulkUpdateProducts(ids, { is_featured: true });
         logActivity("bulk_featured", "products", ids.join(","), `${ids.length} produtos em destaque`);
       } else if (bulkAction === "unfeatured") {
-        const { error } = await supabase.from("products").update({ is_featured: false }).in("id", ids);
-        if (error) throw error;
+        await bulkUpdateProducts(ids, { is_featured: false });
       } else if (bulkAction === "active") {
-        const { error } = await supabase.from("products").update({ is_active: true }).in("id", ids);
-        if (error) throw error;
+        await bulkUpdateProducts(ids, { is_active: true });
       } else if (bulkAction === "inactive") {
-        const { error } = await supabase.from("products").update({ is_active: false }).in("id", ids);
-        if (error) throw error;
+        await bulkUpdateProducts(ids, { is_active: false });
       }
       toast({ title: "✅ Acção em massa aplicada!" });
       setSelectedProducts(new Set()); setBulkAction(""); loadData(true);
@@ -410,8 +309,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const { error } = await supabase.from("orders").update({ status: newStatus, updated_at: new Date().toISOString() }).eq("id", orderId);
-      if (error) throw error;
+      await updateOrderStatusRecord(orderId, newStatus);
       logActivity("update", "order", orderId, `Status alterado para ${newStatus}`);
       toast({ title: "✅ Status atualizado!" }); loadData(true);
     } catch (error: unknown) {
@@ -425,21 +323,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
       toast({ title: "Preencha código e valor", variant: "destructive" }); return;
     }
     try {
-      const couponData = {
+      const newCoupon = await insertCouponRecord({
         code: couponForm.code.toUpperCase(), type: couponForm.type, value: couponForm.value,
         min_order: couponForm.minOrder, max_uses: couponForm.maxUses, used_count: 0,
         expiry_date: couponForm.expiryDate || null, active: true,
-      };
-      const { data, error } = await supabase.from("coupons").insert([couponData]).select().single();
-      if (error) throw error;
-      const newCoupon: Coupon = {
-        id: data.id, code: data.code, type: data.type,
-        value: Number(data.value), min_order: Number(data.min_order) || 0,
-        max_uses: Number(data.max_uses) || 100, used_count: 0,
-        expiry_date: data.expiry_date, active: data.active, created_at: data.created_at
-      };
+      });
       setCoupons(prev => [...prev, newCoupon]);
-      logActivity("create", "coupon", data.id, `Cupão "${couponForm.code.toUpperCase()}" criado`);
+      logActivity("create", "coupon", newCoupon.id, `Cupão "${couponForm.code.toUpperCase()}" criado`);
       toast({ title: "✅ Cupão criado!" });
       setCouponForm({ code: "", type: "percent", value: 0, minOrder: 0, maxUses: 100, expiryDate: "" });
     } catch (error: unknown) {
@@ -452,14 +342,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const coupon = coupons.find(c => c.id === id);
     if (!coupon) return;
     try {
-      await supabase.from("coupons").update({ active: !coupon.active }).eq("id", id);
+      await toggleCouponActive(id, !coupon.active);
       setCoupons(prev => prev.map(c => c.id === id ? { ...c, active: !c.active } : c));
     } catch { toast({ title: "Erro ao atualizar cupão", variant: "destructive" }); }
   };
 
   const deleteCoupon = async (id: string) => {
     try {
-      await supabase.from("coupons").delete().eq("id", id);
+      await removeCoupon(id);
       setCoupons(prev => prev.filter(c => c.id !== id));
       logActivity("delete", "coupon", id, "Cupão eliminado");
     } catch { toast({ title: "Erro ao eliminar cupão", variant: "destructive" }); }
@@ -468,20 +358,13 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const handleAddBanner = async () => {
     if (!bannerForm.title) { toast({ title: "Preencha o título", variant: "destructive" }); return; }
     try {
-      const bannerData = {
+      const newBanner = await insertBannerRecord({
         title: bannerForm.title, subtitle: bannerForm.subtitle || null,
         image_url: bannerForm.imageUrl || null, link_url: bannerForm.linkUrl || null,
         active: true, sort_order: contentBanners.length + 1,
-      };
-      const { data, error } = await supabase.from("content_banners").insert([bannerData]).select().single();
-      if (error) throw error;
-      const newBanner: ContentBanner = {
-        id: data.id, title: data.title, subtitle: data.subtitle || "",
-        imageUrl: data.image_url || "", linkUrl: data.link_url || "",
-        active: data.active, order: data.sort_order
-      };
+      });
       setContentBanners(prev => [...prev, newBanner]);
-      logActivity("create", "banner", data.id, `Banner "${bannerForm.title}" criado`);
+      logActivity("create", "banner", newBanner.id, `Banner "${bannerForm.title}" criado`);
       toast({ title: "✅ Banner adicionado!" });
       setBannerForm({ title: "", subtitle: "", imageUrl: "", linkUrl: "" });
     } catch (error: unknown) {
@@ -494,14 +377,14 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const banner = contentBanners.find(b => b.id === id);
     if (!banner) return;
     try {
-      await supabase.from("content_banners").update({ active: !banner.active }).eq("id", id);
+      await toggleBannerActive(id, !banner.active);
       setContentBanners(prev => prev.map(b => b.id === id ? { ...b, active: !b.active } : b));
     } catch { toast({ title: "Erro ao atualizar banner", variant: "destructive" }); }
   };
 
   const deleteBanner = async (id: string) => {
     try {
-      await supabase.from("content_banners").delete().eq("id", id);
+      await removeBanner(id);
       setContentBanners(prev => prev.filter(b => b.id !== id));
       logActivity("delete", "banner", id, "Banner eliminado");
     } catch { toast({ title: "Erro ao eliminar banner", variant: "destructive" }); }
@@ -511,8 +394,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     const answer = answerForm[questionId];
     if (!answer?.trim()) return;
     try {
-      const { error } = await supabase.from("product_questions").update({ answer }).eq("id", questionId);
-      if (error) throw error;
+      await answerQuestionRecord(questionId, answer);
       setQuestions(prev => prev.map(q => q.id === questionId ? { ...q, answer } : q));
       logActivity("answer", "question", questionId, "Pergunta respondida");
       toast({ title: "✅ Resposta enviada!" });
@@ -526,9 +408,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const handleSaveSettings = async () => {
     try {
       setSiteSettings(editingSettings);
-      await supabase.from("admin_settings").upsert({
-        key: "site_settings", value: editingSettings, updated_by: user?.id
-      });
+      await saveSiteSettingsRecord("site_settings", editingSettings, user?.id);
       logActivity("update", "settings", "global", "Configurações atualizadas");
       toast({ title: "✅ Configurações guardadas!" });
     } catch (error: unknown) {
