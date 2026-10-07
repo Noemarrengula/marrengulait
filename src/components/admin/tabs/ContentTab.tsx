@@ -1,4 +1,4 @@
-import { Image, Save, Trash2 } from "lucide-react";
+import { Image, Save, Trash2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAdmin } from "../AdminContext";
 
 export function ContentTab() {
-  const { editingSettings, setEditingSettings, bannerForm, setBannerForm, contentBanners, handleAddBanner, toggleBanner, deleteBanner, handleSaveSettings } = useAdmin();
+  const { editingSettings, setEditingSettings, bannerForm, setBannerForm, contentBanners, handleAddBanner, toggleBanner, deleteBanner, handleSaveSettings, bannerImageFile, setBannerImageFile } = useAdmin();
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold">Gestão de Conteúdo</h3>
@@ -18,7 +18,30 @@ export function ContentTab() {
         <CardContent className="space-y-4">
           <div><Label>Título Principal</Label><Input value={editingSettings.heroTitle} onChange={e => setEditingSettings({ ...editingSettings, heroTitle: e.target.value })} /></div>
           <div><Label>Subtítulo</Label><Textarea value={editingSettings.heroSubtitle} onChange={e => setEditingSettings({ ...editingSettings, heroSubtitle: e.target.value })} /></div>
-          <div className="flex items-center gap-3"><Switch checked={editingSettings.showAugustBanner} onCheckedChange={v => setEditingSettings({ ...editingSettings, showAugustBanner: v })} /><Label className="cursor-pointer">Mostrar Banner de Férias de Inverno (Agosto)</Label></div>
+          <div className="flex items-center gap-3"><Switch checked={editingSettings.showAugustBanner} onCheckedChange={v => setEditingSettings({ ...editingSettings, showAugustBanner: v })} /><Label className="cursor-pointer">Mostrar Banner Sazonal (topo da homepage)</Label></div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader><CardTitle className="text-base">Banner Sazonal — Imagem</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Imagem do Banner</Label>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 px-4 py-2 border-2 border-dashed rounded-lg cursor-pointer hover:border-primary text-sm text-gray-500 dark:text-gray-400">
+                <Upload className="h-4 w-4" />
+                {bannerImageFile ? bannerImageFile.name : "Upload do dispositivo"}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) { setBannerImageFile(f); setEditingSettings({ ...editingSettings, seasonalBannerUrl: "" }); } }} />
+              </label>
+              <span className="text-xs text-gray-400">ou</span>
+              <Input value={bannerImageFile ? "" : editingSettings.seasonalBannerUrl} onChange={e => { setEditingSettings({ ...editingSettings, seasonalBannerUrl: e.target.value }); setBannerImageFile(null); }} placeholder="https://..." className="flex-1" />
+            </div>
+            <p className="text-xs text-gray-400">Recomendado: 1920×822 px. Guardar as alterações faz o upload para o servidor.</p>
+          </div>
+          {(bannerImageFile || editingSettings.seasonalBannerUrl || "/assets/banner-agosto.png") && (
+            <div className="relative w-full max-w-md rounded overflow-hidden border">
+              <img src={bannerImageFile ? URL.createObjectURL(bannerImageFile) : (editingSettings.seasonalBannerUrl || "/assets/banner-agosto.png")} alt="Preview do banner sazonal" className="w-full h-auto" onError={e => { e.currentTarget.style.display = "none"; }} />
+            </div>
+          )}
         </CardContent>
       </Card>
       <Card>

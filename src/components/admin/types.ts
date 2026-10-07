@@ -112,6 +112,7 @@ export interface SiteSettings {
   heroTitle: string;
   heroSubtitle: string;
   showAugustBanner: boolean;
+  seasonalBannerUrl: string;
 }
 
 export interface ContentBanner {

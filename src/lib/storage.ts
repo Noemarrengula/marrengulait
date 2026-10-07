@@ -2,10 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 const BUCKET = 'products';
 
-export async function uploadProductImage(file: File, productId: string): Promise<string> {
-  const ext = file.name.split('.').pop() || 'jpg';
-  const fileName = `${productId}/${Date.now()}.${ext}`;
-
+async function uploadToProductsBucket(fileName: string, file: File): Promise<string> {
   const { error } = await supabase.storage
     .from(BUCKET)
     .upload(fileName, file, { upsert: true, contentType: file.type });
@@ -17,6 +14,16 @@ export async function uploadProductImage(file: File, productId: string): Promise
     .getPublicUrl(fileName);
 
   return urlData.publicUrl;
+}
+
+export async function uploadProductImage(file: File, productId: string): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  return uploadToProductsBucket(`${productId}/${Date.now()}.${ext}`, file);
+}
+
+export async function uploadSeasonalBannerImage(file: File): Promise<string> {
+  const ext = file.name.split('.').pop() || 'png';
+  return uploadToProductsBucket(`banners/seasonal-${Date.now()}.${ext}`, file);
 }
 
 export async function deleteProductImage(fileName: string): Promise<void> {

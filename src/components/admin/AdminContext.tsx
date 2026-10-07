@@ -1,8 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useSettings } from "@/contexts/SettingsContext";
 import { useToast } from "@/hooks/use-toast";
+import { uploadSeasonalBannerImage } from "@/lib/storage";
 import {
   fetchAllAdminData,
   deleteRows,
@@ -72,6 +71,7 @@ interface AdminContextType {
   categories: string[];
   totalProductPages: number; totalOrderPages: number;
   productImageFile: File | null; setProductImageFile: (v: File | null) => void;
+  bannerImageFile: File | null; setBannerImageFile: (v: File | null) => void;
   loadData: (showRefresh?: boolean) => Promise<void>;
   logActivity: (action: string, entity: string, entityId: string, details: string) => Promise<void>;
   openProductModal: (product?: Product) => void;
@@ -94,7 +94,6 @@ interface AdminContextType {
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export function AdminProvider({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -119,6 +118,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     heroTitle: "TECNOLOGIA DE PONTA",
     heroSubtitle: "Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique",
     showAugustBanner: true,
+    seasonalBannerUrl: "",
   });
   const [contentBanners, setContentBanners] = useState<ContentBanner[]>([
     { id: "1", title: "Ofertas Relâmpago", subtitle: "Até 50% OFF", imageUrl: "", linkUrl: "/produtos?promo=true", active: true, order: 1 },
@@ -141,6 +141,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     is_featured: false, is_on_sale: false, is_active: true
   });
   const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [bannerImageFile, setBannerImageFile] = useState<File | null>(null);
   const [inlineEdit, setInlineEdit] = useState<{ productId: string; field: "stock" | "price"; value: string } | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState("");
@@ -407,8 +408,15 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   const handleSaveSettings = async () => {
     try {
-      setSiteSettings(editingSettings);
-      await saveSiteSettingsRecord("site_settings", editingSettings, user?.id);
+      let settingsToSave = editingSettings;
+      if (bannerImageFile) {
+        const url = await uploadSeasonalBannerImage(bannerImageFile);
+        settingsToSave = { ...editingSettings, seasonalBannerUrl: url };
+        setEditingSettings(settingsToSave);
+        setBannerImageFile(null);
+      }
+      setSiteSettings(settingsToSave);
+      await saveSiteSettingsRecord("site_settings", settingsToSave, user?.id);
       logActivity("update", "settings", "global", "Configurações atualizadas");
       toast({ title: "✅ Configurações guardadas!" });
     } catch (error: unknown) {
@@ -445,6 +453,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     filteredOrders, paginatedOrders, filteredUsers, unansweredQuestions,
     categories, totalProductPages, totalOrderPages,
     productImageFile, setProductImageFile,
+    bannerImageFile, setBannerImageFile,
     loadData, logActivity, openProductModal, handleProductSubmit,
     handleInlineEditSave, handleDelete, handleBulkAction, updateOrderStatus,
     handleAddCoupon, toggleCoupon, deleteCoupon,

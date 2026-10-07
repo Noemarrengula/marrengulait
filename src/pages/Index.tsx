@@ -4,7 +4,7 @@ import Header from "@/components/Header";
 import MegaMenu from "@/components/MegaMenu";
 import HeroSection from "@/components/HeroSection";
 import PromoBanners from "@/components/PromoBanners";
-import AugustBanner from "@/components/AugustBanner";
+import SeasonalBanner from "@/components/SeasonalBanner";
 import Categories from "@/components/Categories";
 import ProductGrid from "@/components/ProductGrid";
 import ServicesSection from "@/components/ServicesSection";
@@ -51,7 +51,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <MegaMenu />
-      <AugustBanner />
+      <SeasonalBanner />
       <HeroSection />
       <PromoBanners />
       <Categories />

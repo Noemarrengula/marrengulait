@@ -15,6 +15,7 @@ export interface AdminSiteSettings {
   heroTitle: string;
   heroSubtitle: string;
   showAugustBanner: boolean;
+  seasonalBannerUrl: string;
 }
 
 export interface AdminContentBanner {
@@ -54,6 +55,7 @@ const DEFAULT_SETTINGS: AdminSiteSettings = {
   heroTitle: "TECNOLOGIA DE PONTA",
   heroSubtitle: "Monte seu PC gamer, encontre os melhores smartphones e componentes com entrega rápida em Moçambique",
   showAugustBanner: true,
+  seasonalBannerUrl: "",
 };
 
 export function useAdminSettings() {
