@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">MarrengulaIT</string>
-    <string name="title_activity_main">MarrengulaIT</string>
+    <string name="app_name">Marrengula-IT</string>
+    <string name="title_activity_main">Marrengula-IT</string>
     <string name="package_name">com.marrengulait.store</string>
     <string name="custom_url_scheme">com.marrengulait.store</string>
 </resources>
