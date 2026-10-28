@@ -5,6 +5,10 @@ import { SettingsProvider } from "./contexts/SettingsContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
+import { markNativeApp, initNativeApp } from "./native/nativeApp";
+
+// Android app only: adapt layout before the first paint
+markNativeApp();
 
 if (!crypto.randomUUID) {
   crypto.randomUUID = function() {
@@ -51,6 +55,8 @@ if (!rootElement) {
         </QueryClientProvider>
       </ErrorBoundary>
     );
+    // Android app only: status bar, splash, back button, haptics
+    requestAnimationFrame(() => requestAnimationFrame(() => { void initNativeApp(); }));
   } catch (error) {
     console.error("Erro ao renderizar aplicação:", error);
     rootElement.innerHTML = `

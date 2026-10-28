@@ -10,12 +10,20 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
-      backgroundColor: '#0E0E10',
+      // hidden by the app as soon as the first screen is drawn (src/native/nativeApp.ts)
+      launchShowDuration: 3000,
+      launchAutoHide: true,
+      launchFadeOutDuration: 250,
+      backgroundColor: '#121212',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
       splashFullScreen: true,
       splashImmersive: true
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#121212',
+      overlaysWebView: false
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']

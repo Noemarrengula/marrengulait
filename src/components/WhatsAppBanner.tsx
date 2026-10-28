@@ -32,7 +32,7 @@ export default function WhatsAppBanner() {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden" data-hide-in-app>
         <div 
           className={`bg-green-500 text-white px-4 py-3 transform transition-transform duration-300 ${
             isVisible ? 'translate-y-0' : 'translate-y-full'

@@ -65,7 +65,7 @@ const MegaMenu = () => {
 
   try {
     return (
-    <div className="border-b border-border/50 bg-secondary/30">
+    <div className="border-b border-border/50 bg-secondary/30" data-hide-in-app>
       <div className="container mx-auto px-4">
         <NavigationMenu className="max-w-full w-full justify-start">
           <NavigationMenuList className="flex-wrap gap-2">
@@ -213,7 +213,7 @@ const MegaMenu = () => {
   } catch (error) {
     console.error("MegaMenu: Erro ao renderizar", error);
     return (
-      <div className="border-b border-border/50 bg-secondary/30">
+      <div className="border-b border-border/50 bg-secondary/30" data-hide-in-app>
         <div className="container mx-auto px-4 py-2">
           <p className="text-sm text-muted-foreground">Menu temporariamente indisponível</p>
         </div>
