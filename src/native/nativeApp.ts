@@ -17,6 +17,8 @@ export function markNativeApp(): void {
   if (!isNativeApp()) return;
   document.documentElement.classList.add("native-app");
 
+  enableLazyImages();
+
   // No pinch-zoom inside the app (native apps don't zoom)
   const viewport = document.querySelector('meta[name="viewport"]');
   if (viewport) {
@@ -25,6 +27,27 @@ export function markNativeApp(): void {
       "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
     );
   }
+}
+
+/**
+ * Every <img> created by the app loads only when it gets near the screen and
+ * decodes off the main thread. Set on creation, before React assigns `src`,
+ * so it covers all 33 images without editing each component.
+ */
+function enableLazyImages(): void {
+  const original = Document.prototype.createElement;
+  Document.prototype.createElement = function (
+    this: Document,
+    tagName: string,
+    options?: ElementCreationOptions
+  ): HTMLElement {
+    const el = original.call(this, tagName, options) as HTMLElement;
+    if (el instanceof HTMLImageElement) {
+      el.loading = "lazy";
+      el.decoding = "async";
+    }
+    return el;
+  } as typeof Document.prototype.createElement;
 }
 
 /** Runs after the first render. */

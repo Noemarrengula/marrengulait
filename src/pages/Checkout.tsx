@@ -62,12 +62,11 @@ const Checkout = () => {
     if (!couponCode.trim()) return;
     
     try {
-      const { data, error } = await supabase
-        .from('coupons')
-        .select('*')
-        .eq('code', couponCode.toUpperCase())
-        .eq('is_active', true)
-        .single();
+      // Secure check of a single code (the coupon list is no longer public)
+      const { data: rows, error } = await supabase.rpc('validate_coupon', {
+        p_code: couponCode.trim(),
+      });
+      const data = Array.isArray(rows) ? rows[0] : rows;
       
       if (error || !data) {
         setCouponError('Código de cupom inválido');

@@ -422,6 +422,34 @@ html.native-app [data-hide-in-app] {
   display: none !important;
 }
 
+/* ---------- Performance on mid-range phones (e.g. Galaxy A30) ---------- */
+
+/* Background blur is very expensive on mobile GPUs while scrolling:
+   use the (already 95% opaque) solid background instead */
+html.native-app [class*="backdrop-blur"] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Large decorative glows are redrawn on every scroll frame */
+html.native-app .blur-2xl,
+html.native-app .blur-3xl {
+  display: none !important;
+}
+
+/* Decorative never-ending animations repeated on every product card
+   (loaders, skeletons and the chat typing dots keep theirs) */
+html.native-app .animate-ping,
+html.native-app .animate-float {
+  animation: none !important;
+}
+
+/* Sections below the first screen are only drawn when scrolled into view */
+html.native-app section:not(:first-of-type) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
 /* "Press again to exit" hint */
 .native-exit-hint {
   position: fixed;
