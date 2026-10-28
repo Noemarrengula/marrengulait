@@ -1,13 +1,17 @@
-name: Build Android APK
+name: Build Android App
 
 on:
   push:
-    branches: [main]
+    # app-teste: test branch, builds the APK without touching main
+    branches: [main, app-teste]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # true only when the signing keystore secret has been configured
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -15,8 +19,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
+
+      # Without these the app opens on a blank screen, so stop here with a clear message
+      - name: Check Supabase secrets
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "::error::Faltam os segredos VITE_SUPABASE_URL e/ou VITE_SUPABASE_PUBLISHABLE_KEY (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
 
       - name: Install dependencies
         run: npm ci
@@ -29,11 +44,12 @@ jobs:
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
 
+      # Capacitor 8 requires Java 21
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -41,13 +57,41 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build APK
+      - name: Build debug APK (para testar no telemóvel)
         run: |
           cd android
+          chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Upload APK
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: MarrengulaIT-APK
+          name: MarrengulaIT-APK-teste
           path: android/app/build/outputs/apk/debug/*.apk
+
+      # ---- Release AAB for Google Play (runs only when the keystore secrets exist) ----
+      - name: Decode signing keystore
+        if: env.HAS_KEYSTORE == 'true'
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
+
+      - name: Build signed release AAB
+        if: env.HAS_KEYSTORE == 'true'
+        env:
+          MARRENGULA_KEYSTORE_PATH: release.keystore
+          MARRENGULA_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MARRENGULA_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          MARRENGULA_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd android
+          ./gradlew bundleRelease
+
+      - name: Upload release AAB
+        if: env.HAS_KEYSTORE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: MarrengulaIT-AAB-GooglePlay
+          path: android/app/build/outputs/bundle/release/*.aab
+
+      - name: Remove keystore from runner
+        if: always()
+        run: rm -f android/app/release.keystore
